@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import NoteList from '@/components/notes/NoteList'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -8,10 +9,10 @@ export default async function DashboardPage() {
   if (!user) redirect('/login')
 
   return (
-    <div className="flex items-center justify-center w-full">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-800">¡Bienvenido a NoteEvo!</h1>
-        <p className="text-gray-500 mt-2">{user.email}</p>
+    <div className="flex h-full">
+      <NoteList />
+      <div className="flex-1 flex items-center justify-center">
+        <p className="text-gray-400 text-sm">Selecciona o crea una nota</p>
       </div>
     </div>
   )
