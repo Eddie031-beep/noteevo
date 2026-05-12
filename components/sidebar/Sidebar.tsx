@@ -4,12 +4,19 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useNotebookStore } from '@/store/notebookStore'
+import { useUIStore } from '@/store/uiStore'
 import { getNotebooks, createNotebook, deleteNotebook } from '@/lib/supabase/notebooks'
 import { BookOpen, Star, Trash2, LogOut, Plus, X } from 'lucide-react'
 
 export default function Sidebar() {
   const router = useRouter()
-  const { notebooks, setNotebooks, addNotebook, deleteNotebook: removeNotebook, setSelectedNotebook, selectedNotebook } = useNotebookStore()
+  const {
+    notebooks, setNotebooks, addNotebook,
+    deleteNotebook: removeNotebook,
+    setSelectedNotebook, selectedNotebook,
+  } = useNotebookStore()
+  const { currentView, setCurrentView } = useUIStore()
+
   const [newName, setNewName] = useState('')
   const [creating, setCreating] = useState(false)
   const [showInput, setShowInput] = useState(false)
@@ -63,11 +70,31 @@ export default function Sidebar() {
 
       {/* Navegación */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-        <button type="button" className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-100 transition">
+
+        {/* Favoritos */}
+        <button
+          type="button"
+          onClick={() => { setCurrentView('favorites'); setSelectedNotebook(null) }}
+          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition ${
+            currentView === 'favorites'
+              ? 'bg-yellow-50 text-yellow-600 font-medium'
+              : 'text-gray-700 hover:bg-gray-100'
+          }`}
+        >
           <Star size={18} />
           Favoritos
         </button>
-        <button type="button" className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-100 transition">
+
+        {/* Papelera */}
+        <button
+          type="button"
+          onClick={() => { setCurrentView('trash'); setSelectedNotebook(null) }}
+          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition ${
+            currentView === 'trash'
+              ? 'bg-red-50 text-red-500 font-medium'
+              : 'text-gray-700 hover:bg-gray-100'
+          }`}
+        >
           <Trash2 size={18} />
           Papelera
         </button>
@@ -88,7 +115,6 @@ export default function Sidebar() {
             </button>
           </div>
 
-          {/* Input nueva libreta */}
           {showInput && (
             <div className="flex gap-1 mb-2 px-1">
               <input
@@ -111,13 +137,15 @@ export default function Sidebar() {
             </div>
           )}
 
-          {/* Lista de libretas */}
           {notebooks.map((notebook) => (
             <div
               key={notebook.id}
-              onClick={() => setSelectedNotebook(notebook)}
+              onClick={() => {
+                setSelectedNotebook(notebook)
+                setCurrentView('notebooks')
+              }}
               className={`group flex items-center justify-between px-3 py-2 text-sm rounded-lg cursor-pointer transition ${
-                selectedNotebook?.id === notebook.id
+                currentView === 'notebooks' && selectedNotebook?.id === notebook.id
                   ? 'bg-green-50 text-green-700'
                   : 'text-gray-700 hover:bg-gray-100'
               }`}

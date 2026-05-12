@@ -54,3 +54,58 @@ export async function trashNote(id: string): Promise<void> {
 
   if (error) throw new Error(error.message)
 }
+
+export async function toggleFavorite(id: string, value: boolean): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('notes')
+    .update({ is_favorite: value })
+    .eq('id', id)
+
+  if (error) throw new Error(error.message)
+}
+
+export async function getFavoriteNotes(): Promise<Note[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('notes')
+    .select('*')
+    .eq('is_favorite', true)
+    .eq('is_trashed', false)
+    .order('updated_at', { ascending: false })
+
+  if (error) throw new Error(error.message)
+  return data ?? []
+}
+
+export async function getTrashedNotes(): Promise<Note[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('notes')
+    .select('*')
+    .eq('is_trashed', true)
+    .order('updated_at', { ascending: false })
+
+  if (error) throw new Error(error.message)
+  return data ?? []
+}
+
+export async function restoreNote(id: string): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('notes')
+    .update({ is_trashed: false })
+    .eq('id', id)
+
+  if (error) throw new Error(error.message)
+}
+
+export async function permanentlyDeleteNote(id: string): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('notes')
+    .delete()
+    .eq('id', id)
+
+  if (error) throw new Error(error.message)
+}

@@ -5,7 +5,8 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import { useNoteStore } from '@/store/noteStore'
-import { updateNote } from '@/lib/supabase/notes'
+import { updateNote, toggleFavorite } from '@/lib/supabase/notes'
+import { Star } from 'lucide-react'
 
 export default function NoteEditor() {
   const { selectedNote, updateNote: updateNoteStore } = useNoteStore()
@@ -138,6 +139,23 @@ export default function NoteEditor() {
           }`}
         >
           {'</>'}
+        </button>
+        <button
+          type="button"
+          title={selectedNote?.is_favorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+          onClick={async () => {
+            if (!selectedNote) return
+            const newValue = !selectedNote.is_favorite
+            await toggleFavorite(selectedNote.id, newValue)
+            updateNoteStore(selectedNote.id, { is_favorite: newValue })
+          }}
+          className={`px-3 py-1 text-sm rounded transition ${
+            selectedNote?.is_favorite
+              ? 'text-yellow-500 bg-yellow-50'
+              : 'text-gray-400 hover:bg-gray-100'
+          }`}
+        >
+          <Star size={16} />
         </button>
       </div>
 

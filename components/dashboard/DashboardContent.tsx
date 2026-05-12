@@ -6,14 +6,30 @@ import NoteEditor from '@/components/editor/NoteEditor'
 import FavoriteNotes from '@/components/notes/FavoriteNotes'
 import TrashNotes from '@/components/notes/TrashNotes'
 
-export default function DashboardPage() {
+export default function DashboardContent() {
   const { currentView } = useUIStore()
+
+  if (currentView === 'favorites') {
+    return (
+      <div className="flex h-full">
+        <FavoriteNotes />
+        <NoteEditor />
+      </div>
+    )
+  }
+
+  if (currentView === 'trash') {
+    return (
+      <div className="flex h-full">
+        <TrashNotes />
+        <NoteEditor />
+      </div>
+    )
+  }
 
   return (
     <div className="flex h-full">
-      {currentView === 'notebooks' && <NoteList />}
-      {currentView === 'favorites' && <FavoriteNotes />}
-      {currentView === 'trash' && <TrashNotes />}
+      <NoteList />
       <NoteEditor />
     </div>
   )
