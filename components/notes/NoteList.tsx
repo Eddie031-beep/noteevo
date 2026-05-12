@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useNoteStore } from '@/store/noteStore'
 import { useNotebookStore } from '@/store/notebookStore'
 import { getNotesByNotebook, createNote, trashNote } from '@/lib/supabase/notes'
+import { extractTextPreview } from '@/lib/utils/tiptap'
 import { Plus, Trash2, FileText } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -56,9 +57,11 @@ export default function NoteList() {
 
   return (
     <div className="w-72 h-screen bg-gray-50 border-r border-gray-200 flex flex-col">
-      {/* Header */}
       <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-        <h2 className="font-semibold text-gray-800 truncate">{selectedNotebook.name}</h2>
+        <div>
+          <h2 className="font-semibold text-gray-800 truncate">{selectedNotebook.name}</h2>
+          <p className="text-xs text-gray-400 mt-0.5">{notes.length} nota{notes.length !== 1 ? 's' : ''}</p>
+        </div>
         <button
           type="button"
           title="Nueva nota"
@@ -69,7 +72,6 @@ export default function NoteList() {
         </button>
       </div>
 
-      {/* Lista */}
       <div className="flex-1 overflow-y-auto">
         {notes.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-2">
@@ -96,10 +98,13 @@ export default function NoteList() {
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">
+                  <p className="text-sm font-semibold text-gray-800 truncate">
                     {note.title || 'Sin título'}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">
+                    {extractTextPreview(note.content) || 'Sin contenido'}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1.5">
                     {format(new Date(note.updated_at), "d MMM yyyy", { locale: es })}
                   </p>
                 </div>
@@ -107,7 +112,7 @@ export default function NoteList() {
                   type="button"
                   title="Mover a papelera"
                   onClick={(e) => handleTrash(note.id, e)}
-                  className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition mt-1"
+                  className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition mt-1 shrink-0"
                 >
                   <Trash2 size={14} />
                 </button>

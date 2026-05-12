@@ -5,6 +5,7 @@ import NoteList from '@/components/notes/NoteList'
 import NoteEditor from '@/components/editor/NoteEditor'
 import FavoriteNotes from '@/components/notes/FavoriteNotes'
 import TrashNotes from '@/components/notes/TrashNotes'
+import SearchResults from '@/components/notes/SearchResults'
 
 export default function DashboardPage() {
   const { currentView } = useUIStore()
@@ -14,6 +15,7 @@ export default function DashboardPage() {
       {currentView === 'notebooks' && <NoteList />}
       {currentView === 'favorites' && <FavoriteNotes />}
       {currentView === 'trash' && <TrashNotes />}
+      {currentView === 'search' && <SearchResults />}
       <NoteEditor />
     </div>
   )

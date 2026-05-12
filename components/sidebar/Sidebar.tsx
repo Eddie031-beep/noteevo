@@ -5,8 +5,10 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useNotebookStore } from '@/store/notebookStore'
 import { useUIStore } from '@/store/uiStore'
+import { useTagStore } from '@/store/tagStore'
 import { getNotebooks, createNotebook, deleteNotebook } from '@/lib/supabase/notebooks'
-import { BookOpen, Star, Trash2, LogOut, Plus, X } from 'lucide-react'
+import { getTags } from '@/lib/supabase/tags'
+import { BookOpen, Star, Trash2, LogOut, Plus, X, Search } from 'lucide-react'
 
 export default function Sidebar() {
   const router = useRouter()
@@ -15,7 +17,8 @@ export default function Sidebar() {
     deleteNotebook: removeNotebook,
     setSelectedNotebook, selectedNotebook,
   } = useNotebookStore()
-  const { currentView, setCurrentView } = useUIStore()
+  const { currentView, setCurrentView, searchQuery, setSearchQuery } = useUIStore()
+  const { setTags } = useTagStore()
 
   const [newName, setNewName] = useState('')
   const [creating, setCreating] = useState(false)
@@ -32,6 +35,18 @@ export default function Sidebar() {
     }
     load()
   }, [setNotebooks])
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await getTags()
+        setTags(data)
+      } catch (err) {
+        console.error('Error cargando tags:', err)
+      }
+    }
+    load()
+  }, [setTags])
 
   const handleCreate = async () => {
     if (!newName.trim()) return
@@ -61,6 +76,16 @@ export default function Sidebar() {
     router.refresh()
   }
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setSearchQuery(value)
+    if (value.trim()) {
+      setCurrentView('search')
+    } else {
+      setCurrentView('notebooks')
+    }
+  }
+
   return (
     <aside className="w-64 h-screen bg-white border-r border-gray-200 flex flex-col">
       {/* Logo */}
@@ -68,13 +93,38 @@ export default function Sidebar() {
         <h1 className="text-xl font-bold text-green-600">NoteEvo</h1>
       </div>
 
+      {/* Búsqueda */}
+      <div className="px-4 py-3 border-b border-gray-200">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
+          <Search size={14} className="text-gray-400 shrink-0" />
+          <input
+            type="text"
+            placeholder="Buscar notas..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="flex-1 bg-transparent text-sm text-gray-700 outline-none placeholder-gray-400"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              title="Limpiar búsqueda"
+              onClick={() => {
+                setSearchQuery('')
+                setCurrentView('notebooks')
+              }}
+              className="text-gray-400 hover:text-gray-600 transition"
+            >
+              <X size={14} />
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Navegación */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-
-        {/* Favoritos */}
         <button
           type="button"
-          onClick={() => { setCurrentView('favorites'); setSelectedNotebook(null) }}
+          onClick={() => { setCurrentView('favorites'); setSelectedNotebook(null); setSearchQuery('') }}
           className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition ${
             currentView === 'favorites'
               ? 'bg-yellow-50 text-yellow-600 font-medium'
@@ -85,10 +135,9 @@ export default function Sidebar() {
           Favoritos
         </button>
 
-        {/* Papelera */}
         <button
           type="button"
-          onClick={() => { setCurrentView('trash'); setSelectedNotebook(null) }}
+          onClick={() => { setCurrentView('trash'); setSelectedNotebook(null); setSearchQuery('') }}
           className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition ${
             currentView === 'trash'
               ? 'bg-red-50 text-red-500 font-medium'
@@ -99,7 +148,6 @@ export default function Sidebar() {
           Papelera
         </button>
 
-        {/* Libretas */}
         <div className="pt-4">
           <div className="flex items-center justify-between px-3 mb-2">
             <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
@@ -143,6 +191,7 @@ export default function Sidebar() {
               onClick={() => {
                 setSelectedNotebook(notebook)
                 setCurrentView('notebooks')
+                setSearchQuery('')
               }}
               className={`group flex items-center justify-between px-3 py-2 text-sm rounded-lg cursor-pointer transition ${
                 currentView === 'notebooks' && selectedNotebook?.id === notebook.id

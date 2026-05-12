@@ -13,15 +13,134 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ── Task List ── */
+ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 4px;
+  padding: 0;
+}
+
+ul[data-type="taskList"] li > label {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-top: 3px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+ul[data-type="taskList"] li > label input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: #16a34a;
+  cursor: pointer;
+  border-radius: 3px;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+
+ul[data-type="taskList"] li > div {
+  flex: 1;
+  min-width: 0;
+}
+
+ul[data-type="taskList"] li > div p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+ul[data-type="taskList"] li[data-checked="true"] > div p {
+  text-decoration: line-through;
+  color: #9ca3af;
+}
+
+/* ── Editor images ── */
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 12px 0;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.ProseMirror img:hover {
+  opacity: 0.9;
+}
+
+.ProseMirror img.ProseMirror-selectednode {
+  outline: 2px solid #16a34a;
+  border-radius: 8px;
+}
+
+/* ── Highlight ── */
+.ProseMirror mark {
+  background-color: #fef08a;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+/* ── Code ── */
+.ProseMirror code {
+  background-color: #f3f4f6;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.875em;
+  color: #dc2626;
+}
+
+.ProseMirror pre {
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  padding: 16px;
+  overflow-x: auto;
+}
+
+.ProseMirror pre code {
+  background: none;
+  color: #d4d4d4;
+  padding: 0;
+  font-size: 0.875em;
+}
+
+/* ── Placeholder ── */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #d1d5db;
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
 }

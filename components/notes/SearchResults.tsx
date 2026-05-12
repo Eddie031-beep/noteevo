@@ -2,56 +2,66 @@
 
 import { useEffect, useState } from 'react'
 import { useNoteStore } from '@/store/noteStore'
-import { getFavoriteNotes } from '@/lib/supabase/notes'
+import { useUIStore } from '@/store/uiStore'
+import { searchNotes } from '@/lib/supabase/search'
 import { extractTextPreview } from '@/lib/utils/tiptap'
 import type { Note } from '@/types'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Star } from 'lucide-react'
+import { Search } from 'lucide-react'
 
-export default function FavoriteNotes() {
-  const [favoriteNotes, setFavoriteNotes] = useState<Note[]>([])
-  const [loading, setLoading] = useState(true)
+export default function SearchResults() {
+  const [results, setResults] = useState<Note[]>([])
+  const [loading, setLoading] = useState(false)
   const { setSelectedNote, selectedNote } = useNoteStore()
+  const { searchQuery } = useUIStore()
 
   useEffect(() => {
-    const load = async () => {
+    if (!searchQuery.trim()) {
+      setResults([])
+      return
+    }
+    const timeout = setTimeout(async () => {
+      setLoading(true)
       try {
-        const data = await getFavoriteNotes()
-        setFavoriteNotes(data)
+        const data = await searchNotes(searchQuery)
+        setResults(data)
       } catch (err) {
-        console.error('Error cargando favoritos:', err)
+        console.error('Error buscando notas:', err)
       } finally {
         setLoading(false)
       }
-    }
-    load()
-  }, [])
+    }, 400)
+    return () => clearTimeout(timeout)
+  }, [searchQuery])
 
   return (
     <div className="w-72 h-screen bg-gray-50 border-r border-gray-200 flex flex-col">
       <div className="p-4 border-b border-gray-200 flex items-center gap-2">
-        <Star size={18} className="text-yellow-500" />
+        <Search size={18} className="text-gray-500" />
         <div>
-          <h2 className="font-semibold text-gray-800">Favoritos</h2>
-          {!loading && (
-            <p className="text-xs text-gray-400 mt-0.5">
-              {favoriteNotes.length} nota{favoriteNotes.length !== 1 ? 's' : ''}
-            </p>
+          <h2 className="font-semibold text-gray-800">Resultados</h2>
+          {!loading && results.length > 0 && (
+            <p className="text-xs text-gray-400 mt-0.5">{results.length} nota{results.length !== 1 ? 's' : ''}</p>
           )}
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto">
         {loading ? (
-          <p className="text-xs text-gray-400 text-center mt-8">Cargando...</p>
-        ) : favoriteNotes.length === 0 ? (
+          <p className="text-xs text-gray-400 text-center mt-8">Buscando...</p>
+        ) : !searchQuery.trim() ? (
           <div className="flex flex-col items-center justify-center h-full gap-2">
-            <Star size={32} className="text-gray-300" />
-            <p className="text-sm text-gray-400">Sin notas favoritas</p>
+            <Search size={32} className="text-gray-300" />
+            <p className="text-sm text-gray-400">Escribe para buscar</p>
+          </div>
+        ) : results.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full gap-2">
+            <Search size={32} className="text-gray-300" />
+            <p className="text-sm text-gray-400">Sin resultados</p>
           </div>
         ) : (
-          favoriteNotes.map((note) => (
+          results.map((note) => (
             <div
               key={note.id}
               onClick={() => setSelectedNote(note)}
