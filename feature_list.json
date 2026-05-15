@@ -1,0 +1,182 @@
+[
+  {
+    "id": 1,
+    "phase": 1,
+    "name": "project-setup",
+    "title": "Setup inicial del proyecto",
+    "status": "done",
+    "notes": "Next.js 16.2.6, TypeScript, Tailwind v4, todas las dependencias instaladas."
+  },
+  {
+    "id": 2,
+    "phase": 1,
+    "name": "auth-supabase",
+    "title": "Autenticación con Supabase",
+    "status": "done",
+    "notes": "Login, registro, middleware, clientes browser/server. Todo funcional."
+  },
+  {
+    "id": 3,
+    "phase": 1,
+    "name": "layout-base",
+    "title": "Layout base 3 paneles",
+    "status": "done",
+    "notes": "Sidebar + NoteList + NoteEditor funcionando. Sidebar aún no es colapsable."
+  },
+  {
+    "id": 4,
+    "phase": 2,
+    "name": "notebooks-crud",
+    "title": "Notebooks CRUD",
+    "status": "done",
+    "notes": "Crear, listar, eliminar. RLS activo."
+  },
+  {
+    "id": 5,
+    "phase": 2,
+    "name": "notes-crud",
+    "title": "Notes CRUD",
+    "status": "done",
+    "notes": "Crear, listar, editar, eliminar. is_trashed para soft delete."
+  },
+  {
+    "id": 6,
+    "phase": 2,
+    "name": "tiptap-editor",
+    "title": "Editor TipTap v3 con autosave",
+    "status": "done",
+    "notes": "Toolbar completa, autosave 800ms, upload de imágenes, task list, highlight, align."
+  },
+  {
+    "id": 7,
+    "phase": 2,
+    "name": "favorites-trash",
+    "title": "Favoritos y Papelera",
+    "status": "done",
+    "notes": "toggleFavorite, getFavoriteNotes, getTrashedNotes, restoreNote, permanentlyDeleteNote. Vistas en sidebar."
+  },
+  {
+    "id": 8,
+    "phase": 3,
+    "name": "tags-system",
+    "title": "Sistema de Tags",
+    "status": "done",
+    "notes": "TagInput con create/add/remove. tagStore global. RLS en tags y note_tags."
+  },
+  {
+    "id": 9,
+    "phase": 3,
+    "name": "search-fulltext",
+    "title": "Búsqueda full-text",
+    "status": "partial",
+    "notes": "Código listo (SearchResults + lib/supabase/search.ts). BLOCKER: falta crear la función Postgres search_notes() en Supabase. Ver TODO #1 en CLAUDE.md."
+  },
+  {
+    "id": 10,
+    "phase": 3,
+    "name": "visual-redesign",
+    "title": "Rediseño visual — dark mode + identidad propia",
+    "status": "pending",
+    "description": "El UI actual es el default de Next.js (blanco/gris). Rediseñar con dark mode, identidad visual propia inspirada en Evernote. Sidebar colapsable (56px ↔ 240px), color primario verde esmeralda #1a7a4a, fondos #0f0f0f / #1a1a1a / #242424. Incluir: Home page del dashboard, página de login/register con el nuevo estilo, sidebar con todos los items de navegación futuros (Home, Notes, Tasks, Files, Calendar, Notebooks, Tags, Spaces, AI).",
+    "depends_on": []
+  },
+  {
+    "id": 11,
+    "phase": 4,
+    "name": "tasks-crud",
+    "title": "Tasks CRUD",
+    "status": "pending",
+    "description": "Crear tabla tasks en Supabase con RLS. CRUD completo. Campos: título, descripción, due date, reminder, prioridad (low/medium/high), flag, is_completed. Tasks pueden estar vinculadas a una nota (note_id nullable).",
+    "depends_on": [10]
+  },
+  {
+    "id": 12,
+    "phase": 4,
+    "name": "tasks-views",
+    "title": "Vistas de Tasks",
+    "status": "pending",
+    "description": "Vista 'My tasks' en el panel central con filtros por prioridad/estado/fecha. Modal de creación igual al de Evernote. Contador de tasks pendientes en sidebar. Tabs: My tasks / Notebooks.",
+    "depends_on": [11]
+  },
+  {
+    "id": 13,
+    "phase": 5,
+    "name": "files-upload",
+    "title": "Upload de archivos adjuntos",
+    "status": "pending",
+    "description": "Tabla attachments en Supabase + RLS. Bucket 'attachments' en Storage. Upload vinculado a notas. Barra de progreso.",
+    "depends_on": [10]
+  },
+  {
+    "id": 14,
+    "phase": 5,
+    "name": "files-view",
+    "title": "Vista Files",
+    "status": "pending",
+    "description": "Página Files con tabs: Files / Media / Docs. Lista con nombre, tipo, tamaño, fecha. Preview de imágenes. Descarga. Búsqueda por nombre.",
+    "depends_on": [13]
+  },
+  {
+    "id": 15,
+    "phase": 5,
+    "name": "calendar-view",
+    "title": "Vista Calendar",
+    "status": "pending",
+    "description": "Calendario con tasks que tienen due date. Vistas: Day / Week / Month. Mini calendario en sidebar. Crear tasks desde el calendario.",
+    "depends_on": [12]
+  },
+  {
+    "id": 16,
+    "phase": 6,
+    "name": "spaces-setup",
+    "title": "Spaces — estructura base",
+    "status": "pending",
+    "description": "Tablas spaces + space_members con roles (viewer/editor/admin). Invitar usuarios por email. Vista Spaces en sidebar.",
+    "depends_on": [10]
+  },
+  {
+    "id": 17,
+    "phase": 6,
+    "name": "spaces-shared-content",
+    "title": "Spaces — contenido compartido",
+    "status": "pending",
+    "description": "Notebooks dentro de un Space (space_id en notebooks). Notas visibles para miembros según rol. Vista 'Shared with me'. Permisos por rol.",
+    "depends_on": [16]
+  },
+  {
+    "id": 18,
+    "phase": 7,
+    "name": "ai-summarize",
+    "title": "IA — Resumir nota",
+    "status": "pending",
+    "description": "Botón 'Resumir' en editor. Route Handler server-side que llama claude-haiku-4-5 via Anthropic API. Panel lateral con resumen. Rate limit 10 req/día/usuario via tabla ai_usage. API key en ANTHROPIC_API_KEY env var (solo servidor).",
+    "depends_on": [10]
+  },
+  {
+    "id": 19,
+    "phase": 7,
+    "name": "ai-improve-writing",
+    "title": "IA — Mejorar escritura",
+    "status": "pending",
+    "description": "Seleccionar texto en editor → menú flotante 'Mejorar con IA'. Reformula con streaming. Aceptar/rechazar el cambio.",
+    "depends_on": [18]
+  },
+  {
+    "id": 20,
+    "phase": 7,
+    "name": "ai-chat-note",
+    "title": "IA — Chat con tu nota",
+    "status": "pending",
+    "description": "Panel de chat (slide-over derecho) con el contenido de la nota como contexto. Preguntas sobre el contenido. Historial en sesión.",
+    "depends_on": [18]
+  },
+  {
+    "id": 21,
+    "phase": 7,
+    "name": "ai-smart-tags",
+    "title": "IA — Smart Tags",
+    "status": "pending",
+    "description": "Botón 'Sugerir tags'. IA analiza contenido y sugiere hasta 5 tags relevantes. Aceptar/rechazar individualmente. Crea tags nuevos si no existen.",
+    "depends_on": [18]
+  }
+]
