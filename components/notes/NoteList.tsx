@@ -10,7 +10,8 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 export default function NoteList() {
-  const { notes, setNotes, addNote, deleteNote, setSelectedNote, selectedNote } = useNoteStore()
+  const { notes, setNotes, addNote, deleteNote, setSelectedNote, selectedNote } =
+    useNoteStore()
   const { selectedNotebook } = useNotebookStore()
 
   useEffect(() => {
@@ -19,8 +20,8 @@ export default function NoteList() {
       try {
         const data = await getNotesByNotebook(selectedNotebook.id)
         setNotes(data)
-      } catch (err) {
-        console.error('Error cargando notas:', err)
+      } catch {
+        // error cargando notas
       }
     }
     load()
@@ -32,8 +33,8 @@ export default function NoteList() {
       const note = await createNote(selectedNotebook.id)
       addNote(note)
       setSelectedNote(note)
-    } catch (err) {
-      console.error('Error creando nota:', err)
+    } catch {
+      // error creando nota
     }
   }
 
@@ -42,45 +43,52 @@ export default function NoteList() {
     try {
       await trashNote(id)
       deleteNote(id)
-    } catch (err) {
-      console.error('Error eliminando nota:', err)
+    } catch {
+      // error eliminando nota
     }
   }
 
   if (!selectedNotebook) {
     return (
-      <div className="w-72 h-screen bg-gray-50 border-r border-gray-200 flex items-center justify-center">
-        <p className="text-sm text-gray-400">Selecciona una libreta</p>
+      <div className="w-72 h-screen bg-panel border-r border-border flex flex-col items-center justify-center gap-3 shrink-0">
+        <FileText size={32} className="text-subtle" />
+        <p className="text-sm text-muted">Selecciona una libreta</p>
       </div>
     )
   }
 
   return (
-    <div className="w-72 h-screen bg-gray-50 border-r border-gray-200 flex flex-col">
-      <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-        <div>
-          <h2 className="font-semibold text-gray-800 truncate">{selectedNotebook.name}</h2>
-          <p className="text-xs text-gray-400 mt-0.5">{notes.length} nota{notes.length !== 1 ? 's' : ''}</p>
+    <div className="w-72 h-screen bg-panel border-r border-border flex flex-col shrink-0">
+      {/* Header */}
+      <div className="h-14 px-4 border-b border-border flex items-center justify-between gap-2">
+        <div className="min-w-0">
+          <h2 className="font-semibold text-foreground text-sm truncate">
+            {selectedNotebook.name}
+          </h2>
+          <p className="text-xs text-muted">
+            {notes.length} nota{notes.length !== 1 ? 's' : ''}
+          </p>
         </div>
         <button
           type="button"
           title="Nueva nota"
           onClick={handleCreate}
-          className="text-gray-400 hover:text-green-600 transition"
+          className="p-1.5 text-muted hover:text-accent hover:bg-accent/10 rounded-lg transition cursor-pointer shrink-0"
         >
           <Plus size={18} />
         </button>
       </div>
 
+      {/* List */}
       <div className="flex-1 overflow-y-auto">
         {notes.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full gap-2">
-            <FileText size={32} className="text-gray-300" />
-            <p className="text-sm text-gray-400">Sin notas aún</p>
+          <div className="flex flex-col items-center justify-center h-full gap-3">
+            <FileText size={32} className="text-subtle" />
+            <p className="text-sm text-muted">Sin notas aún</p>
             <button
               type="button"
               onClick={handleCreate}
-              className="text-sm text-green-600 hover:underline"
+              className="text-sm text-accent hover:text-accent-light transition cursor-pointer"
             >
               Crear primera nota
             </button>
@@ -90,29 +98,31 @@ export default function NoteList() {
             <div
               key={note.id}
               onClick={() => setSelectedNote(note)}
-              className={`group p-4 border-b border-gray-200 cursor-pointer transition ${
+              className={`group px-4 py-3.5 border-b border-border cursor-pointer transition ${
                 selectedNote?.id === note.id
-                  ? 'bg-green-50 border-l-2 border-l-green-500'
-                  : 'hover:bg-white'
+                  ? 'bg-elevated border-l-2 border-l-accent'
+                  : 'hover:bg-surface'
               }`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-800 truncate">
+                  <p className="text-sm font-medium text-foreground truncate">
                     {note.title || 'Sin título'}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-muted mt-1 line-clamp-2 leading-relaxed">
                     {extractTextPreview(note.content) || 'Sin contenido'}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1.5">
-                    {format(new Date(note.updated_at), "d MMM yyyy", { locale: es })}
+                  <p className="text-xs text-subtle mt-1.5">
+                    {format(new Date(note.updated_at), 'd MMM yyyy', {
+                      locale: es,
+                    })}
                   </p>
                 </div>
                 <button
                   type="button"
                   title="Mover a papelera"
                   onClick={(e) => handleTrash(note.id, e)}
-                  className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition mt-1 shrink-0"
+                  className="opacity-0 group-hover:opacity-100 text-muted hover:text-danger transition cursor-pointer mt-0.5 shrink-0"
                 >
                   <Trash2 size={14} />
                 </button>

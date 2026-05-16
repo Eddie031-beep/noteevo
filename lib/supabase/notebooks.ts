@@ -6,10 +6,24 @@ export async function getNotebooks(): Promise<Notebook[]> {
   const { data, error } = await supabase
     .from('notebooks')
     .select('*')
+    .is('space_id', null)
     .order('created_at', { ascending: false })
 
   if (error) throw new Error(error.message)
   return data ?? []
+}
+
+export async function moveNotebookToSpace(
+  notebookId: string,
+  spaceId: string | null
+): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('notebooks')
+    .update({ space_id: spaceId })
+    .eq('id', notebookId)
+
+  if (error) throw new Error(error.message)
 }
 
 export async function createNotebook(name: string, description?: string): Promise<Notebook> {

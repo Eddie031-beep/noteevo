@@ -21,7 +21,7 @@
     "name": "layout-base",
     "title": "Layout base 3 paneles",
     "status": "done",
-    "notes": "Sidebar + NoteList + NoteEditor funcionando. Sidebar aún no es colapsable."
+    "notes": "Sidebar + NoteList + NoteEditor funcionando. Sidebar colapsable (56px ↔ 240px)."
   },
   {
     "id": 4,
@@ -68,16 +68,16 @@
     "phase": 3,
     "name": "search-fulltext",
     "title": "Búsqueda full-text",
-    "status": "partial",
-    "notes": "Código listo (SearchResults + lib/supabase/search.ts). BLOCKER: falta crear la función Postgres search_notes() en Supabase. Ver TODO #1 en CLAUDE.md."
+    "status": "done",
+    "notes": "Código listo + función Postgres search_notes() creada via MCP. Búsqueda por título e ilike en content::text con debounce 400ms."
   },
   {
     "id": 10,
     "phase": 3,
     "name": "visual-redesign",
     "title": "Rediseño visual — dark mode + identidad propia",
-    "status": "pending",
-    "description": "El UI actual es el default de Next.js (blanco/gris). Rediseñar con dark mode, identidad visual propia inspirada en Evernote. Sidebar colapsable (56px ↔ 240px), color primario verde esmeralda #1a7a4a, fondos #0f0f0f / #1a1a1a / #242424. Incluir: Home page del dashboard, página de login/register con el nuevo estilo, sidebar con todos los items de navegación futuros (Home, Notes, Tasks, Files, Calendar, Notebooks, Tags, Spaces, AI).",
+    "status": "done",
+    "notes": "Dark mode completo. Design system con tokens CSS (background #0f0f0f, panel #1a1a1a, accent #1a7a4a). Sidebar colapsable 56px/240px con 14 nav items. HomePanel con saludo dinámico y grid de libretas. Login/Register rediseñados. TipTap dark. Build verde.",
     "depends_on": []
   },
   {
@@ -85,8 +85,8 @@
     "phase": 4,
     "name": "tasks-crud",
     "title": "Tasks CRUD",
-    "status": "pending",
-    "description": "Crear tabla tasks en Supabase con RLS. CRUD completo. Campos: título, descripción, due date, reminder, prioridad (low/medium/high), flag, is_completed. Tasks pueden estar vinculadas a una nota (note_id nullable).",
+    "status": "done",
+    "notes": "Tabla tasks en Supabase con RLS. CRUD en lib/supabase/tasks.ts. taskStore. TaskList con filtros (todas/pendientes/completadas). TaskModal con título, descripción, due date, prioridad, flag. Nav item activo en sidebar. Build verde.",
     "depends_on": [10]
   },
   {
@@ -94,8 +94,8 @@
     "phase": 4,
     "name": "tasks-views",
     "title": "Vistas de Tasks",
-    "status": "pending",
-    "description": "Vista 'My tasks' en el panel central con filtros por prioridad/estado/fecha. Modal de creación igual al de Evernote. Contador de tasks pendientes en sidebar. Tabs: My tasks / Notebooks.",
+    "status": "done",
+    "notes": "Tabs Mis tareas / Por libreta. Filtros por estado, prioridad y fecha. Badge con pendientes en sidebar. Fecha vencida en rojo. Build verde.",
     "depends_on": [11]
   },
   {
@@ -103,8 +103,8 @@
     "phase": 5,
     "name": "files-upload",
     "title": "Upload de archivos adjuntos",
-    "status": "pending",
-    "description": "Tabla attachments en Supabase + RLS. Bucket 'attachments' en Storage. Upload vinculado a notas. Barra de progreso.",
+    "status": "done",
+    "notes": "Tabla attachments + RLS + bucket 'attachments' (MCP). lib/supabase/attachments.ts: getAttachments, uploadAttachment, deleteAttachment, getAttachmentUrl. AttachmentPanel con drag & drop, barra de progreso animada, íconos por tipo, descargar/eliminar. Integrado en NoteEditor bajo el editor. Botón 📎 en toolbar. Build verde.",
     "depends_on": [10]
   },
   {
@@ -112,8 +112,8 @@
     "phase": 5,
     "name": "files-view",
     "title": "Vista Files",
-    "status": "pending",
-    "description": "Página Files con tabs: Files / Media / Docs. Lista con nombre, tipo, tamaño, fecha. Preview de imágenes. Descarga. Búsqueda por nombre.",
+    "status": "done",
+    "notes": "FilesView con tabs Todos/Media/Docs y contadores. Búsqueda client-side por nombre. Thumbnails para imágenes, íconos por tipo para el resto. Nombre de nota como referencia. Tamaño + fecha. Descarga + eliminar (optimistic). Nav item Archivos habilitado en sidebar. Build verde.",
     "depends_on": [13]
   },
   {
@@ -121,8 +121,8 @@
     "phase": 5,
     "name": "calendar-view",
     "title": "Vista Calendar",
-    "status": "pending",
-    "description": "Calendario con tasks que tienen due date. Vistas: Day / Week / Month. Mini calendario en sidebar. Crear tasks desde el calendario.",
+    "status": "done",
+    "notes": "CalendarView con vistas Mes/Semana/Día. Navegación prev/next/hoy. Pills de tareas por prioridad en celdas. Click en día abre TaskModal con fecha pre-filled. Nav item Calendario habilitado en sidebar. Build verde.",
     "depends_on": [12]
   },
   {
@@ -130,8 +130,8 @@
     "phase": 6,
     "name": "spaces-setup",
     "title": "Spaces — estructura base",
-    "status": "pending",
-    "description": "Tablas spaces + space_members con roles (viewer/editor/admin). Invitar usuarios por email. Vista Spaces en sidebar.",
+    "status": "done",
+    "notes": "Tablas spaces + space_members con RLS en Supabase. lib/supabase/spaces.ts + admin.ts. spaceStore. SpacesView con grid de cards + roles (owner/admin/editor/viewer). SpaceModal crear space. Route Handler /api/spaces/invite (service role). Build verde.",
     "depends_on": [10]
   },
   {

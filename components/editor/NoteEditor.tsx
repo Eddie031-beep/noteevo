@@ -20,9 +20,10 @@ import {
   AlignLeft, AlignCenter, AlignRight,
   Heading1, Heading2, Heading3,
   List, ListOrdered, CheckSquare,
-  Code, FileCode, Minus, ImageIcon,
+  Code, FileCode, Minus, ImageIcon, Paperclip,
 } from 'lucide-react'
 import TagInput from './TagInput'
+import AttachmentPanel from './AttachmentPanel'
 
 function ToolbarButton({
   onClick, active, title, children,
@@ -37,10 +38,10 @@ function ToolbarButton({
       type="button"
       title={title}
       onClick={onClick}
-      className={`p-1.5 rounded transition ${
+      className={`p-1.5 rounded transition cursor-pointer ${
         active
-          ? 'bg-gray-200 text-gray-900'
-          : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'
+          ? 'bg-elevated text-foreground'
+          : 'text-muted hover:bg-surface hover:text-foreground'
       }`}
     >
       {children}
@@ -49,7 +50,7 @@ function ToolbarButton({
 }
 
 function Divider() {
-  return <div className="w-px h-5 bg-gray-200 mx-1 shrink-0" />
+  return <div className="w-px h-4 bg-border mx-1 shrink-0" />
 }
 
 export default function NoteEditor() {
@@ -83,8 +84,7 @@ export default function NoteEditor() {
     },
     editorProps: {
       attributes: {
-        class:
-          'prose prose-sm max-w-none focus:outline-none min-h-[400px] text-gray-800',
+        class: 'focus:outline-none min-h-[300px]',
       },
     },
   })
@@ -115,8 +115,8 @@ export default function NoteEditor() {
     try {
       const url = await uploadNoteImage(file)
       editor.chain().focus().setImage({ src: url }).run()
-    } catch (err) {
-      console.error('Error subiendo imagen:', err)
+    } catch {
+      // error subiendo imagen
     } finally {
       e.target.value = ''
     }
@@ -124,93 +124,178 @@ export default function NoteEditor() {
 
   if (!selectedNote) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center gap-3 bg-gray-50">
-        <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-          <FileCode size={28} className="text-gray-400" />
+      <div className="flex-1 flex flex-col items-center justify-center gap-4 bg-background">
+        <div className="w-16 h-16 bg-panel border border-border rounded-2xl flex items-center justify-center">
+          <FileCode size={28} className="text-subtle" />
         </div>
-        <p className="text-gray-400 text-sm">Selecciona o crea una nota</p>
+        <div className="text-center">
+          <p className="text-foreground font-medium">Sin nota seleccionada</p>
+          <p className="text-muted text-sm mt-1">
+            Elige una nota del panel o crea una nueva
+          </p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="flex-1 flex flex-col h-screen overflow-hidden bg-white">
+    <div className="flex-1 flex flex-col h-screen overflow-hidden bg-background">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-0.5 px-4 py-2 border-b border-gray-200 bg-white">
-        <ToolbarButton title="Negrita" onClick={() => editor?.chain().focus().toggleBold().run()} active={editor?.isActive('bold')}>
+      <div className="flex flex-wrap items-center gap-0.5 px-4 py-2 border-b border-border bg-panel shrink-0">
+        <ToolbarButton
+          title="Negrita"
+          onClick={() => editor?.chain().focus().toggleBold().run()}
+          active={editor?.isActive('bold')}
+        >
           <Bold size={15} />
         </ToolbarButton>
-        <ToolbarButton title="Cursiva" onClick={() => editor?.chain().focus().toggleItalic().run()} active={editor?.isActive('italic')}>
+        <ToolbarButton
+          title="Cursiva"
+          onClick={() => editor?.chain().focus().toggleItalic().run()}
+          active={editor?.isActive('italic')}
+        >
           <Italic size={15} />
         </ToolbarButton>
-        <ToolbarButton title="Subrayado" onClick={() => editor?.chain().focus().toggleUnderline().run()} active={editor?.isActive('underline')}>
+        <ToolbarButton
+          title="Subrayado"
+          onClick={() => editor?.chain().focus().toggleUnderline().run()}
+          active={editor?.isActive('underline')}
+        >
           <UnderlineIcon size={15} />
         </ToolbarButton>
-        <ToolbarButton title="Tachado" onClick={() => editor?.chain().focus().toggleStrike().run()} active={editor?.isActive('strike')}>
+        <ToolbarButton
+          title="Tachado"
+          onClick={() => editor?.chain().focus().toggleStrike().run()}
+          active={editor?.isActive('strike')}
+        >
           <Strikethrough size={15} />
         </ToolbarButton>
-        <ToolbarButton title="Resaltar" onClick={() => editor?.chain().focus().toggleHighlight().run()} active={editor?.isActive('highlight')}>
+        <ToolbarButton
+          title="Resaltar"
+          onClick={() => editor?.chain().focus().toggleHighlight().run()}
+          active={editor?.isActive('highlight')}
+        >
           <Highlighter size={15} />
         </ToolbarButton>
 
         <Divider />
 
-        <ToolbarButton title="Alinear izquierda" onClick={() => editor?.chain().focus().setTextAlign('left').run()} active={editor?.isActive({ textAlign: 'left' })}>
+        <ToolbarButton
+          title="Alinear izquierda"
+          onClick={() => editor?.chain().focus().setTextAlign('left').run()}
+          active={editor?.isActive({ textAlign: 'left' })}
+        >
           <AlignLeft size={15} />
         </ToolbarButton>
-        <ToolbarButton title="Centrar" onClick={() => editor?.chain().focus().setTextAlign('center').run()} active={editor?.isActive({ textAlign: 'center' })}>
+        <ToolbarButton
+          title="Centrar"
+          onClick={() => editor?.chain().focus().setTextAlign('center').run()}
+          active={editor?.isActive({ textAlign: 'center' })}
+        >
           <AlignCenter size={15} />
         </ToolbarButton>
-        <ToolbarButton title="Alinear derecha" onClick={() => editor?.chain().focus().setTextAlign('right').run()} active={editor?.isActive({ textAlign: 'right' })}>
+        <ToolbarButton
+          title="Alinear derecha"
+          onClick={() => editor?.chain().focus().setTextAlign('right').run()}
+          active={editor?.isActive({ textAlign: 'right' })}
+        >
           <AlignRight size={15} />
         </ToolbarButton>
 
         <Divider />
 
-        <ToolbarButton title="Título 1" onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()} active={editor?.isActive('heading', { level: 1 })}>
+        <ToolbarButton
+          title="Título 1"
+          onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
+          active={editor?.isActive('heading', { level: 1 })}
+        >
           <Heading1 size={15} />
         </ToolbarButton>
-        <ToolbarButton title="Título 2" onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} active={editor?.isActive('heading', { level: 2 })}>
+        <ToolbarButton
+          title="Título 2"
+          onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
+          active={editor?.isActive('heading', { level: 2 })}
+        >
           <Heading2 size={15} />
         </ToolbarButton>
-        <ToolbarButton title="Título 3" onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()} active={editor?.isActive('heading', { level: 3 })}>
+        <ToolbarButton
+          title="Título 3"
+          onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
+          active={editor?.isActive('heading', { level: 3 })}
+        >
           <Heading3 size={15} />
         </ToolbarButton>
 
         <Divider />
 
-        <ToolbarButton title="Lista con viñetas" onClick={() => editor?.chain().focus().toggleBulletList().run()} active={editor?.isActive('bulletList')}>
+        <ToolbarButton
+          title="Lista con viñetas"
+          onClick={() => editor?.chain().focus().toggleBulletList().run()}
+          active={editor?.isActive('bulletList')}
+        >
           <List size={15} />
         </ToolbarButton>
-        <ToolbarButton title="Lista numerada" onClick={() => editor?.chain().focus().toggleOrderedList().run()} active={editor?.isActive('orderedList')}>
+        <ToolbarButton
+          title="Lista numerada"
+          onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+          active={editor?.isActive('orderedList')}
+        >
           <ListOrdered size={15} />
         </ToolbarButton>
-        <ToolbarButton title="Lista de tareas" onClick={() => editor?.chain().focus().toggleTaskList().run()} active={editor?.isActive('taskList')}>
+        <ToolbarButton
+          title="Lista de tareas"
+          onClick={() => editor?.chain().focus().toggleTaskList().run()}
+          active={editor?.isActive('taskList')}
+        >
           <CheckSquare size={15} />
         </ToolbarButton>
 
         <Divider />
 
-        <ToolbarButton title="Código inline" onClick={() => editor?.chain().focus().toggleCode().run()} active={editor?.isActive('code')}>
+        <ToolbarButton
+          title="Código inline"
+          onClick={() => editor?.chain().focus().toggleCode().run()}
+          active={editor?.isActive('code')}
+        >
           <Code size={15} />
         </ToolbarButton>
-        <ToolbarButton title="Bloque de código" onClick={() => editor?.chain().focus().toggleCodeBlock().run()} active={editor?.isActive('codeBlock')}>
+        <ToolbarButton
+          title="Bloque de código"
+          onClick={() => editor?.chain().focus().toggleCodeBlock().run()}
+          active={editor?.isActive('codeBlock')}
+        >
           <FileCode size={15} />
         </ToolbarButton>
 
         <Divider />
 
-        <ToolbarButton title="Línea horizontal" onClick={() => editor?.chain().focus().setHorizontalRule().run()}>
+        <ToolbarButton
+          title="Línea horizontal"
+          onClick={() => editor?.chain().focus().setHorizontalRule().run()}
+        >
           <Minus size={15} />
         </ToolbarButton>
-        <ToolbarButton title="Insertar imagen" onClick={() => imageInputRef.current?.click()}>
+        <ToolbarButton
+          title="Insertar imagen"
+          onClick={() => imageInputRef.current?.click()}
+        >
           <ImageIcon size={15} />
+        </ToolbarButton>
+        <ToolbarButton
+          title="Adjuntar archivo"
+          onClick={() => {
+            document.getElementById(`attach-input-${selectedNote?.id}`)?.click()
+          }}
+        >
+          <Paperclip size={15} />
         </ToolbarButton>
 
         <Divider />
 
         <ToolbarButton
-          title={selectedNote.is_favorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+          title={
+            selectedNote.is_favorite ? 'Quitar de favoritos' : 'Añadir a favoritos'
+          }
           onClick={async () => {
             const newValue = !selectedNote.is_favorite
             await toggleFavorite(selectedNote.id, newValue)
@@ -220,7 +305,9 @@ export default function NoteEditor() {
         >
           <Star
             size={15}
-            className={selectedNote.is_favorite ? 'text-yellow-500 fill-yellow-500' : ''}
+            className={
+              selectedNote.is_favorite ? 'text-yellow-400 fill-yellow-400' : ''
+            }
           />
         </ToolbarButton>
 
@@ -234,18 +321,20 @@ export default function NoteEditor() {
         />
       </div>
 
-      {/* Contenido */}
-      <div className="flex-1 overflow-y-auto px-10 py-8 bg-white">
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto px-10 py-8 bg-background">
         <input
           ref={titleRef}
           type="text"
           defaultValue={selectedNote.title}
           onChange={handleTitleChange}
           placeholder="Sin título"
-          className="w-full text-3xl font-bold text-gray-900 border-none outline-none mb-4 placeholder-gray-300 bg-transparent"
+          className="w-full text-3xl font-bold text-foreground border-none outline-none mb-4 bg-transparent placeholder-subtle"
+          style={{ color: 'var(--color-foreground)' }}
         />
         <TagInput key={selectedNote.id} noteId={selectedNote.id} />
         <EditorContent editor={editor} />
+        <AttachmentPanel noteId={selectedNote.id} />
       </div>
     </div>
   )

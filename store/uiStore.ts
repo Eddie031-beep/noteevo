@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-type View = 'notebooks' | 'favorites' | 'trash' | 'search'
+type View = 'home' | 'notebooks' | 'all-notes' | 'favorites' | 'trash' | 'search' | 'tags-view' | 'notebooks-view' | 'tasks' | 'files' | 'calendar' | 'spaces'
 
 interface UIStore {
   currentView: View
@@ -10,7 +10,7 @@ interface UIStore {
 }
 
 export const useUIStore = create<UIStore>((set) => ({
-  currentView: 'notebooks',
+  currentView: 'home',
   setCurrentView: (view) => set({ currentView: view }),
   searchQuery: '',
   setSearchQuery: (query) => set({ searchQuery: query }),

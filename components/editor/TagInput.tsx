@@ -28,8 +28,8 @@ export default function TagInput({ noteId }: Props) {
       try {
         const data = await getTagsByNote(noteId)
         setNoteTags(data)
-      } catch (err) {
-        console.error('Error cargando tags:', err)
+      } catch {
+        // error cargando tags
       }
     }
     load()
@@ -64,8 +64,8 @@ export default function TagInput({ noteId }: Props) {
       setNoteTags((prev) => [...prev, tag])
       setQuery('')
       inputRef.current?.focus()
-    } catch (err) {
-      console.error('Error agregando tag:', err)
+    } catch {
+      // error agregando tag
     }
   }
 
@@ -78,8 +78,8 @@ export default function TagInput({ noteId }: Props) {
       setNoteTags((prev) => [...prev, newTag])
       setQuery('')
       inputRef.current?.focus()
-    } catch (err) {
-      console.error('Error creando tag:', err)
+    } catch {
+      // error creando tag
     }
   }
 
@@ -87,8 +87,8 @@ export default function TagInput({ noteId }: Props) {
     try {
       await removeTagFromNote(noteId, tagId)
       setNoteTags((prev) => prev.filter((t) => t.id !== tagId))
-    } catch (err) {
-      console.error('Error quitando tag:', err)
+    } catch {
+      // error quitando tag
     }
   }
 
@@ -112,18 +112,19 @@ export default function TagInput({ noteId }: Props) {
       ref={containerRef}
       className="relative flex flex-wrap items-center gap-1.5 mb-6"
     >
-      <TagIcon size={14} className="text-gray-400 shrink-0" />
+      <TagIcon size={13} className="text-subtle shrink-0" />
 
       {noteTags.map((tag) => (
         <span
           key={tag.id}
-          className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full"
+          className="inline-flex items-center gap-1 px-2 py-0.5 bg-accent/10 text-accent text-xs rounded-full border border-accent/25"
         >
           {tag.name}
           <button
             type="button"
+            title="Quitar etiqueta"
             onClick={() => handleRemove(tag.id)}
-            className="hover:text-green-900 transition"
+            className="hover:text-accent-light transition cursor-pointer"
           >
             <X size={10} />
           </button>
@@ -137,7 +138,7 @@ export default function TagInput({ noteId }: Props) {
             setOpen(true)
             setTimeout(() => inputRef.current?.focus(), 0)
           }}
-          className="inline-flex items-center gap-1 px-2 py-0.5 text-xs text-gray-400 hover:text-green-600 border border-dashed border-gray-300 hover:border-green-400 rounded-full transition"
+          className="inline-flex items-center gap-1 px-2 py-0.5 text-xs text-muted hover:text-accent border border-dashed border-border hover:border-accent/40 rounded-full transition cursor-pointer"
         >
           <Plus size={10} />
           Etiqueta
@@ -151,17 +152,18 @@ export default function TagInput({ noteId }: Props) {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Buscar o crear..."
-            className="px-2 py-0.5 text-xs border border-green-400 rounded-full outline-none w-36 text-gray-700"
+            className="px-2 py-0.5 text-xs border border-accent/50 bg-elevated rounded-full outline-none w-36 text-foreground"
+            style={{ color: 'var(--color-foreground)' }}
           />
 
           {(filtered.length > 0 || (query.trim() && !exactMatch)) && (
-            <div className="absolute top-full left-0 mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
+            <div className="absolute top-full left-0 mt-1 w-44 bg-panel border border-border rounded-lg shadow-xl z-10 overflow-hidden">
               {filtered.map((tag) => (
                 <button
                   key={tag.id}
                   type="button"
                   onClick={() => handleAdd(tag)}
-                  className="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-green-50 hover:text-green-700 transition"
+                  className="w-full text-left px-3 py-1.5 text-xs text-muted hover:bg-surface hover:text-accent transition cursor-pointer"
                 >
                   {tag.name}
                 </button>
@@ -170,7 +172,7 @@ export default function TagInput({ noteId }: Props) {
                 <button
                   type="button"
                   onClick={handleCreate}
-                  className="w-full text-left px-3 py-1.5 text-xs text-green-600 hover:bg-green-50 transition border-t border-gray-100"
+                  className="w-full text-left px-3 py-1.5 text-xs text-accent hover:bg-surface transition border-t border-border cursor-pointer"
                 >
                   + Crear &quot;{query.trim()}&quot;
                 </button>

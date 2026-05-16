@@ -43,7 +43,7 @@ export async function getTagsByNote(noteId: string): Promise<Tag[]> {
     .eq('note_id', noteId)
 
   if (error) throw new Error(error.message)
-  return ((data ?? []) as NoteTagRow[])
+  return ((data ?? []) as unknown as NoteTagRow[])
     .map(row => row.tags)
     .filter((tag): tag is Tag => tag !== null)
 }

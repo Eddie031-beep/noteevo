@@ -19,8 +19,8 @@ export default function FavoriteNotes() {
       try {
         const data = await getFavoriteNotes()
         setFavoriteNotes(data)
-      } catch (err) {
-        console.error('Error cargando favoritos:', err)
+      } catch {
+        // error cargando favoritos
       } finally {
         setLoading(false)
       }
@@ -29,13 +29,13 @@ export default function FavoriteNotes() {
   }, [])
 
   return (
-    <div className="w-72 h-screen bg-gray-50 border-r border-gray-200 flex flex-col">
-      <div className="p-4 border-b border-gray-200 flex items-center gap-2">
-        <Star size={18} className="text-yellow-500" />
+    <div className="w-72 h-screen bg-panel border-r border-border flex flex-col shrink-0">
+      <div className="h-14 px-4 border-b border-border flex items-center gap-2.5">
+        <Star size={18} className="text-yellow-400 fill-yellow-400 shrink-0" />
         <div>
-          <h2 className="font-semibold text-gray-800">Favoritos</h2>
+          <h2 className="font-semibold text-foreground text-sm">Favoritos</h2>
           {!loading && (
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-xs text-muted">
               {favoriteNotes.length} nota{favoriteNotes.length !== 1 ? 's' : ''}
             </p>
           )}
@@ -44,31 +44,31 @@ export default function FavoriteNotes() {
 
       <div className="flex-1 overflow-y-auto">
         {loading ? (
-          <p className="text-xs text-gray-400 text-center mt-8">Cargando...</p>
+          <p className="text-xs text-muted text-center mt-8">Cargando...</p>
         ) : favoriteNotes.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full gap-2">
-            <Star size={32} className="text-gray-300" />
-            <p className="text-sm text-gray-400">Sin notas favoritas</p>
+          <div className="flex flex-col items-center justify-center h-full gap-3">
+            <Star size={32} className="text-subtle" />
+            <p className="text-sm text-muted">Sin notas favoritas</p>
           </div>
         ) : (
           favoriteNotes.map((note) => (
             <div
               key={note.id}
               onClick={() => setSelectedNote(note)}
-              className={`p-4 border-b border-gray-200 cursor-pointer transition ${
+              className={`px-4 py-3.5 border-b border-border cursor-pointer transition ${
                 selectedNote?.id === note.id
-                  ? 'bg-green-50 border-l-2 border-l-green-500'
-                  : 'hover:bg-white'
+                  ? 'bg-elevated border-l-2 border-l-accent'
+                  : 'hover:bg-surface'
               }`}
             >
-              <p className="text-sm font-semibold text-gray-800 truncate">
+              <p className="text-sm font-medium text-foreground truncate">
                 {note.title || 'Sin título'}
               </p>
-              <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">
+              <p className="text-xs text-muted mt-1 line-clamp-2 leading-relaxed">
                 {extractTextPreview(note.content) || 'Sin contenido'}
               </p>
-              <p className="text-xs text-gray-400 mt-1.5">
-                {format(new Date(note.updated_at), "d MMM yyyy", { locale: es })}
+              <p className="text-xs text-subtle mt-1.5">
+                {format(new Date(note.updated_at), 'd MMM yyyy', { locale: es })}
               </p>
             </div>
           ))

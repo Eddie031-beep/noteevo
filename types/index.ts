@@ -5,6 +5,7 @@ export interface Notebook {
   description: string | null
   created_at: string
   updated_at: string
+  space_id?: string | null
 }
 
 export interface Note {
@@ -31,13 +32,49 @@ export interface NoteTag {
   tag_id: string
 }
 
+export interface Task {
+  id: string
+  user_id: string
+  note_id: string | null
+  title: string
+  description: string | null
+  due_date: string | null
+  reminder_at: string | null
+  priority: 'low' | 'medium' | 'high'
+  is_flagged: boolean
+  is_completed: boolean
+  completed_at: string | null
+  created_at: string
+}
+
 export interface Attachment {
   id: string
-  note_id: string
   user_id: string
-  file_url: string
+  note_id: string | null
   file_name: string
   file_type: string | null
-  size: number | null
+  file_size: number | null
+  storage_path: string
   created_at: string
+}
+
+export type SpaceRole = 'viewer' | 'editor' | 'admin'
+
+export interface Space {
+  id: string
+  name: string
+  description: string | null
+  owner_id: string
+  created_at: string
+  updated_at: string
+  user_role?: SpaceRole | 'owner'
+}
+
+export interface SpaceMember {
+  space_id: string
+  user_id: string
+  role: SpaceRole
+  invited_by: string | null
+  joined_at: string
+  email?: string
 }
