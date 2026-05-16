@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-type View = 'home' | 'notebooks' | 'all-notes' | 'favorites' | 'trash' | 'search' | 'tags-view' | 'notebooks-view' | 'tasks' | 'files' | 'calendar' | 'spaces'
+type View = 'home' | 'notebooks' | 'all-notes' | 'favorites' | 'trash' | 'search' | 'tags-view' | 'notebooks-view' | 'tasks' | 'files' | 'calendar' | 'spaces' | 'shared'
 
 interface UIStore {
   currentView: View

@@ -14,11 +14,11 @@ import { useSpaceStore } from '@/store/spaceStore'
 import {
   Home, FileText, BookOpen, Star, Trash2, LogOut,
   Plus, X, Search, Tag, CheckSquare, Paperclip,
-  Calendar, Users, Sparkles, ChevronDown, ChevronRight, ChevronLeft,
+  Calendar, Users, Sparkles, ChevronDown, ChevronRight, ChevronLeft, Share2,
 } from 'lucide-react'
 import type { Notebook, Space } from '@/types'
 
-type View = 'home' | 'notebooks' | 'all-notes' | 'favorites' | 'trash' | 'search' | 'tags-view' | 'notebooks-view' | 'tasks' | 'files' | 'calendar' | 'spaces'
+type View = 'home' | 'notebooks' | 'all-notes' | 'favorites' | 'trash' | 'search' | 'tags-view' | 'notebooks-view' | 'tasks' | 'files' | 'calendar' | 'spaces' | 'shared'
 
 interface NavItemProps {
   icon: React.ReactNode
@@ -500,6 +500,13 @@ export default function Sidebar() {
             collapsed={collapsed}
           />
         )}
+        <NavItem
+          icon={<Share2 size={18} />}
+          label="Compartido conmigo"
+          active={currentView === 'shared'}
+          onClick={() => handleNav('shared')}
+          collapsed={collapsed}
+        />
         <NavItem
           icon={<Sparkles size={18} />}
           label="IA"

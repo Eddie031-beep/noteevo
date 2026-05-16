@@ -10,6 +10,7 @@ import {
 import { moveNotebookToSpace } from '@/lib/supabase/notebooks'
 import { extractTextPreview } from '@/lib/utils/tiptap'
 import InviteModal from './InviteModal'
+import CreateNotebookInSpaceModal from './CreateNotebookInSpaceModal'
 import type { Space, Notebook, Note } from '@/types'
 
 type Tab = 'notebooks' | 'notes'
@@ -25,7 +26,7 @@ export default function SpaceDetailView({ space, onBack }: SpaceDetailViewProps)
   const [notes, setNotes] = useState<Note[]>([])
   const [loading, setLoading] = useState(true)
   const [showInvite, setShowInvite] = useState(false)
-  const [creatingNotebook, setCreatingNotebook] = useState(false)
+  const [showCreateNotebook, setShowCreateNotebook] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const isViewer = space.user_role === 'viewer'
@@ -53,19 +54,9 @@ export default function SpaceDetailView({ space, onBack }: SpaceDetailViewProps)
 
   const notebookMap = new Map(notebooks.map((nb) => [nb.id, nb.name]))
 
-  const handleCreateNotebook = async () => {
-    const name = prompt('Nombre de la libreta:')
-    if (!name?.trim()) return
-
-    setCreatingNotebook(true)
-    try {
-      const nb = await createNotebookInSpace(space.id, name.trim())
-      setNotebooks((prev) => [nb, ...prev])
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al crear libreta')
-    } finally {
-      setCreatingNotebook(false)
-    }
+  const handleConfirmCreateNotebook = async (name: string) => {
+    const nb = await createNotebookInSpace(space.id, name)
+    setNotebooks((prev) => [nb, ...prev])
   }
 
   const handleMoveOut = async (notebook: Notebook) => {
@@ -151,9 +142,8 @@ export default function SpaceDetailView({ space, onBack }: SpaceDetailViewProps)
                     <button
                       type="button"
                       title="Nueva libreta"
-                      onClick={handleCreateNotebook}
-                      disabled={creatingNotebook}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-accent text-white text-sm rounded-lg hover:bg-accent/90 disabled:opacity-50 transition"
+                      onClick={() => setShowCreateNotebook(true)}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-accent text-white text-sm rounded-lg hover:bg-accent/90 transition"
                     >
                       <Plus size={14} />
                       Nueva libreta
@@ -242,6 +232,13 @@ export default function SpaceDetailView({ space, onBack }: SpaceDetailViewProps)
 
       {showInvite && (
         <InviteModal spaceId={space.id} onClose={() => setShowInvite(false)} />
+      )}
+
+      {showCreateNotebook && (
+        <CreateNotebookInSpaceModal
+          onClose={() => setShowCreateNotebook(false)}
+          onConfirm={handleConfirmCreateNotebook}
+        />
       )}
     </div>
   )

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -11,6 +11,8 @@ import TaskItem from '@tiptap/extension-task-item'
 import Image from '@tiptap/extension-image'
 import TextAlign from '@tiptap/extension-text-align'
 import { useNoteStore } from '@/store/noteStore'
+import { useNotebookStore } from '@/store/notebookStore'
+import { useSpaceStore } from '@/store/spaceStore'
 import { updateNote, toggleFavorite } from '@/lib/supabase/notes'
 import { uploadNoteImage } from '@/lib/supabase/storage'
 import {
@@ -55,13 +57,24 @@ function Divider() {
 
 export default function NoteEditor() {
   const { selectedNote, updateNote: updateNoteStore } = useNoteStore()
+  const { notebooks } = useNotebookStore()
+  const { spaces } = useSpaceStore()
   const titleRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const syncedNoteIdRef = useRef<string | null>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
 
+  const isReadOnly = useMemo(() => {
+    if (!selectedNote?.notebook_id) return false
+    const notebook = notebooks.find((nb) => nb.id === selectedNote.notebook_id)
+    if (!notebook?.space_id) return false
+    const space = spaces.find((sp) => sp.id === notebook.space_id)
+    return space?.user_role === 'viewer'
+  }, [selectedNote, notebooks, spaces])
+
   const editor = useEditor({
     immediatelyRender: false,
+    editable: !isReadOnly,
     extensions: [
       StarterKit,
       Placeholder.configure({ placeholder: 'Escribe algo...' }),
@@ -98,6 +111,10 @@ export default function NoteEditor() {
       Object.keys(selectedNote.content).length > 0 ? selectedNote.content : ''
     )
   }, [selectedNote, editor])
+
+  useEffect(() => {
+    editor?.setEditable(!isReadOnly)
+  }, [editor, isReadOnly])
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!selectedNote) return
@@ -140,8 +157,8 @@ export default function NoteEditor() {
 
   return (
     <div className="flex-1 flex flex-col h-screen overflow-hidden bg-background">
-      {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-0.5 px-4 py-2 border-b border-border bg-panel shrink-0">
+      {/* Toolbar — hidden for viewers */}
+      {!isReadOnly && <div className="flex flex-wrap items-center gap-0.5 px-4 py-2 border-b border-border bg-panel shrink-0">
         <ToolbarButton
           title="Negrita"
           onClick={() => editor?.chain().focus().toggleBold().run()}
@@ -319,7 +336,7 @@ export default function NoteEditor() {
           className="hidden"
           onChange={handleImageUpload}
         />
-      </div>
+      </div>}
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-10 py-8 bg-background">
@@ -327,9 +344,10 @@ export default function NoteEditor() {
           ref={titleRef}
           type="text"
           defaultValue={selectedNote.title}
-          onChange={handleTitleChange}
+          onChange={isReadOnly ? undefined : handleTitleChange}
+          readOnly={isReadOnly}
           placeholder="Sin título"
-          className="w-full text-3xl font-bold text-foreground border-none outline-none mb-4 bg-transparent placeholder-subtle"
+          className={`w-full text-3xl font-bold text-foreground border-none outline-none mb-4 bg-transparent placeholder-subtle ${isReadOnly ? 'cursor-default' : ''}`}
           style={{ color: 'var(--color-foreground)' }}
         />
         <TagInput key={selectedNote.id} noteId={selectedNote.id} />
