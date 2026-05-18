@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -22,10 +22,11 @@ import {
   AlignLeft, AlignCenter, AlignRight,
   Heading1, Heading2, Heading3,
   List, ListOrdered, CheckSquare,
-  Code, FileCode, Minus, ImageIcon, Paperclip,
+  Code, FileCode, Minus, ImageIcon, Paperclip, Sparkles,
 } from 'lucide-react'
 import TagInput from './TagInput'
 import AttachmentPanel from './AttachmentPanel'
+import AiSummaryPanel from './AiSummaryPanel'
 
 function ToolbarButton({
   onClick, active, title, children,
@@ -63,6 +64,10 @@ export default function NoteEditor() {
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const syncedNoteIdRef = useRef<string | null>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
+  const [showSummary, setShowSummary] = useState(false)
+  const [summary, setSummary] = useState<string | null>(null)
+  const [isSummarizing, setIsSummarizing] = useState(false)
+  const [summaryError, setSummaryError] = useState<string | null>(null)
 
   const isReadOnly = useMemo(() => {
     if (!selectedNote?.notebook_id) return false
@@ -136,6 +141,33 @@ export default function NoteEditor() {
       // error subiendo imagen
     } finally {
       e.target.value = ''
+    }
+  }
+
+  const handleSummarize = async () => {
+    if (!editor) return
+    const text = editor.getText().trim()
+    if (!text) return
+    setShowSummary(true)
+    setIsSummarizing(true)
+    setSummary(null)
+    setSummaryError(null)
+    try {
+      const res = await fetch('/api/ai/summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: text }),
+      })
+      const json = await res.json()
+      if (!json.success) {
+        setSummaryError(json.error ?? 'Error desconocido')
+      } else {
+        setSummary(json.data.summary)
+      }
+    } catch {
+      setSummaryError('Error al conectar con el servidor')
+    } finally {
+      setIsSummarizing(false)
     }
   }
 
@@ -310,6 +342,16 @@ export default function NoteEditor() {
         <Divider />
 
         <ToolbarButton
+          title="Resumir con IA"
+          onClick={handleSummarize}
+          active={showSummary}
+        >
+          <Sparkles size={15} />
+        </ToolbarButton>
+
+        <Divider />
+
+        <ToolbarButton
           title={
             selectedNote.is_favorite ? 'Quitar de favoritos' : 'Añadir a favoritos'
           }
@@ -338,21 +380,32 @@ export default function NoteEditor() {
         />
       </div>}
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto px-10 py-8 bg-background">
-        <input
-          ref={titleRef}
-          type="text"
-          defaultValue={selectedNote.title}
-          onChange={isReadOnly ? undefined : handleTitleChange}
-          readOnly={isReadOnly}
-          placeholder="Sin título"
-          className={`w-full text-3xl font-bold text-foreground border-none outline-none mb-4 bg-transparent placeholder-subtle ${isReadOnly ? 'cursor-default' : ''}`}
-          style={{ color: 'var(--color-foreground)' }}
-        />
-        <TagInput key={selectedNote.id} noteId={selectedNote.id} />
-        <EditorContent editor={editor} />
-        <AttachmentPanel noteId={selectedNote.id} />
+      {/* Content + optional AI panel */}
+      <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 overflow-y-auto px-10 py-8 bg-background">
+          <input
+            ref={titleRef}
+            type="text"
+            defaultValue={selectedNote.title}
+            onChange={isReadOnly ? undefined : handleTitleChange}
+            readOnly={isReadOnly}
+            placeholder="Sin título"
+            className={`w-full text-3xl font-bold text-foreground border-none outline-none mb-4 bg-transparent placeholder-subtle ${isReadOnly ? 'cursor-default' : ''}`}
+            style={{ color: 'var(--color-foreground)' }}
+          />
+          <TagInput key={selectedNote.id} noteId={selectedNote.id} />
+          <EditorContent editor={editor} />
+          <AttachmentPanel noteId={selectedNote.id} />
+        </div>
+
+        {showSummary && (
+          <AiSummaryPanel
+            summary={summary}
+            isLoading={isSummarizing}
+            error={summaryError}
+            onClose={() => setShowSummary(false)}
+          />
+        )}
       </div>
     </div>
   )

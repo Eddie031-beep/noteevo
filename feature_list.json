@@ -148,8 +148,8 @@
     "phase": 7,
     "name": "ai-summarize",
     "title": "IA — Resumir nota",
-    "status": "pending",
-    "description": "Botón 'Resumir' en editor. Route Handler server-side que llama claude-haiku-4-5 via Anthropic API. Panel lateral con resumen. Rate limit 10 req/día/usuario via tabla ai_usage. API key en ANTHROPIC_API_KEY env var (solo servidor).",
+    "status": "done",
+    "notes": "Botón Sparkles en toolbar. Route Handler /api/ai/summarize server-side con claude-haiku-4-5-20251001. Panel lateral AiSummaryPanel. Rate limit 10 req/día via tabla ai_usage (RLS). ANTHROPIC_API_KEY en .env.local. Build verde.",
     "depends_on": [10]
   },
   {
