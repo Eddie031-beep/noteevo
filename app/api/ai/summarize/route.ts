@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import Groq from 'groq-sdk'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 
 const MAX_DAILY_REQUESTS = 10
@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
       .from('ai_usage')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
+      .eq('action', 'summarize')
       .gte('created_at', `${today}T00:00:00`)
 
     if ((count ?? 0) >= MAX_DAILY_REQUESTS) {
@@ -28,16 +29,19 @@ export async function POST(req: NextRequest) {
 
     const { content } = await req.json()
     if (!content || typeof content !== 'string' || content.trim().length === 0) {
-      return NextResponse.json({ success: false, error: 'La nota no tiene contenido para resumir' }, { status: 400 })
+      return NextResponse.json(
+        { success: false, error: 'La nota no tiene contenido para resumir' },
+        { status: 400 }
+      )
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY
-    if (!apiKey) throw new Error('ANTHROPIC_API_KEY no configurada')
+    const apiKey = process.env.GROQ_API_KEY
+    if (!apiKey) throw new Error('GROQ_API_KEY no configurada')
 
-    const anthropic = new Anthropic({ apiKey })
+    const groq = new Groq({ apiKey })
 
-    const message = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
+    const completion = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
       max_tokens: 512,
       messages: [
         {
@@ -47,8 +51,8 @@ export async function POST(req: NextRequest) {
       ],
     })
 
-    const summary = message.content[0].type === 'text' ? message.content[0].text : ''
-    const tokensUsed = message.usage.input_tokens + message.usage.output_tokens
+    const summary = completion.choices[0]?.message?.content ?? ''
+    const tokensUsed = completion.usage?.total_tokens ?? 0
 
     await client.from('ai_usage').insert({
       user_id: user.id,
@@ -58,6 +62,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, data: { summary } })
   } catch {
-    return NextResponse.json({ success: false, error: 'Error al generar el resumen' }, { status: 500 })
+    return NextResponse.json(
+      { success: false, error: 'Error al generar el resumen' },
+      { status: 500 }
+    )
   }
 }
