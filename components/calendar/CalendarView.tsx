@@ -48,7 +48,12 @@ function buildWeekDays(date: Date): Date[] {
 }
 
 function tasksForDay(tasks: Task[], day: Date): Task[] {
-  return tasks.filter((t) => t.due_date && isSameDay(parseISO(t.due_date), day))
+  return tasks.filter((t) => {
+    if (!t.due_date) return false
+    const [year, month, dayNum] = t.due_date.split('T')[0].split('-').map(Number)
+    const taskDate = new Date(year, month - 1, dayNum)
+    return isSameDay(taskDate, day)
+  })
 }
 
 export default function CalendarView() {
