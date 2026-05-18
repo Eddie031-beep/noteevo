@@ -18,14 +18,12 @@ interface InviteBody {
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Verificar autenticación del llamador
     const serverClient = await createServerClient()
     const { data: { user }, error: authError } = await serverClient.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 })
     }
 
-    // 2. Validar body
     const body: InviteBody = await req.json()
     const { spaceId, email, role } = body
 
@@ -33,7 +31,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Datos inválidos' }, { status: 400 })
     }
 
-    // 3. Verificar que el llamador es dueño o admin del space
     const { data: space, error: spaceError } = await serverClient
       .from('spaces')
       .select('id, owner_id')
@@ -58,7 +55,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 4. Buscar usuario por email via RPC (security definer accede a auth.users)
     const admin = getAdminClient()
     const { data: inviteeId, error: rpcError } = await admin
       .rpc('get_user_id_by_email', { email })
@@ -80,7 +76,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // 5. Verificar si ya es miembro
     const { data: existing } = await admin
       .from('space_members')
       .select('user_id')
@@ -95,7 +90,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // 6. Insertar en space_members
     const { error: insertError } = await admin
       .from('space_members')
       .insert({ space_id: spaceId, user_id: inviteeId, role, invited_by: user.id })

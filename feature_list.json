@@ -139,8 +139,8 @@
     "phase": 6,
     "name": "spaces-shared-content",
     "title": "Spaces — contenido compartido",
-    "status": "pending",
-    "description": "Notebooks dentro de un Space (space_id en notebooks). Notas visibles para miembros según rol. Vista 'Shared with me'. Permisos por rol.",
+    "status": "done",
+    "notes": "CreateNotebookInSpaceModal reemplaza prompt(). NoteEditor read-only para viewers. SharedWithMeView con grid filtrado por role != owner. Item 'Compartido conmigo' en Sidebar. Build verde.",
     "depends_on": [16]
   },
   {
