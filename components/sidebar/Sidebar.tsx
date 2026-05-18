@@ -81,7 +81,7 @@ export default function Sidebar() {
   } = useNotebookStore()
   const { currentView, setCurrentView, searchQuery, setSearchQuery } = useUIStore()
   const { setTags } = useTagStore()
-  const { spaces, setSpaces, selectedSpace, setSelectedSpace } = useSpaceStore()
+  const { spaces, setSpaces, selectedSpace, setSelectedSpace, removeSpace } = useSpaceStore()
 
   const [collapsed, setCollapsed] = useState(false)
   const [newName, setNewName] = useState('')
@@ -120,12 +120,48 @@ export default function Sidebar() {
       try {
         const data = await getMySpaces()
         setSpaces(data)
+        if (selectedSpace && !data.find((s) => s.id === selectedSpace.id)) {
+          setSelectedSpace(null)
+          setCurrentView('home')
+        }
       } catch {
         // sin spaces
       }
     }
     load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setSpaces])
+
+  useEffect(() => {
+    const supabase = createClient()
+    let userId: string | null = null
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      userId = user?.id ?? null
+    })
+
+    const channel = supabase
+      .channel('my-space-memberships')
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'space_members',
+        },
+        (payload) => {
+          if (payload.old && (payload.old as { user_id: string }).user_id === userId) {
+            const spaceId = (payload.old as { space_id: string }).space_id
+            removeSpace(spaceId)
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [removeSpace])
 
   useEffect(() => {
     const load = async () => {

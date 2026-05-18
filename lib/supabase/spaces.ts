@@ -159,6 +159,25 @@ export async function createNotebookInSpace(
   return data
 }
 
+export interface SpaceMemberWithEmail {
+  user_id: string
+  role: SpaceRole
+  invited_by: string | null
+  joined_at: string
+  email: string
+}
+
+export async function getSpaceMembersWithEmail(
+  spaceId: string
+): Promise<SpaceMemberWithEmail[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .rpc('get_space_members_with_email', { p_space_id: spaceId })
+
+  if (error) throw new Error(error.message)
+  return (data ?? []) as SpaceMemberWithEmail[]
+}
+
 export async function getSpaceNotes(spaceId: string): Promise<import('@/types').Note[]> {
   const supabase = createClient()
 
