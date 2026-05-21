@@ -22,13 +22,14 @@ import {
   AlignLeft, AlignCenter, AlignRight,
   Heading1, Heading2, Heading3,
   List, ListOrdered, CheckSquare,
-  Code, FileCode, Minus, ImageIcon, Paperclip, Sparkles, MessageSquare,
+  Code, FileCode, Minus, ImageIcon, Paperclip, Sparkles, MessageSquare, Tag as TagIcon,
 } from 'lucide-react'
 import TagInput from './TagInput'
 import AttachmentPanel from './AttachmentPanel'
 import AiSummaryPanel from './AiSummaryPanel'
 import AiImproveToolbar from './AiImproveToolbar'
 import AiChatPanel from './AiChatPanel'
+import AiSmartTags from './AiSmartTags'
 
 function ToolbarButton({
   onClick, active, title, children,
@@ -71,6 +72,8 @@ export default function NoteEditor() {
   const [isSummarizing, setIsSummarizing] = useState(false)
   const [summaryError, setSummaryError] = useState<string | null>(null)
   const [showChat, setShowChat] = useState(false)
+  const [showSmartTags, setShowSmartTags] = useState(false)
+  const [tagInputKey, setTagInputKey] = useState(0)
   const [improveToolbar, setImproveToolbar] = useState<{
     position: { top: number; left: number }
     selectedText: string
@@ -395,6 +398,13 @@ export default function NoteEditor() {
         >
           <MessageSquare size={15} />
         </ToolbarButton>
+        <ToolbarButton
+          title="Sugerir etiquetas con IA"
+          onClick={() => setShowSmartTags((v) => !v)}
+          active={showSmartTags}
+        >
+          <TagIcon size={15} />
+        </ToolbarButton>
 
         <Divider />
 
@@ -428,7 +438,7 @@ export default function NoteEditor() {
       </div>}
 
       {/* Content + optional AI panel */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         <div className="flex-1 overflow-y-auto px-10 py-8 bg-background" onMouseUp={handleEditorMouseUp}>
           <input
             ref={titleRef}
@@ -440,7 +450,7 @@ export default function NoteEditor() {
             className={`w-full text-3xl font-bold text-foreground border-none outline-none mb-4 bg-transparent placeholder-subtle ${isReadOnly ? 'cursor-default' : ''}`}
             style={{ color: 'var(--color-foreground)' }}
           />
-          <TagInput key={selectedNote.id} noteId={selectedNote.id} />
+          <TagInput key={`${selectedNote.id}-${tagInputKey}`} noteId={selectedNote.id} />
           <EditorContent editor={editor} />
           <AttachmentPanel noteId={selectedNote.id} />
         </div>
@@ -458,6 +468,17 @@ export default function NoteEditor() {
             noteContent={editor.getText()}
             onClose={() => setShowChat(false)}
           />
+        )}
+
+        {showSmartTags && editor && (
+          <div className="absolute bottom-6 left-10 z-30">
+            <AiSmartTags
+              noteId={selectedNote.id}
+              noteContent={editor.getText()}
+              onTagsAdded={() => setTagInputKey((k) => k + 1)}
+              onClose={() => setShowSmartTags(false)}
+            />
+          </div>
         )}
       </div>
 
