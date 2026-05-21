@@ -157,8 +157,8 @@
     "phase": 7,
     "name": "ai-improve-writing",
     "title": "IA — Mejorar escritura",
-    "status": "pending",
-    "description": "Seleccionar texto en editor → menú flotante 'Mejorar con IA'. Reformula con streaming. Aceptar/rechazar el cambio.",
+    "status": "done",
+    "notes": "/api/ai/improve con streaming (ReadableStream nativo). AiImproveToolbar flotante al seleccionar texto ≥10 chars. Posición calculada con getBoundingClientRect(). Aceptar reemplaza la selección en TipTap, cancelar descarta. Rate limit 10/día via ai_usage. Build verde.",
     "depends_on": [18]
   },
   {
@@ -166,8 +166,8 @@
     "phase": 7,
     "name": "ai-chat-note",
     "title": "IA — Chat con tu nota",
-    "status": "pending",
-    "description": "Panel de chat (slide-over derecho) con el contenido de la nota como contexto. Preguntas sobre el contenido. Historial en sesión.",
+    "status": "done",
+    "notes": "/api/ai/chat con streaming. AiChatPanel 320px panel derecho. Historial en sesión (se resetea al cerrar). Enter envía, Shift+Enter nueva línea. Rate limit 20/día via ai_usage. Errores en español. Build verde.",
     "depends_on": [18]
   },
   {
@@ -175,8 +175,8 @@
     "phase": 7,
     "name": "ai-smart-tags",
     "title": "IA — Smart Tags",
-    "status": "pending",
-    "description": "Botón 'Sugerir tags'. IA analiza contenido y sugiere hasta 5 tags relevantes. Aceptar/rechazar individualmente. Crea tags nuevos si no existen.",
+    "status": "done",
+    "notes": "Botón Tag en toolbar. /api/ai/suggest-tags con Groq. AiSmartTags panel flotante con chips aceptar/rechazar. Crea tags nuevos si no existen. Rate limit 10/día via ai_usage. Build verde.",
     "depends_on": [18]
   }
 ]
