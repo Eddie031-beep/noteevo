@@ -22,11 +22,13 @@ import {
   AlignLeft, AlignCenter, AlignRight,
   Heading1, Heading2, Heading3,
   List, ListOrdered, CheckSquare,
-  Code, FileCode, Minus, ImageIcon, Paperclip, Sparkles,
+  Code, FileCode, Minus, ImageIcon, Paperclip, Sparkles, MessageSquare,
 } from 'lucide-react'
 import TagInput from './TagInput'
 import AttachmentPanel from './AttachmentPanel'
 import AiSummaryPanel from './AiSummaryPanel'
+import AiImproveToolbar from './AiImproveToolbar'
+import AiChatPanel from './AiChatPanel'
 
 function ToolbarButton({
   onClick, active, title, children,
@@ -68,6 +70,12 @@ export default function NoteEditor() {
   const [summary, setSummary] = useState<string | null>(null)
   const [isSummarizing, setIsSummarizing] = useState(false)
   const [summaryError, setSummaryError] = useState<string | null>(null)
+  const [showChat, setShowChat] = useState(false)
+  const [improveToolbar, setImproveToolbar] = useState<{
+    position: { top: number; left: number }
+    selectedText: string
+  } | null>(null)
+
 
   const isReadOnly = useMemo(() => {
     if (!selectedNote?.notebook_id) return false
@@ -91,6 +99,9 @@ export default function NoteEditor() {
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
     ],
     content: '',
+    onSelectionUpdate: ({ editor }) => {
+      if (editor.state.selection.empty) setImproveToolbar(null)
+    },
     onUpdate: ({ editor }) => {
       if (!selectedNote) return
       const content = editor.getJSON()
@@ -169,6 +180,35 @@ export default function NoteEditor() {
     } finally {
       setIsSummarizing(false)
     }
+  }
+
+  const handleEditorMouseUp = () => {
+    if (isReadOnly) return
+    const selection = window.getSelection()
+    if (!selection || selection.isCollapsed || !selection.toString().trim()) {
+      return
+    }
+    const text = selection.toString().trim()
+    if (text.length < 10) return
+
+    const range = selection.getRangeAt(0)
+    const rect = range.getBoundingClientRect()
+
+    setImproveToolbar({
+      position: {
+        top: rect.bottom + window.scrollY + 8,
+        left: Math.max(8, rect.left + window.scrollX),
+      },
+      selectedText: text,
+    })
+  }
+
+  const handleAcceptImprovement = (improvedText: string) => {
+    if (!editor) return
+    const { state } = editor
+    const { from, to } = state.selection
+    editor.chain().focus().deleteRange({ from, to }).insertContentAt(from, improvedText).run()
+    setImproveToolbar(null)
   }
 
   if (!selectedNote) {
@@ -348,6 +388,13 @@ export default function NoteEditor() {
         >
           <Sparkles size={15} />
         </ToolbarButton>
+        <ToolbarButton
+          title="Chat con la nota"
+          onClick={() => setShowChat((v) => !v)}
+          active={showChat}
+        >
+          <MessageSquare size={15} />
+        </ToolbarButton>
 
         <Divider />
 
@@ -382,7 +429,7 @@ export default function NoteEditor() {
 
       {/* Content + optional AI panel */}
       <div className="flex-1 flex overflow-hidden">
-        <div className="flex-1 overflow-y-auto px-10 py-8 bg-background">
+        <div className="flex-1 overflow-y-auto px-10 py-8 bg-background" onMouseUp={handleEditorMouseUp}>
           <input
             ref={titleRef}
             type="text"
@@ -406,7 +453,22 @@ export default function NoteEditor() {
             onClose={() => setShowSummary(false)}
           />
         )}
+        {showChat && editor && (
+          <AiChatPanel
+            noteContent={editor.getText()}
+            onClose={() => setShowChat(false)}
+          />
+        )}
       </div>
+
+      {improveToolbar && (
+        <AiImproveToolbar
+          position={improveToolbar.position}
+          selectedText={improveToolbar.selectedText}
+          onAccept={handleAcceptImprovement}
+          onReject={() => setImproveToolbar(null)}
+        />
+      )}
     </div>
   )
 }
