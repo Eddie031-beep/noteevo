@@ -63,4 +63,4 @@
 - [ ] API key NUNCA expuesta al cliente (solo server-side)
 - [ ] Rate limit funciona (tabla ai_usage)
 - [ ] Streaming funciona en mejorar escritura
-- [ ] Errores de la API de Claude manejados y mostrados en español
+- [ ] Errores de la API de Groq manejados y mostrados en español

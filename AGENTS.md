@@ -36,6 +36,7 @@
 - **Cliente correcto**: `lib/supabase/client.ts` en componentes cliente, `lib/supabase/server.ts` en Server Components
 - **RLS activo** — nunca bypassear seguridad de Supabase
 - **Build limpio** — `npm run build` verde antes de declarar cualquier feature como done
+- **GROQ_API_KEY solo servidor** — nunca en componentes cliente ni con prefijo `NEXT_PUBLIC_`
 - **Mensajes de error al usuario en español**
 - **Columna es `is_trashed`**, no `is_deleted` — así está en la DB real
 

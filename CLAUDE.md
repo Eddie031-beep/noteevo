@@ -21,6 +21,7 @@ Repo: `Eddie031-beep/noteevo`
 | TypeScript | ^5 | Strict mode activo |
 | Supabase | ^2.105.4 | Auth + DB + Storage + RPC |
 | TipTap | ^3.23.1 | Editor rich-text, contenido en JSON |
+| Groq SDK | ^0.x | LLM API — llama-3.3-70b-versatile, server-side only |
 | Zustand | ^5.0.13 | Estado global del cliente |
 | Tailwind CSS | v4 | Config via `@import "tailwindcss"` en globals.css — NO existe tailwind.config.ts |
 | Lucide React | ^1.14.0 | Iconos |
@@ -121,11 +122,11 @@ El objetivo es un diseño dark mode inspirado en Evernote pero con identidad pro
 - Tablas `spaces` y `space_members`
 - Compartir notebooks dentro de un Space
 
-### TODO #8 — IA integrada con Claude API (Phase 7)
-- Usar `claude-haiku-4-5` via Anthropic API (server-side only)
+### TODO #8 — IA integrada con Groq API (Phase 7)
+- Usar `llama-3.3-70b-versatile` via Groq API (server-side only)
 - Features: resumir nota, mejorar escritura, chat con nota, smart tags
 - Rate limiting: tabla `ai_usage` (máx 10 req/día/usuario)
-- API key en `ANTHROPIC_API_KEY` env var — nunca expuesta al cliente
+- API key en `GROQ_API_KEY` env var — nunca expuesta al cliente
 
 ---
 
@@ -205,7 +206,7 @@ types/
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
-ANTHROPIC_API_KEY=        # Solo para Phase 7 (IA) — solo servidor
+GROQ_API_KEY=        # Solo para Phase 7 (IA) — solo servidor
 ```
 
 ---
