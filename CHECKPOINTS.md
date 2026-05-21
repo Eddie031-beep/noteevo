@@ -19,48 +19,73 @@
 
 ## Por feature
 
-### Rediseño visual (id: 10)
-- [ ] Dark mode por defecto en toda la app
-- [ ] Sidebar colapsable 56px ↔ 240px con animación suave
-- [ ] Color primario verde esmeralda `#1a7a4a` consistente
-- [ ] Fondos `#0f0f0f` / `#1a1a1a` / `#242424` aplicados correctamente
-- [ ] Login y register con nuevo estilo
-- [ ] Sidebar con todos los items de navegación futuros (aunque las vistas no existan aún)
-- [ ] Layout 3 paneles refinado y responsivo en desktop
+### Rediseño visual (id: 10) ✅
+- [x] Dark mode por defecto
+- [x] Sidebar colapsable 56px ↔ 240px
+- [x] Color primario verde esmeralda `#1a7a4a`
+- [x] Fondos `#0f0f0f` / `#1a1a1a` / `#242424`
+- [x] Login y register con nuevo estilo
+- [x] Layout 3 paneles
 
-### Tasks CRUD (id: 11)
-- [ ] Tabla `tasks` creada en Supabase con RLS
-- [ ] CRUD completo: crear, listar, completar, eliminar
-- [ ] Modal de creación con todos los campos
-- [ ] Tasks vinculables a notas (note_id nullable)
+### Tasks (id: 11-12) ✅
+- [x] Tabla `tasks` con RLS
+- [x] CRUD completo con modal
+- [x] Filtros por prioridad/estado/fecha
+- [x] Badge pendientes en sidebar
+- [x] Vista por libreta
 
-### Tasks Views (id: 12)
-- [ ] Vista "My tasks" con filtros por prioridad/estado/fecha
-- [ ] Contador de tasks pendientes en sidebar
-- [ ] Tabs: My tasks / Notebooks
+### Files (id: 13-14) ✅
+- [x] Tabla `attachments` con RLS (columnas: `storage_path`, `file_size`)
+- [x] Bucket `attachments` con políticas
+- [x] Upload drag & drop, barra de progreso
+- [x] Vista Files con tabs Todos/Media/Docs
 
-### Files Upload (id: 13)
-- [ ] Tabla `attachments` en Supabase con RLS
-- [ ] Bucket `attachments` en Storage con políticas correctas
-- [ ] Upload funciona, barra de progreso visible
+### Calendar (id: 15) ✅
+- [x] Tasks con due date en calendario
+- [x] Vistas Mes/Semana/Día
+- [x] Crear tasks desde calendario
+- [x] Timezone fix (local, no UTC offset)
 
-### Files View (id: 14)
-- [ ] Tabs: Files / Media / Docs
-- [ ] Preview de imágenes funciona
-- [ ] Descarga de archivos funciona
+### Spaces (id: 16-17) ✅
+- [x] Solo el dueño/admin puede administrar
+- [x] Roles viewer/editor/admin funcionan
+- [x] Vista "Compartido conmigo"
+- [x] Gestión de miembros (ver email, cambiar rol, expulsar)
+- [x] Realtime: expulsión notificada inmediatamente
+- [x] RLS en notebooks para spaces (por rol)
+- [x] `REPLICA IDENTITY FULL` en space_members
 
-### Calendar (id: 15)
-- [ ] Tasks con due date aparecen en el calendario
-- [ ] Vistas Day / Week / Month funcionan
-- [ ] Se pueden crear tasks desde el calendario
+### IA — Resumir nota (id: 18) ✅
+- [x] `GROQ_API_KEY` solo server-side
+- [x] Rate limit 10/día via `ai_usage`
+- [x] Panel `AiSummaryPanel` con loading/error/resultado
+- [x] Botón Sparkles en toolbar
 
-### Spaces (id: 16-17)
-- [ ] Solo el dueño puede administrar el Space
-- [ ] Miembros ven solo lo que su rol permite
-- [ ] Vista "Shared with me" muestra correctamente
+### IA — Mejorar escritura (id: 19) ✅
+- [x] Streaming funciona en `/api/ai/improve`
+- [x] `AiImproveToolbar` aparece al seleccionar texto ≥10 chars
+- [x] Posición calculada con `getBoundingClientRect()`
+- [x] Aceptar reemplaza selección en TipTap
+- [x] Cancelar descarta sin modificar
+- [x] Rate limit 10/día
+- [x] Errores de Groq en español
 
-### IA (id: 18-21)
-- [ ] API key NUNCA expuesta al cliente (solo server-side)
-- [ ] Rate limit funciona (tabla ai_usage)
-- [ ] Streaming funciona en mejorar escritura
-- [ ] Errores de la API de Groq manejados y mostrados en español
+### IA — Chat con nota (id: 20) ✅
+- [x] Streaming funciona en `/api/ai/chat`
+- [x] `AiChatPanel` 320px panel derecho
+- [x] Historial en sesión (se resetea al cerrar)
+- [x] Enter = enviar, Shift+Enter = nueva línea
+- [x] Rate limit 20/día
+- [x] Estado vacío con instrucción clara
+- [x] Errores en español
+
+### IA — Smart Tags (id: 21) 🔲 NEXT
+- [ ] `/api/ai/suggest-tags` route handler con Groq
+- [ ] Prompt devuelve JSON con array de tags (máx 5)
+- [ ] Componente en NoteEditor para mostrar sugerencias
+- [ ] Chips individuales: aceptar (añade tag) / rechazar (descarta)
+- [ ] Crea tag nuevo si no existe via `createTag` + `addTagToNote`
+- [ ] Rate limit 10/día via `ai_usage` (action: `suggest_tags`)
+- [ ] `GROQ_API_KEY` solo server
+- [ ] Errores en español
+- [ ] Build verde
