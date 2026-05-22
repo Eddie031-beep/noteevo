@@ -24,7 +24,7 @@ import {
   Heading1, Heading2, Heading3,
   List, ListOrdered, CheckSquare,
   Code, FileCode, Minus, ImageIcon, Paperclip, Sparkles, MessageSquare, Tag as TagIcon,
-  Maximize2, Minimize2,
+  Maximize2, Minimize2, Download,
 } from 'lucide-react'
 import TagInput from './TagInput'
 import AttachmentPanel from './AttachmentPanel'
@@ -32,6 +32,7 @@ import AiSummaryPanel from './AiSummaryPanel'
 import AiImproveToolbar from './AiImproveToolbar'
 import AiChatPanel from './AiChatPanel'
 import AiSmartTags from './AiSmartTags'
+import ExportModal from './ExportModal'
 
 function ToolbarButton({
   onClick, active, title, children,
@@ -76,6 +77,7 @@ export default function NoteEditor() {
   const [summaryError, setSummaryError] = useState<string | null>(null)
   const [showChat, setShowChat] = useState(false)
   const [showSmartTags, setShowSmartTags] = useState(false)
+  const [showExport, setShowExport] = useState(false)
   const [tagInputKey, setTagInputKey] = useState(0)
   const [improveToolbar, setImproveToolbar] = useState<{
     position: { top: number; left: number }
@@ -438,6 +440,12 @@ export default function NoteEditor() {
         >
           {isFocusMode ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
         </ToolbarButton>
+        <ToolbarButton
+          title="Exportar nota"
+          onClick={() => setShowExport(true)}
+        >
+          <Download size={15} />
+        </ToolbarButton>
 
         <input
           ref={imageInputRef}
@@ -493,6 +501,14 @@ export default function NoteEditor() {
           </div>
         )}
       </div>
+
+      {showExport && selectedNote && (
+        <ExportModal
+          title={selectedNote.title}
+          content={selectedNote.content}
+          onClose={() => setShowExport(false)}
+        />
+      )}
 
       {improveToolbar && (
         <AiImproveToolbar
