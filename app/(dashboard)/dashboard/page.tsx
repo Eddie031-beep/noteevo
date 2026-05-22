@@ -144,7 +144,7 @@ function AllNotesPlaceholder() {
 }
 
 export default function DashboardPage() {
-  const { currentView } = useUIStore()
+  const { currentView, isFocusMode } = useUIStore()
 
   const showHome = currentView === 'home'
   const showAllNotes = currentView === 'all-notes'
@@ -164,18 +164,22 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-full bg-background">
-      {showHome && <HomePanel />}
-      {showAllNotes && <AllNotesPlaceholder />}
-      {showNoteList && <NoteList />}
-      {showFavorites && <FavoriteNotes />}
-      {showTrash && <TrashNotes />}
-      {showSearch && <SearchResults />}
-      {showTags && <TagsPanel />}
-      {showTasks && <TaskList />}
-      {showFiles && <FilesView />}
-      {showCalendar && <CalendarView />}
-      {showSpaces && <SpacesView />}
-      {showShared && <SharedWithMeView />}
+      {!isFocusMode && (
+        <>
+          {showHome && <HomePanel />}
+          {showAllNotes && <AllNotesPlaceholder />}
+          {showNoteList && <NoteList />}
+          {showFavorites && <FavoriteNotes />}
+          {showTrash && <TrashNotes />}
+          {showSearch && <SearchResults />}
+          {showTags && <TagsPanel />}
+          {showTasks && <TaskList />}
+          {showFiles && <FilesView />}
+          {showCalendar && <CalendarView />}
+          {showSpaces && <SpacesView />}
+          {showShared && <SharedWithMeView />}
+        </>
+      )}
       {showEditor && <NoteEditor />}
     </div>
   )

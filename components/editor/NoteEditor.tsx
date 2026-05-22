@@ -13,6 +13,7 @@ import TextAlign from '@tiptap/extension-text-align'
 import { useNoteStore } from '@/store/noteStore'
 import { useNotebookStore } from '@/store/notebookStore'
 import { useSpaceStore } from '@/store/spaceStore'
+import { useUIStore } from '@/store/uiStore'
 import { updateNote, toggleFavorite } from '@/lib/supabase/notes'
 import { uploadNoteImage } from '@/lib/supabase/storage'
 import {
@@ -23,6 +24,7 @@ import {
   Heading1, Heading2, Heading3,
   List, ListOrdered, CheckSquare,
   Code, FileCode, Minus, ImageIcon, Paperclip, Sparkles, MessageSquare, Tag as TagIcon,
+  Maximize2, Minimize2,
 } from 'lucide-react'
 import TagInput from './TagInput'
 import AttachmentPanel from './AttachmentPanel'
@@ -63,6 +65,7 @@ export default function NoteEditor() {
   const { selectedNote, updateNote: updateNoteStore } = useNoteStore()
   const { notebooks } = useNotebookStore()
   const { spaces } = useSpaceStore()
+  const { isFocusMode, setFocusMode } = useUIStore()
   const titleRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const syncedNoteIdRef = useRef<string | null>(null)
@@ -425,6 +428,15 @@ export default function NoteEditor() {
               selectedNote.is_favorite ? 'text-yellow-400 fill-yellow-400' : ''
             }
           />
+        </ToolbarButton>
+
+        <Divider />
+        <ToolbarButton
+          title={isFocusMode ? 'Salir del modo enfoque' : 'Modo enfoque'}
+          onClick={() => setFocusMode(!isFocusMode)}
+          active={isFocusMode}
+        >
+          {isFocusMode ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
         </ToolbarButton>
 
         <input
