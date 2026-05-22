@@ -107,36 +107,29 @@
 
   {
     "id": 22, "phase": 8, "name": "keyboard-shortcuts",
-    "title": "Atajos de teclado globales", "status": "pending",
-    "description": "Hook useKeyboardShortcuts global montado en dashboard/layout. Atajos: Ctrl+N (nueva nota), Ctrl+K (abrir búsqueda), Ctrl+, (abrir preferencias), Escape (cerrar modales). Mostrar cheatsheet con ? o desde menú. Sin nueva tabla en DB.",
-    "depends_on": []
+    "title": "Atajos de teclado globales", "status": "done",
+    "notes": "Hook useKeyboardShortcuts + KeyboardShortcutsCheatsheet. Ctrl+Shift+E, Ctrl+K, Ctrl+Shift+F, ?. Build verde."
   },
   {
     "id": 23, "phase": 8, "name": "presentation-mode",
-    "title": "Modo presentación / Focus mode", "status": "pending",
-    "description": "Botón en toolbar del editor que oculta sidebar + panel de notas. Solo se ve el editor en pantalla completa con tipografía grande. Esc o botón para salir. Estado en uiStore: isFocusMode boolean. Sin nueva tabla en DB.",
-    "depends_on": []
+    "title": "Modo presentación / Focus mode", "status": "done",
+    "notes": "isFocusMode en uiStore. Botón Maximize2/Minimize2 en toolbar. Sidebar + panel ocultos. Build verde."
   },
   {
     "id": 24, "phase": 8, "name": "export-note",
-    "title": "Exportar nota (PDF + Markdown)", "status": "pending",
-    "description": "Botón 'Exportar' en toolbar del editor. Modal con opciones: PDF (usando @react-pdf/renderer o html2pdf.js) y Markdown (convertir TipTap JSON a .md). Descarga directa en el browser. Sin nueva tabla en DB.",
-    "depends_on": []
+    "title": "Exportar nota (PDF + Markdown)", "status": "done",
+    "notes": "ExportModal con Markdown (tiptap-to-markdown.ts) y PDF (window.print). Descarga directa. Build verde."
   },
   {
     "id": 25, "phase": 8, "name": "note-versions",
-    "title": "Historial de versiones de notas", "status": "pending",
-    "description": "Tabla note_versions ya creada en Supabase (migration aplicada). Guardar snapshot cada 10 autosaves o manualmente con botón 'Guardar versión'. Panel lateral 'Historial' con lista de versiones (fecha, número). Click en versión: preview del contenido. Botón 'Restaurar esta versión'. lib/supabase/versions.ts con: saveVersion, getVersions, restoreVersion.",
-    "depends_on": [],
-    "db_tables": ["note_versions"]
+    "title": "Historial de versiones de notas", "status": "done",
+    "notes": "Tabla note_versions. saveVersion/getVersions/deleteVersion. VersionHistoryPanel. Auto-save cada 10 autosaves. Build verde."
   },
 
   {
     "id": 26, "phase": 9, "name": "note-templates",
-    "title": "Templates de notas", "status": "pending",
-    "description": "Tabla templates ya creada en Supabase con 3 builtin (Reunión, Diario, Plan de proyecto). Al crear nota: modal/selector de template antes de abrir el editor. Vista 'Templates' accesible desde sidebar o desde el botón Nueva nota. Crear/editar/eliminar templates propios. lib/supabase/templates.ts: getTemplates, createTemplate, deleteTemplate, applyTemplate. Categorías: builtin / personal / work / meeting / journal.",
-    "depends_on": [23],
-    "db_tables": ["templates"]
+    "title": "Templates de notas", "status": "done",
+    "notes": "Tabla templates (3 builtin). TemplateSelector al crear nota. TemplatesView en sidebar. SaveAsTemplateModal en toolbar. Build verde."
   },
   {
     "id": 27, "phase": 9, "name": "drag-drop-notes",

@@ -14,11 +14,11 @@ import { useSpaceStore } from '@/store/spaceStore'
 import {
   Home, FileText, BookOpen, Star, Trash2, LogOut,
   Plus, X, Search, Tag, CheckSquare, Paperclip,
-  Calendar, Users, Sparkles, ChevronDown, ChevronRight, ChevronLeft, Share2,
+  Calendar, Users, Sparkles, ChevronDown, ChevronRight, ChevronLeft, Share2, LayoutTemplate,
 } from 'lucide-react'
 import type { Notebook, Space } from '@/types'
 
-type View = 'home' | 'notebooks' | 'all-notes' | 'favorites' | 'trash' | 'search' | 'tags-view' | 'notebooks-view' | 'tasks' | 'files' | 'calendar' | 'spaces' | 'shared'
+type View = 'home' | 'notebooks' | 'all-notes' | 'favorites' | 'trash' | 'search' | 'tags-view' | 'notebooks-view' | 'tasks' | 'files' | 'calendar' | 'spaces' | 'shared' | 'settings' | 'templates'
 
 interface NavItemProps {
   icon: React.ReactNode
@@ -442,6 +442,13 @@ export default function Sidebar() {
           label="Etiquetas"
           active={currentView === 'tags-view'}
           onClick={() => handleNav('tags-view')}
+          collapsed={collapsed}
+        />
+        <NavItem
+          icon={<LayoutTemplate size={18} />}
+          label="Plantillas"
+          active={currentView === 'templates'}
+          onClick={() => handleNav('templates')}
           collapsed={collapsed}
         />
         <NavItem

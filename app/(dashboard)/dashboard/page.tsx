@@ -13,6 +13,7 @@ import FilesView from '@/components/files/FilesView'
 import CalendarView from '@/components/calendar/CalendarView'
 import SpacesView from '@/components/spaces/SpacesView'
 import SharedWithMeView from '@/components/spaces/SharedWithMeView'
+import TemplatesView from '@/components/templates/TemplatesView'
 import { BookOpen, FileText, Tag } from 'lucide-react'
 
 function HomePanel() {
@@ -159,8 +160,9 @@ export default function DashboardPage() {
   const showCalendar = currentView === 'calendar'
   const showSpaces = currentView === 'spaces'
   const showShared = currentView === 'shared'
+  const showTemplates = currentView === 'templates'
 
-  const showEditor = !showHome && !showTags && !showTasks && !showFiles && !showCalendar && !showSpaces && !showShared
+  const showEditor = !showHome && !showTags && !showTasks && !showFiles && !showCalendar && !showSpaces && !showShared && !showTemplates
 
   return (
     <div className="flex h-full bg-background">
@@ -178,6 +180,7 @@ export default function DashboardPage() {
           {showCalendar && <CalendarView />}
           {showSpaces && <SpacesView />}
           {showShared && <SharedWithMeView />}
+          {showTemplates && <TemplatesView />}
         </>
       )}
       {showEditor && <NoteEditor />}

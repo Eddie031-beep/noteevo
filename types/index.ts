@@ -88,3 +88,15 @@ export interface NoteVersion {
   version_number: number
   created_at: string
 }
+
+export interface Template {
+  id: string
+  user_id: string | null
+  name: string
+  description: string | null
+  content: Record<string, unknown>
+  category: string | null
+  is_builtin: boolean
+  created_at: string
+  updated_at: string
+}

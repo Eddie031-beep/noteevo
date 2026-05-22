@@ -3,7 +3,7 @@ import { create } from 'zustand'
 type View =
   | 'home' | 'notebooks' | 'all-notes' | 'favorites' | 'trash'
   | 'search' | 'tags-view' | 'notebooks-view' | 'tasks' | 'files'
-  | 'calendar' | 'spaces' | 'shared' | 'settings'
+  | 'calendar' | 'spaces' | 'shared' | 'settings' | 'templates'
 
 interface UIStore {
   currentView: View

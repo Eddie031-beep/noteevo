@@ -24,7 +24,7 @@ import {
   Heading1, Heading2, Heading3,
   List, ListOrdered, CheckSquare,
   Code, FileCode, Minus, ImageIcon, Paperclip, Sparkles, MessageSquare, Tag as TagIcon,
-  Maximize2, Minimize2, Download, History,
+  Maximize2, Minimize2, Download, History, LayoutTemplate,
 } from 'lucide-react'
 import TagInput from './TagInput'
 import AttachmentPanel from './AttachmentPanel'
@@ -34,6 +34,7 @@ import AiChatPanel from './AiChatPanel'
 import AiSmartTags from './AiSmartTags'
 import ExportModal from './ExportModal'
 import VersionHistoryPanel from './VersionHistoryPanel'
+import SaveAsTemplateModal from '@/components/templates/SaveAsTemplateModal'
 import { saveVersion, getVersionCount } from '@/lib/supabase/versions'
 import type { NoteVersion } from '@/types'
 
@@ -82,6 +83,7 @@ export default function NoteEditor() {
   const [showSmartTags, setShowSmartTags] = useState(false)
   const [showExport, setShowExport] = useState(false)
   const [showVersions, setShowVersions] = useState(false)
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false)
   const [tagInputKey, setTagInputKey] = useState(0)
   const [improveToolbar, setImproveToolbar] = useState<{
     position: { top: number; left: number }
@@ -459,6 +461,12 @@ export default function NoteEditor() {
         >
           <History size={15} />
         </ToolbarButton>
+        <ToolbarButton
+          title="Guardar como plantilla"
+          onClick={() => setShowSaveTemplate(true)}
+        >
+          <LayoutTemplate size={15} />
+        </ToolbarButton>
 
         <input
           ref={imageInputRef}
@@ -549,6 +557,15 @@ export default function NoteEditor() {
           title={selectedNote.title}
           content={selectedNote.content}
           onClose={() => setShowExport(false)}
+        />
+      )}
+
+      {showSaveTemplate && selectedNote && editor && (
+        <SaveAsTemplateModal
+          content={editor.getJSON()}
+          defaultName={selectedNote.title !== 'Sin título' ? selectedNote.title : ''}
+          onSaved={() => {}}
+          onClose={() => setShowSaveTemplate(false)}
         />
       )}
 
