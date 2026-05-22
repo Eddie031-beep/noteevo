@@ -24,7 +24,7 @@ import {
   Heading1, Heading2, Heading3,
   List, ListOrdered, CheckSquare,
   Code, FileCode, Minus, ImageIcon, Paperclip, Sparkles, MessageSquare, Tag as TagIcon,
-  Maximize2, Minimize2, Download,
+  Maximize2, Minimize2, Download, History,
 } from 'lucide-react'
 import TagInput from './TagInput'
 import AttachmentPanel from './AttachmentPanel'
@@ -33,6 +33,9 @@ import AiImproveToolbar from './AiImproveToolbar'
 import AiChatPanel from './AiChatPanel'
 import AiSmartTags from './AiSmartTags'
 import ExportModal from './ExportModal'
+import VersionHistoryPanel from './VersionHistoryPanel'
+import { saveVersion, getVersionCount } from '@/lib/supabase/versions'
+import type { NoteVersion } from '@/types'
 
 function ToolbarButton({
   onClick, active, title, children,
@@ -78,6 +81,7 @@ export default function NoteEditor() {
   const [showChat, setShowChat] = useState(false)
   const [showSmartTags, setShowSmartTags] = useState(false)
   const [showExport, setShowExport] = useState(false)
+  const [showVersions, setShowVersions] = useState(false)
   const [tagInputKey, setTagInputKey] = useState(0)
   const [improveToolbar, setImproveToolbar] = useState<{
     position: { top: number; left: number }
@@ -111,12 +115,14 @@ export default function NoteEditor() {
       if (editor.state.selection.empty) setImproveToolbar(null)
     },
     onUpdate: ({ editor }) => {
-      if (!selectedNote) return
+      if (!syncedNoteIdRef.current) return
+      const noteId = syncedNoteIdRef.current
       const content = editor.getJSON()
       if (debounceRef.current) clearTimeout(debounceRef.current)
-      debounceRef.current = setTimeout(async () => {
-        await updateNote(selectedNote.id, { content })
-        updateNoteStore(selectedNote.id, { content })
+      debounceRef.current = setTimeout(() => {
+        updateNote(noteId, { content })
+          .then(() => updateNoteStore(noteId, { content }))
+          .catch(() => {})
       }, 800)
     },
     editorProps: {
@@ -446,6 +452,13 @@ export default function NoteEditor() {
         >
           <Download size={15} />
         </ToolbarButton>
+        <ToolbarButton
+          title="Historial de versiones"
+          onClick={() => setShowVersions((v) => !v)}
+          active={showVersions}
+        >
+          <History size={15} />
+        </ToolbarButton>
 
         <input
           ref={imageInputRef}
@@ -487,6 +500,35 @@ export default function NoteEditor() {
           <AiChatPanel
             noteContent={editor.getText()}
             onClose={() => setShowChat(false)}
+          />
+        )}
+
+        {showVersions && selectedNote && (
+          <VersionHistoryPanel
+            noteId={selectedNote.id}
+            onSave={async () => {
+              if (!editor || !selectedNote) return
+              const count = await getVersionCount(selectedNote.id)
+              await saveVersion(
+                selectedNote.id,
+                titleRef.current?.value ?? selectedNote.title,
+                editor.getJSON(),
+                count + 1
+              )
+            }}
+            onRestore={(version: NoteVersion) => {
+              editor?.commands.setContent(version.content)
+              if (titleRef.current) titleRef.current.value = version.title
+              updateNote(selectedNote.id, {
+                title: version.title,
+                content: version.content,
+              })
+              updateNoteStore(selectedNote.id, {
+                title: version.title,
+                content: version.content,
+              })
+            }}
+            onClose={() => setShowVersions(false)}
           />
         )}
 

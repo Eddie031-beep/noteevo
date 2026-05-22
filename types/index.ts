@@ -78,3 +78,13 @@ export interface SpaceMember {
   joined_at: string
   email?: string
 }
+
+export interface NoteVersion {
+  id: string
+  note_id: string
+  user_id: string
+  title: string
+  content: Record<string, unknown>
+  version_number: number
+  created_at: string
+}
