@@ -1,21 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNoteStore } from '@/store/noteStore'
 import { useNotebookStore } from '@/store/notebookStore'
-import { getNotesByNotebook, createNote, trashNote, updateNote } from '@/lib/supabase/notes'
+import { getNotesByNotebook, createNote, trashNote } from '@/lib/supabase/notes'
 import { extractTextPreview } from '@/lib/utils/tiptap'
 import { Plus, Trash2, FileText } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import TemplateSelector from '@/components/templates/TemplateSelector'
-import type { Template } from '@/types'
 
 export default function NoteList() {
   const { notes, setNotes, addNote, deleteNote, setSelectedNote, selectedNote } =
     useNoteStore()
   const { selectedNotebook } = useNotebookStore()
-  const [showTemplateSelector, setShowTemplateSelector] = useState(false)
 
   useEffect(() => {
     if (!selectedNotebook) return
@@ -30,37 +27,14 @@ export default function NoteList() {
     load()
   }, [selectedNotebook, setNotes])
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!selectedNotebook) return
-    setShowTemplateSelector(true)
-  }
-
-  const handleCreateBlank = async () => {
-    if (!selectedNotebook) return
-    setShowTemplateSelector(false)
     try {
       const note = await createNote(selectedNotebook.id)
       addNote(note)
       setSelectedNote(note)
     } catch {
       // error creando nota
-    }
-  }
-
-  const handleCreateFromTemplate = async (template: Template) => {
-    if (!selectedNotebook) return
-    setShowTemplateSelector(false)
-    try {
-      const note = await createNote(selectedNotebook.id)
-      await updateNote(note.id, {
-        title: template.name,
-        content: template.content,
-      })
-      const populated = { ...note, title: template.name, content: template.content }
-      addNote(populated)
-      setSelectedNote(populated)
-    } catch {
-      // error creando nota desde plantilla
     }
   }
 
@@ -104,14 +78,6 @@ export default function NoteList() {
           <Plus size={18} />
         </button>
       </div>
-
-      {showTemplateSelector && (
-        <TemplateSelector
-          onSelectBlank={handleCreateBlank}
-          onSelectTemplate={handleCreateFromTemplate}
-          onClose={() => setShowTemplateSelector(false)}
-        />
-      )}
 
       {/* List */}
       <div className="flex-1 overflow-y-auto">

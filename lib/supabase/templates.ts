@@ -1,15 +1,27 @@
 import { createClient } from './client'
 import type { Template } from '@/types'
+import { BUILTIN_TEMPLATES } from '@/lib/templates/builtin-templates'
 
 export async function getTemplates(): Promise<Template[]> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('templates')
     .select('*')
-    .order('is_builtin', { ascending: false })
+    .eq('is_builtin', false)
     .order('created_at', { ascending: false })
+
   if (error) throw new Error(error.message)
-  return data ?? []
+
+  const personal = (data ?? []) as Template[]
+
+  const builtin = BUILTIN_TEMPLATES.map((t) => ({
+    ...t,
+    user_id: null,
+    created_at: '',
+    updated_at: '',
+  })) as Template[]
+
+  return [...builtin, ...personal]
 }
 
 export async function createTemplate(
