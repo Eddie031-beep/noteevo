@@ -51,3 +51,13 @@ export async function deleteNotebook(id: string): Promise<void> {
 
   if (error) throw new Error(error.message)
 }
+
+export async function updateNotebook(id: string, name: string): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('notebooks')
+    .update({ name, updated_at: new Date().toISOString() })
+    .eq('id', id)
+
+  if (error) throw new Error(error.message)
+}

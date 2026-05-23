@@ -109,3 +109,23 @@ export async function permanentlyDeleteNote(id: string): Promise<void> {
 
   if (error) throw new Error(error.message)
 }
+
+export type NoteWithNotebook = Note & {
+  notebooks: { name: string } | null
+}
+
+export async function getAllNotesWithNotebook(): Promise<NoteWithNotebook[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('notes')
+    .select('*, notebooks(name)')
+    .eq('is_trashed', false)
+    .order('updated_at', { ascending: false })
+
+  if (error) throw new Error(error.message)
+  return (data ?? []) as unknown as NoteWithNotebook[]
+}
+
+export async function createQuickNote(notebookId: string): Promise<Note> {
+  return createNote(notebookId)
+}

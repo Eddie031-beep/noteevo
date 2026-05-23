@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useNotebookStore } from '@/store/notebookStore'
 import { useUIStore } from '@/store/uiStore'
 import { useTagStore } from '@/store/tagStore'
-import { getNotebooks, createNotebook, deleteNotebook } from '@/lib/supabase/notebooks'
+import { getNotebooks, createNotebook, deleteNotebook, updateNotebook } from '@/lib/supabase/notebooks'
 import { getTags } from '@/lib/supabase/tags'
 import { getPendingTaskCount } from '@/lib/supabase/tasks'
 import { getMySpaces } from '@/lib/supabase/spaces'
@@ -14,8 +14,9 @@ import { useSpaceStore } from '@/store/spaceStore'
 import {
   Home, FileText, BookOpen, Star, Trash2, LogOut,
   Plus, X, Search, Tag, CheckSquare, Paperclip,
-  Calendar, Users, Sparkles, ChevronDown, ChevronRight, ChevronLeft, Share2, LayoutTemplate,
+  Calendar, Users, Sparkles, ChevronDown, ChevronRight, ChevronLeft, Share2, LayoutTemplate, Pencil,
 } from 'lucide-react'
+import { useDroppable } from '@dnd-kit/core'
 import type { Notebook, Space } from '@/types'
 
 type View = 'home' | 'notebooks' | 'all-notes' | 'favorites' | 'trash' | 'search' | 'tags-view' | 'notebooks-view' | 'tasks' | 'files' | 'calendar' | 'spaces' | 'shared' | 'settings' | 'templates'
@@ -72,11 +73,109 @@ function Separator() {
   return <div className="my-1 mx-2 h-px bg-border" />
 }
 
+function DroppableNotebook({
+  notebook,
+  isActive,
+  onClick,
+  onDelete,
+  onRename,
+}: {
+  notebook: Notebook
+  isActive: boolean
+  onClick: () => void
+  onDelete: (e: React.MouseEvent) => void
+  onRename: (id: string, newName: string) => void
+}) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `notebook-${notebook.id}`,
+    data: { type: 'notebook', notebookId: notebook.id },
+  })
+  const [editing, setEditing] = useState(false)
+  const [name, setName] = useState(notebook.name)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (editing) setTimeout(() => inputRef.current?.focus(), 0)
+  }, [editing])
+
+  const handleRename = () => {
+    if (!name.trim() || name.trim() === notebook.name) {
+      setName(notebook.name)
+      setEditing(false)
+      return
+    }
+    onRename(notebook.id, name.trim())
+    setEditing(false)
+  }
+
+  if (editing) {
+    return (
+      <div
+        ref={setNodeRef}
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <BookOpen size={14} className="text-muted shrink-0" />
+        <input
+          ref={inputRef}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleRename()
+            if (e.key === 'Escape') { setName(notebook.name); setEditing(false) }
+          }}
+          onBlur={handleRename}
+          className="flex-1 bg-transparent text-xs text-foreground outline-none min-w-0"
+          style={{ color: 'var(--color-foreground)' }}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      onClick={onClick}
+      className={`group flex items-center justify-between px-3 py-1.5 rounded-lg cursor-pointer transition ${
+        isOver
+          ? 'bg-accent/20 ring-1 ring-accent/40'
+          : isActive
+            ? 'bg-accent/15 text-accent'
+            : 'text-muted hover:bg-surface hover:text-foreground'
+      }`}
+    >
+      <div className="flex items-center gap-2 truncate min-w-0">
+        <BookOpen size={14} className="shrink-0" />
+        <span className="text-xs truncate">{notebook.name}</span>
+      </div>
+      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 shrink-0 ml-1">
+        <button
+          type="button"
+          title="Renombrar libreta"
+          onClick={(e) => { e.stopPropagation(); setEditing(true) }}
+          className="p-0.5 text-muted hover:text-foreground transition cursor-pointer rounded"
+        >
+          <Pencil size={10} />
+        </button>
+        <button
+          type="button"
+          title="Eliminar libreta"
+          onClick={onDelete}
+          className="p-0.5 text-muted hover:text-danger transition cursor-pointer rounded"
+        >
+          <X size={11} />
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function Sidebar() {
   const router = useRouter()
   const {
     notebooks, setNotebooks, addNotebook,
     deleteNotebook: removeNotebook,
+    renameNotebook,
     setSelectedNotebook, selectedNotebook,
   } = useNotebookStore()
   const { currentView, setCurrentView, searchQuery, setSearchQuery } = useUIStore()
@@ -392,29 +491,20 @@ export default function Sidebar() {
             {notebooksOpen && (
               <div className="space-y-0.5">
                 {notebooks.map((notebook) => (
-                  <div
+                  <DroppableNotebook
                     key={notebook.id}
-                    onClick={() => handleNotebookClick(notebook)}
-                    className={`group flex items-center justify-between px-3 py-1.5 rounded-lg cursor-pointer transition ${
+                    notebook={notebook}
+                    isActive={
                       currentView === 'notebooks' &&
                       selectedNotebook?.id === notebook.id
-                        ? 'bg-accent/15 text-accent'
-                        : 'text-muted hover:bg-surface hover:text-foreground'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 truncate min-w-0">
-                      <BookOpen size={14} className="shrink-0" />
-                      <span className="text-xs truncate">{notebook.name}</span>
-                    </div>
-                    <button
-                      type="button"
-                      title="Eliminar libreta"
-                      onClick={(e) => handleDelete(notebook.id, e)}
-                      className="opacity-0 group-hover:opacity-100 text-muted hover:text-danger transition cursor-pointer shrink-0 ml-1"
-                    >
-                      <X size={11} />
-                    </button>
-                  </div>
+                    }
+                    onClick={() => handleNotebookClick(notebook)}
+                    onDelete={(e) => handleDelete(notebook.id, e)}
+                    onRename={async (id, newName) => {
+                      await updateNotebook(id, newName)
+                      renameNotebook(id, newName)
+                    }}
+                  />
                 ))}
                 {notebooks.length === 0 && (
                   <p className="text-xs text-subtle px-3 py-1.5">Sin libretas aún</p>

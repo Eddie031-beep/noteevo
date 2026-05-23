@@ -24,7 +24,7 @@ import {
   Heading1, Heading2, Heading3,
   List, ListOrdered, CheckSquare,
   Code, FileCode, Minus, ImageIcon, Paperclip, Sparkles, MessageSquare, Tag as TagIcon,
-  Maximize2, Minimize2, Download, History, LayoutTemplate,
+  Maximize2, Minimize2, Download, History, LayoutTemplate, GitBranch,
 } from 'lucide-react'
 import TagInput from './TagInput'
 import AttachmentPanel from './AttachmentPanel'
@@ -36,6 +36,7 @@ import ExportModal from './ExportModal'
 import VersionHistoryPanel from './VersionHistoryPanel'
 import SaveAsTemplateModal from '@/components/templates/SaveAsTemplateModal'
 import { saveVersion, getVersionCount } from '@/lib/supabase/versions'
+import { MermaidExtension } from '@/lib/editor/mermaid-extension'
 import type { NoteVersion } from '@/types'
 
 function ToolbarButton({
@@ -111,6 +112,7 @@ export default function NoteEditor() {
       TaskItem.configure({ nested: true }),
       Image.configure({ inline: false, allowBase64: false }),
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      MermaidExtension,
     ],
     content: '',
     onSelectionUpdate: ({ editor }) => {
@@ -393,6 +395,19 @@ export default function NoteEditor() {
           }}
         >
           <Paperclip size={15} />
+        </ToolbarButton>
+        <ToolbarButton
+          title="Insertar diagrama Mermaid"
+          onClick={() => {
+            editor?.chain().focus().insertContent({
+              type: 'mermaid',
+              attrs: {
+                code: 'flowchart TD\n  A[Inicio] --> B{¿Decisión?}\n  B -->|Sí| C[Acción A]\n  B -->|No| D[Acción B]\n  C --> E[Fin]\n  D --> E',
+              },
+            }).run()
+          }}
+        >
+          <GitBranch size={15} />
         </ToolbarButton>
 
         <Divider />
