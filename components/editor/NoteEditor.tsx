@@ -10,31 +10,41 @@ import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
 import Image from '@tiptap/extension-image'
 import TextAlign from '@tiptap/extension-text-align'
+import { TextStyle } from '@tiptap/extension-text-style'
+import { Color } from '@tiptap/extension-color'
+import { FontFamily } from '@tiptap/extension-font-family'
+import { Table } from '@tiptap/extension-table'
+import { TableRow } from '@tiptap/extension-table-row'
+import { TableCell } from '@tiptap/extension-table-cell'
+import { TableHeader } from '@tiptap/extension-table-header'
 import { useNoteStore } from '@/store/noteStore'
 import { useNotebookStore } from '@/store/notebookStore'
 import { useSpaceStore } from '@/store/spaceStore'
 import { useUIStore } from '@/store/uiStore'
-import { updateNote, toggleFavorite } from '@/lib/supabase/notes'
+import { updateNote } from '@/lib/supabase/notes'
 import { uploadNoteImage } from '@/lib/supabase/storage'
 import {
-  Star, Bold, Italic,
-  Underline as UnderlineIcon,
+  Bold, Italic, Underline as UnderlineIcon,
   Strikethrough, Highlighter,
   AlignLeft, AlignCenter, AlignRight,
   Heading1, Heading2, Heading3,
   List, ListOrdered, CheckSquare,
-  Code, FileCode, Minus, ImageIcon, Paperclip, Sparkles, MessageSquare, Tag as TagIcon,
-  Maximize2, Minimize2, Download, History, LayoutTemplate, GitBranch,
+  Code, FileCode,
 } from 'lucide-react'
 import TagInput from './TagInput'
 import AttachmentPanel from './AttachmentPanel'
 import AiSummaryPanel from './AiSummaryPanel'
-import AiImproveToolbar from './AiImproveToolbar'
 import AiChatPanel from './AiChatPanel'
 import AiSmartTags from './AiSmartTags'
+import AiImproveToolbar from './AiImproveToolbar'
 import ExportModal from './ExportModal'
 import VersionHistoryPanel from './VersionHistoryPanel'
 import SaveAsTemplateModal from '@/components/templates/SaveAsTemplateModal'
+import MoveNoteModal from '@/components/notes/MoveNoteModal'
+import InsertMenu from './InsertMenu'
+import { FontFamilySelector, FontSizeSelector, TextColorPicker } from './FormatDropdowns'
+import AiMenuExpanded from './AiMenuExpanded'
+import NoteActionsMenu from './NoteActionsMenu'
 import { saveVersion, getVersionCount } from '@/lib/supabase/versions'
 import { MermaidExtension } from '@/lib/editor/mermaid-extension'
 import type { NoteVersion } from '@/types'
@@ -64,18 +74,19 @@ function ToolbarButton({
 }
 
 function Divider() {
-  return <div className="w-px h-4 bg-border mx-1 shrink-0" />
+  return <div className="w-px h-4 bg-border mx-0.5 shrink-0" />
 }
 
 export default function NoteEditor() {
   const { selectedNote, updateNote: updateNoteStore } = useNoteStore()
   const { notebooks } = useNotebookStore()
   const { spaces } = useSpaceStore()
-  const { isFocusMode, setFocusMode } = useUIStore()
+  const { isFocusMode } = useUIStore()
   const titleRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const syncedNoteIdRef = useRef<string | null>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
+
   const [showSummary, setShowSummary] = useState(false)
   const [summary, setSummary] = useState<string | null>(null)
   const [isSummarizing, setIsSummarizing] = useState(false)
@@ -85,12 +96,12 @@ export default function NoteEditor() {
   const [showExport, setShowExport] = useState(false)
   const [showVersions, setShowVersions] = useState(false)
   const [showSaveTemplate, setShowSaveTemplate] = useState(false)
+  const [showMove, setShowMove] = useState(false)
   const [tagInputKey, setTagInputKey] = useState(0)
   const [improveToolbar, setImproveToolbar] = useState<{
     position: { top: number; left: number }
     selectedText: string
   } | null>(null)
-
 
   const isReadOnly = useMemo(() => {
     if (!selectedNote?.notebook_id) return false
@@ -112,6 +123,13 @@ export default function NoteEditor() {
       TaskItem.configure({ nested: true }),
       Image.configure({ inline: false, allowBase64: false }),
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      TextStyle,
+      Color,
+      FontFamily,
+      Table.configure({ resizable: false }),
+      TableRow,
+      TableHeader,
+      TableCell,
       MermaidExtension,
     ],
     content: '',
@@ -130,9 +148,7 @@ export default function NoteEditor() {
       }, 800)
     },
     editorProps: {
-      attributes: {
-        class: 'focus:outline-none min-h-[300px]',
-      },
+      attributes: { class: 'focus:outline-none min-h-[300px]' },
     },
   })
 
@@ -167,7 +183,7 @@ export default function NoteEditor() {
       const url = await uploadNoteImage(file)
       editor.chain().focus().setImage({ src: url }).run()
     } catch {
-      // error subiendo imagen
+      // error silencioso
     } finally {
       e.target.value = ''
     }
@@ -201,17 +217,13 @@ export default function NoteEditor() {
   }
 
   const handleEditorMouseUp = () => {
-    if (isReadOnly) return
+    if (isReadOnly || !editor) return
     const selection = window.getSelection()
-    if (!selection || selection.isCollapsed || !selection.toString().trim()) {
-      return
-    }
+    if (!selection || selection.isCollapsed || !selection.toString().trim()) return
     const text = selection.toString().trim()
     if (text.length < 10) return
-
     const range = selection.getRangeAt(0)
     const rect = range.getBoundingClientRect()
-
     setImproveToolbar({
       position: {
         top: rect.bottom + window.scrollY + 8,
@@ -223,8 +235,7 @@ export default function NoteEditor() {
 
   const handleAcceptImprovement = (improvedText: string) => {
     if (!editor) return
-    const { state } = editor
-    const { from, to } = state.selection
+    const { from, to } = editor.state.selection
     editor.chain().focus().deleteRange({ from, to }).insertContentAt(from, improvedText).run()
     setImproveToolbar(null)
   }
@@ -237,9 +248,7 @@ export default function NoteEditor() {
         </div>
         <div className="text-center">
           <p className="text-foreground font-medium">Sin nota seleccionada</p>
-          <p className="text-muted text-sm mt-1">
-            Elige una nota del panel o crea una nueva
-          </p>
+          <p className="text-muted text-sm mt-1">Elige una nota del panel o crea una nueva</p>
         </div>
       </div>
     )
@@ -247,255 +256,139 @@ export default function NoteEditor() {
 
   return (
     <div className="flex-1 flex flex-col h-screen overflow-hidden bg-background">
-      {/* Toolbar — hidden for viewers */}
-      {!isReadOnly && <div className="flex flex-wrap items-center gap-0.5 px-4 py-2 border-b border-border bg-panel shrink-0">
-        <ToolbarButton
-          title="Negrita"
-          onClick={() => editor?.chain().focus().toggleBold().run()}
-          active={editor?.isActive('bold')}
-        >
-          <Bold size={15} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Cursiva"
-          onClick={() => editor?.chain().focus().toggleItalic().run()}
-          active={editor?.isActive('italic')}
-        >
-          <Italic size={15} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Subrayado"
-          onClick={() => editor?.chain().focus().toggleUnderline().run()}
-          active={editor?.isActive('underline')}
-        >
-          <UnderlineIcon size={15} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Tachado"
-          onClick={() => editor?.chain().focus().toggleStrike().run()}
-          active={editor?.isActive('strike')}
-        >
-          <Strikethrough size={15} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Resaltar"
-          onClick={() => editor?.chain().focus().toggleHighlight().run()}
-          active={editor?.isActive('highlight')}
-        >
-          <Highlighter size={15} />
-        </ToolbarButton>
+      {/* ── Toolbar ── */}
+      {!isReadOnly && (
+        <div className="flex flex-wrap items-center gap-0.5 px-3 py-1.5 border-b border-border bg-panel shrink-0">
 
-        <Divider />
+          {/* Formato básico */}
+          <ToolbarButton title="Negrita" onClick={() => editor?.chain().focus().toggleBold().run()} active={editor?.isActive('bold')}>
+            <Bold size={14} />
+          </ToolbarButton>
+          <ToolbarButton title="Cursiva" onClick={() => editor?.chain().focus().toggleItalic().run()} active={editor?.isActive('italic')}>
+            <Italic size={14} />
+          </ToolbarButton>
+          <ToolbarButton title="Subrayado" onClick={() => editor?.chain().focus().toggleUnderline().run()} active={editor?.isActive('underline')}>
+            <UnderlineIcon size={14} />
+          </ToolbarButton>
+          <ToolbarButton title="Tachado" onClick={() => editor?.chain().focus().toggleStrike().run()} active={editor?.isActive('strike')}>
+            <Strikethrough size={14} />
+          </ToolbarButton>
+          <ToolbarButton title="Resaltar" onClick={() => editor?.chain().focus().toggleHighlight().run()} active={editor?.isActive('highlight')}>
+            <Highlighter size={14} />
+          </ToolbarButton>
 
-        <ToolbarButton
-          title="Alinear izquierda"
-          onClick={() => editor?.chain().focus().setTextAlign('left').run()}
-          active={editor?.isActive({ textAlign: 'left' })}
-        >
-          <AlignLeft size={15} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Centrar"
-          onClick={() => editor?.chain().focus().setTextAlign('center').run()}
-          active={editor?.isActive({ textAlign: 'center' })}
-        >
-          <AlignCenter size={15} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Alinear derecha"
-          onClick={() => editor?.chain().focus().setTextAlign('right').run()}
-          active={editor?.isActive({ textAlign: 'right' })}
-        >
-          <AlignRight size={15} />
-        </ToolbarButton>
+          <Divider />
 
-        <Divider />
+          {/* Formato avanzado */}
+          {editor && <FontFamilySelector editor={editor} />}
+          {editor && <FontSizeSelector editor={editor} />}
+          {editor && <TextColorPicker editor={editor} />}
 
-        <ToolbarButton
-          title="Título 1"
-          onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
-          active={editor?.isActive('heading', { level: 1 })}
-        >
-          <Heading1 size={15} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Título 2"
-          onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
-          active={editor?.isActive('heading', { level: 2 })}
-        >
-          <Heading2 size={15} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Título 3"
-          onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
-          active={editor?.isActive('heading', { level: 3 })}
-        >
-          <Heading3 size={15} />
-        </ToolbarButton>
+          <Divider />
 
-        <Divider />
+          {/* Alineación */}
+          <ToolbarButton title="Izquierda" onClick={() => editor?.chain().focus().setTextAlign('left').run()} active={editor?.isActive({ textAlign: 'left' })}>
+            <AlignLeft size={14} />
+          </ToolbarButton>
+          <ToolbarButton title="Centro" onClick={() => editor?.chain().focus().setTextAlign('center').run()} active={editor?.isActive({ textAlign: 'center' })}>
+            <AlignCenter size={14} />
+          </ToolbarButton>
+          <ToolbarButton title="Derecha" onClick={() => editor?.chain().focus().setTextAlign('right').run()} active={editor?.isActive({ textAlign: 'right' })}>
+            <AlignRight size={14} />
+          </ToolbarButton>
 
-        <ToolbarButton
-          title="Lista con viñetas"
-          onClick={() => editor?.chain().focus().toggleBulletList().run()}
-          active={editor?.isActive('bulletList')}
-        >
-          <List size={15} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Lista numerada"
-          onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-          active={editor?.isActive('orderedList')}
-        >
-          <ListOrdered size={15} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Lista de tareas"
-          onClick={() => editor?.chain().focus().toggleTaskList().run()}
-          active={editor?.isActive('taskList')}
-        >
-          <CheckSquare size={15} />
-        </ToolbarButton>
+          <Divider />
 
-        <Divider />
+          {/* Headings */}
+          <ToolbarButton title="H1" onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()} active={editor?.isActive('heading', { level: 1 })}>
+            <Heading1 size={14} />
+          </ToolbarButton>
+          <ToolbarButton title="H2" onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} active={editor?.isActive('heading', { level: 2 })}>
+            <Heading2 size={14} />
+          </ToolbarButton>
+          <ToolbarButton title="H3" onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()} active={editor?.isActive('heading', { level: 3 })}>
+            <Heading3 size={14} />
+          </ToolbarButton>
 
-        <ToolbarButton
-          title="Código inline"
-          onClick={() => editor?.chain().focus().toggleCode().run()}
-          active={editor?.isActive('code')}
-        >
-          <Code size={15} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Bloque de código"
-          onClick={() => editor?.chain().focus().toggleCodeBlock().run()}
-          active={editor?.isActive('codeBlock')}
-        >
-          <FileCode size={15} />
-        </ToolbarButton>
+          <Divider />
 
-        <Divider />
+          {/* Listas */}
+          <ToolbarButton title="Lista" onClick={() => editor?.chain().focus().toggleBulletList().run()} active={editor?.isActive('bulletList')}>
+            <List size={14} />
+          </ToolbarButton>
+          <ToolbarButton title="Lista numerada" onClick={() => editor?.chain().focus().toggleOrderedList().run()} active={editor?.isActive('orderedList')}>
+            <ListOrdered size={14} />
+          </ToolbarButton>
+          <ToolbarButton title="Checklist" onClick={() => editor?.chain().focus().toggleTaskList().run()} active={editor?.isActive('taskList')}>
+            <CheckSquare size={14} />
+          </ToolbarButton>
 
-        <ToolbarButton
-          title="Línea horizontal"
-          onClick={() => editor?.chain().focus().setHorizontalRule().run()}
-        >
-          <Minus size={15} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Insertar imagen"
-          onClick={() => imageInputRef.current?.click()}
-        >
-          <ImageIcon size={15} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Adjuntar archivo"
-          onClick={() => {
-            document.getElementById(`attach-input-${selectedNote?.id}`)?.click()
-          }}
-        >
-          <Paperclip size={15} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Insertar diagrama Mermaid"
-          onClick={() => {
-            editor?.chain().focus().insertContent({
-              type: 'mermaid',
-              attrs: {
-                code: 'flowchart TD\n  A[Inicio] --> B{¿Decisión?}\n  B -->|Sí| C[Acción A]\n  B -->|No| D[Acción B]\n  C --> E[Fin]\n  D --> E',
-              },
-            }).run()
-          }}
-        >
-          <GitBranch size={15} />
-        </ToolbarButton>
+          <Divider />
 
-        <Divider />
+          {/* Código */}
+          <ToolbarButton title="Código inline" onClick={() => editor?.chain().focus().toggleCode().run()} active={editor?.isActive('code')}>
+            <Code size={14} />
+          </ToolbarButton>
+          <ToolbarButton title="Bloque de código" onClick={() => editor?.chain().focus().toggleCodeBlock().run()} active={editor?.isActive('codeBlock')}>
+            <FileCode size={14} />
+          </ToolbarButton>
 
-        <ToolbarButton
-          title="Resumir con IA"
-          onClick={handleSummarize}
-          active={showSummary}
-        >
-          <Sparkles size={15} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Chat con la nota"
-          onClick={() => setShowChat((v) => !v)}
-          active={showChat}
-        >
-          <MessageSquare size={15} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Sugerir etiquetas con IA"
-          onClick={() => setShowSmartTags((v) => !v)}
-          active={showSmartTags}
-        >
-          <TagIcon size={15} />
-        </ToolbarButton>
+          <Divider />
 
-        <Divider />
+          {/* Insert Menu */}
+          {editor && (
+            <InsertMenu
+              editor={editor}
+              imageInputRef={imageInputRef}
+              noteId={selectedNote.id}
+            />
+          )}
 
-        <ToolbarButton
-          title={
-            selectedNote.is_favorite ? 'Quitar de favoritos' : 'Añadir a favoritos'
-          }
-          onClick={async () => {
-            const newValue = !selectedNote.is_favorite
-            await toggleFavorite(selectedNote.id, newValue)
-            updateNoteStore(selectedNote.id, { is_favorite: newValue })
-          }}
-          active={selectedNote.is_favorite}
-        >
-          <Star
-            size={15}
-            className={
-              selectedNote.is_favorite ? 'text-yellow-400 fill-yellow-400' : ''
-            }
+          <Divider />
+
+          {/* AI Menu */}
+          {editor && (
+            <AiMenuExpanded
+              editor={editor}
+              noteId={selectedNote.id}
+              noteContent={editor.getText()}
+              onSummarize={handleSummarize}
+              onChat={() => setShowChat((v) => !v)}
+              onSmartTags={() => setShowSmartTags((v) => !v)}
+            />
+          )}
+
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          {/* Note Actions ⋯ */}
+          {selectedNote && (
+            <NoteActionsMenu
+              note={selectedNote}
+              onExport={() => setShowExport(true)}
+              onVersions={() => setShowVersions((v) => !v)}
+              onSaveTemplate={() => setShowSaveTemplate(true)}
+              onMove={() => setShowMove(true)}
+            />
+          )}
+
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*"
+            title="Seleccionar imagen"
+            className="hidden"
+            onChange={handleImageUpload}
           />
-        </ToolbarButton>
+        </div>
+      )}
 
-        <Divider />
-        <ToolbarButton
-          title={isFocusMode ? 'Salir del modo enfoque' : 'Modo enfoque'}
-          onClick={() => setFocusMode(!isFocusMode)}
-          active={isFocusMode}
-        >
-          {isFocusMode ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-        </ToolbarButton>
-        <ToolbarButton
-          title="Exportar nota"
-          onClick={() => setShowExport(true)}
-        >
-          <Download size={15} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Historial de versiones"
-          onClick={() => setShowVersions((v) => !v)}
-          active={showVersions}
-        >
-          <History size={15} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Guardar como plantilla"
-          onClick={() => setShowSaveTemplate(true)}
-        >
-          <LayoutTemplate size={15} />
-        </ToolbarButton>
-
-        <input
-          ref={imageInputRef}
-          type="file"
-          accept="image/*"
-          title="Seleccionar imagen"
-          className="hidden"
-          onChange={handleImageUpload}
-        />
-      </div>}
-
-      {/* Content + optional AI panel */}
+      {/* ── Content ── */}
       <div className="flex-1 flex overflow-hidden relative">
-        <div className="flex-1 overflow-y-auto px-10 py-8 bg-background" onMouseUp={handleEditorMouseUp}>
+        <div
+          className="flex-1 overflow-y-auto px-10 py-8 bg-background"
+          onMouseUp={handleEditorMouseUp}
+        >
           <input
             ref={titleRef}
             type="text"
@@ -511,6 +404,7 @@ export default function NoteEditor() {
           <AttachmentPanel noteId={selectedNote.id} />
         </div>
 
+        {/* Side panels */}
         {showSummary && (
           <AiSummaryPanel
             summary={summary}
@@ -525,7 +419,6 @@ export default function NoteEditor() {
             onClose={() => setShowChat(false)}
           />
         )}
-
         {showVersions && selectedNote && (
           <VersionHistoryPanel
             noteId={selectedNote.id}
@@ -542,14 +435,8 @@ export default function NoteEditor() {
             onRestore={(version: NoteVersion) => {
               editor?.commands.setContent(version.content)
               if (titleRef.current) titleRef.current.value = version.title
-              updateNote(selectedNote.id, {
-                title: version.title,
-                content: version.content,
-              })
-              updateNoteStore(selectedNote.id, {
-                title: version.title,
-                content: version.content,
-              })
+              updateNote(selectedNote.id, { title: version.title, content: version.content })
+              updateNoteStore(selectedNote.id, { title: version.title, content: version.content })
             }}
             onClose={() => setShowVersions(false)}
           />
@@ -567,6 +454,7 @@ export default function NoteEditor() {
         )}
       </div>
 
+      {/* ── Modals ── */}
       {showExport && selectedNote && (
         <ExportModal
           title={selectedNote.title}
@@ -574,7 +462,6 @@ export default function NoteEditor() {
           onClose={() => setShowExport(false)}
         />
       )}
-
       {showSaveTemplate && selectedNote && editor && (
         <SaveAsTemplateModal
           content={editor.getJSON()}
@@ -583,7 +470,15 @@ export default function NoteEditor() {
           onClose={() => setShowSaveTemplate(false)}
         />
       )}
+      {showMove && selectedNote && (
+        <MoveNoteModal
+          note={selectedNote}
+          onMoved={() => {}}
+          onClose={() => setShowMove(false)}
+        />
+      )}
 
+      {/* ── Floating AI improve toolbar ── */}
       {improveToolbar && (
         <AiImproveToolbar
           position={improveToolbar.position}

@@ -170,3 +170,26 @@ ul[data-type="taskList"] li > div {
 .mermaid-container .label {
   color: var(--color-foreground) !important;
 }
+
+/* ── TipTap Table ── */
+.ProseMirror table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  font-size: 0.875rem;
+}
+.ProseMirror th,
+.ProseMirror td {
+  border: 1px solid var(--color-border);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+.ProseMirror th {
+  background: var(--color-surface);
+  font-weight: 600;
+  color: #f0f0f0;
+}
+.ProseMirror tr:hover td {
+  background: var(--color-surface);
+}
