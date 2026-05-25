@@ -1,210 +1,130 @@
 [
+  { "id": 1, "phase": 1, "name": "project-setup", "title": "Setup inicial del proyecto", "status": "done", "notes": "Next.js 16.2.6, TypeScript, Tailwind v4, todas las dependencias instaladas." },
+  { "id": 2, "phase": 1, "name": "auth-supabase", "title": "Autenticación con Supabase", "status": "done", "notes": "Login, registro, middleware, clientes browser/server. Todo funcional." },
+  { "id": 3, "phase": 1, "name": "layout-base", "title": "Layout base 3 paneles", "status": "done", "notes": "Sidebar + NoteList + NoteEditor funcionando. Sidebar colapsable (56px ↔ 240px)." },
+  { "id": 4, "phase": 2, "name": "notebooks-crud", "title": "Notebooks CRUD", "status": "done", "notes": "Crear, listar, eliminar, renombrar. RLS activo." },
+  { "id": 5, "phase": 2, "name": "notes-crud", "title": "Notes CRUD", "status": "done", "notes": "Crear, listar, editar, eliminar. is_trashed para soft delete." },
+  { "id": 6, "phase": 2, "name": "tiptap-editor", "title": "Editor TipTap v3 con autosave", "status": "done", "notes": "Toolbar completa, autosave 800ms, upload de imágenes, task list, highlight, align, superscript, subscript, eraser. 6 fuentes (Slab Serif, Script, Handwritten vía Google Fonts). Bloques custom: Callout, Toggle, TOC. Mermaid diagrams." },
+  { "id": 7, "phase": 2, "name": "favorites-trash", "title": "Favoritos y Papelera", "status": "done", "notes": "toggleFavorite, getFavoriteNotes, getTrashedNotes, restoreNote, permanentlyDeleteNote." },
+  { "id": 8, "phase": 3, "name": "tags-system", "title": "Sistema de Tags", "status": "done", "notes": "TagInput con create/add/remove. tagStore global. RLS." },
+  { "id": 9, "phase": 3, "name": "search-fulltext", "title": "Búsqueda full-text", "status": "done", "notes": "RPC search_notes() activa. Debounce 400ms." },
+  { "id": 10, "phase": 3, "name": "visual-redesign", "title": "Rediseño visual — dark mode + identidad propia", "status": "done", "notes": "Dark mode. Design system CSS tokens. Sidebar colapsable. HomePanel. Build verde." },
+  { "id": 11, "phase": 4, "name": "tasks-crud", "title": "Tasks CRUD", "status": "done", "notes": "Tabla tasks + RLS. CRUD. TaskModal. taskStore. Build verde." },
+  { "id": 12, "phase": 4, "name": "tasks-views", "title": "Vistas de Tasks", "status": "done", "notes": "Tabs Mis tareas / Por libreta. Filtros. Badge pendientes. Build verde." },
+  { "id": 13, "phase": 5, "name": "files-upload", "title": "Upload de archivos adjuntos", "status": "done", "notes": "Tabla attachments + RLS. Bucket attachments. Drag & drop, barra de progreso." },
+  { "id": 14, "phase": 5, "name": "files-view", "title": "Vista Files", "status": "done", "notes": "FilesView con tabs Todos/Media/Docs. Thumbnails. Descarga." },
+  { "id": 15, "phase": 5, "name": "calendar-view", "title": "Vista Calendar", "status": "done", "notes": "Vistas Mes/Semana/Día. Crear tasks desde calendario." },
+  { "id": 16, "phase": 6, "name": "spaces-setup", "title": "Spaces — estructura base", "status": "done", "notes": "spaces + space_members + RLS. Roles. Invite via service role." },
+  { "id": 17, "phase": 6, "name": "spaces-shared-content", "title": "Spaces — contenido compartido", "status": "done", "notes": "Read-only para viewers. SharedWithMeView. Realtime expulsión." },
+  { "id": 18, "phase": 7, "name": "ai-summarize", "title": "IA — Resumir nota", "status": "done", "notes": "Groq llama-3.3-70b. AiSummaryPanel. Rate limit 10/día." },
+  { "id": 19, "phase": 7, "name": "ai-improve-writing", "title": "IA — Mejorar escritura", "status": "done", "notes": "Streaming. AiImproveToolbar flotante. Aceptar/rechazar. Rate limit 10/día." },
+  { "id": 20, "phase": 7, "name": "ai-chat-note", "title": "IA — Chat con tu nota", "status": "done", "notes": "Streaming. AiChatPanel. Historial en sesión. Rate limit 20/día." },
+  { "id": 21, "phase": 7, "name": "ai-smart-tags", "title": "IA — Smart Tags", "status": "done", "notes": "Groq sugiere hasta 5 tags. Chips aceptar/rechazar. Rate limit 10/día." },
+  { "id": 22, "phase": 8, "name": "keyboard-shortcuts", "title": "Atajos de teclado globales", "status": "done", "notes": "Hook useKeyboardShortcuts + KeyboardShortcutsCheatsheet. Ctrl+Shift+E, Ctrl+K, Ctrl+Shift+F, ?. Build verde." },
+  { "id": 23, "phase": 8, "name": "presentation-mode", "title": "Modo presentación / Focus mode", "status": "done", "notes": "isFocusMode en uiStore. Botón en toolbar. Sidebar + panel ocultos. Build verde." },
+  { "id": 24, "phase": 8, "name": "export-note", "title": "Exportar nota (PDF + Markdown)", "status": "done", "notes": "ExportModal con Markdown (tiptap-to-markdown.ts) y PDF (window.print). Build verde." },
+  { "id": 25, "phase": 8, "name": "note-versions", "title": "Historial de versiones de notas", "status": "done", "notes": "Tabla note_versions. saveVersion/getVersions/deleteVersion. VersionHistoryPanel. Auto-save cada 10 autosaves. Build verde." },
+  { "id": 26, "phase": 9, "name": "note-templates", "title": "Templates de notas", "status": "done", "notes": "Tabla templates (4 builtin). TemplateSelector al crear nota. TemplatesView. SaveAsTemplateModal. Build verde." },
   {
-    "id": 1, "phase": 1, "name": "project-setup",
-    "title": "Setup inicial del proyecto", "status": "done",
-    "notes": "Next.js 16.2.6, TypeScript, Tailwind v4, todas las dependencias instaladas."
+    "id": 27,
+    "phase": 9,
+    "name": "drag-drop-notes",
+    "title": "Arrastrar notas entre notebooks",
+    "status": "done",
+    "notes": "@dnd-kit/core integrado. NoteList con DraggableNote. Notebooks como drop targets en sidebar. Actualiza notebook_id en notes. DragOverlay con label. Build verde."
   },
   {
-    "id": 2, "phase": 1, "name": "auth-supabase",
-    "title": "Autenticación con Supabase", "status": "done",
-    "notes": "Login, registro, middleware, clientes browser/server. Todo funcional."
-  },
-  {
-    "id": 3, "phase": 1, "name": "layout-base",
-    "title": "Layout base 3 paneles", "status": "done",
-    "notes": "Sidebar + NoteList + NoteEditor funcionando. Sidebar colapsable (56px ↔ 240px)."
-  },
-  {
-    "id": 4, "phase": 2, "name": "notebooks-crud",
-    "title": "Notebooks CRUD", "status": "done",
-    "notes": "Crear, listar, eliminar. RLS activo."
-  },
-  {
-    "id": 5, "phase": 2, "name": "notes-crud",
-    "title": "Notes CRUD", "status": "done",
-    "notes": "Crear, listar, editar, eliminar. is_trashed para soft delete."
-  },
-  {
-    "id": 6, "phase": 2, "name": "tiptap-editor",
-    "title": "Editor TipTap v3 con autosave", "status": "done",
-    "notes": "Toolbar completa, autosave 800ms, upload de imágenes, task list, highlight, align."
-  },
-  {
-    "id": 7, "phase": 2, "name": "favorites-trash",
-    "title": "Favoritos y Papelera", "status": "done",
-    "notes": "toggleFavorite, getFavoriteNotes, getTrashedNotes, restoreNote, permanentlyDeleteNote."
-  },
-  {
-    "id": 8, "phase": 3, "name": "tags-system",
-    "title": "Sistema de Tags", "status": "done",
-    "notes": "TagInput con create/add/remove. tagStore global. RLS en tags y note_tags."
-  },
-  {
-    "id": 9, "phase": 3, "name": "search-fulltext",
-    "title": "Búsqueda full-text", "status": "done",
-    "notes": "RPC search_notes() creada. Búsqueda con debounce 400ms."
-  },
-  {
-    "id": 10, "phase": 3, "name": "visual-redesign",
-    "title": "Rediseño visual — dark mode + identidad propia", "status": "done",
-    "notes": "Dark mode. Design system con tokens CSS. Sidebar colapsable. HomePanel. Build verde."
-  },
-  {
-    "id": 11, "phase": 4, "name": "tasks-crud",
-    "title": "Tasks CRUD", "status": "done",
-    "notes": "Tabla tasks + RLS. CRUD. TaskModal. taskStore. Build verde."
-  },
-  {
-    "id": 12, "phase": 4, "name": "tasks-views",
-    "title": "Vistas de Tasks", "status": "done",
-    "notes": "Tabs Mis tareas / Por libreta. Filtros. Badge pendientes. Build verde."
-  },
-  {
-    "id": 13, "phase": 5, "name": "files-upload",
-    "title": "Upload de archivos adjuntos", "status": "done",
-    "notes": "Tabla attachments + RLS. Bucket attachments. Drag & drop, barra de progreso. Build verde."
-  },
-  {
-    "id": 14, "phase": 5, "name": "files-view",
-    "title": "Vista Files", "status": "done",
-    "notes": "FilesView con tabs Todos/Media/Docs. Thumbnails. Descarga. Build verde."
-  },
-  {
-    "id": 15, "phase": 5, "name": "calendar-view",
-    "title": "Vista Calendar", "status": "done",
-    "notes": "Vistas Mes/Semana/Día. Timezone fix. Crear tasks desde calendario. Build verde."
-  },
-  {
-    "id": 16, "phase": 6, "name": "spaces-setup",
-    "title": "Spaces — estructura base", "status": "done",
-    "notes": "spaces + space_members + RLS. Roles. Invite via service role. Build verde."
-  },
-  {
-    "id": 17, "phase": 6, "name": "spaces-shared-content",
-    "title": "Spaces — contenido compartido", "status": "done",
-    "notes": "Read-only para viewers. SharedWithMeView. Realtime expulsión. Build verde."
-  },
-  {
-    "id": 18, "phase": 7, "name": "ai-summarize",
-    "title": "IA — Resumir nota", "status": "done",
-    "notes": "Groq llama-3.3-70b. AiSummaryPanel. Rate limit 10/día. Build verde."
-  },
-  {
-    "id": 19, "phase": 7, "name": "ai-improve-writing",
-    "title": "IA — Mejorar escritura", "status": "done",
-    "notes": "Streaming. AiImproveToolbar flotante. Aceptar/rechazar. Rate limit 10/día. Build verde."
-  },
-  {
-    "id": 20, "phase": 7, "name": "ai-chat-note",
-    "title": "IA — Chat con tu nota", "status": "done",
-    "notes": "Streaming. AiChatPanel 320px. Historial en sesión. Rate limit 20/día. Build verde."
-  },
-  {
-    "id": 21, "phase": 7, "name": "ai-smart-tags",
-    "title": "IA — Smart Tags", "status": "done",
-    "notes": "Groq sugiere hasta 5 tags. Chips aceptar/rechazar. Crea tags nuevos. Rate limit 10/día. Build verde."
-  },
-
-  {
-    "id": 22, "phase": 8, "name": "keyboard-shortcuts",
-    "title": "Atajos de teclado globales", "status": "done",
-    "notes": "Hook useKeyboardShortcuts + KeyboardShortcutsCheatsheet. Ctrl+Shift+E, Ctrl+K, Ctrl+Shift+F, ?. Build verde."
-  },
-  {
-    "id": 23, "phase": 8, "name": "presentation-mode",
-    "title": "Modo presentación / Focus mode", "status": "done",
-    "notes": "isFocusMode en uiStore. Botón Maximize2/Minimize2 en toolbar. Sidebar + panel ocultos. Build verde."
-  },
-  {
-    "id": 24, "phase": 8, "name": "export-note",
-    "title": "Exportar nota (PDF + Markdown)", "status": "done",
-    "notes": "ExportModal con Markdown (tiptap-to-markdown.ts) y PDF (window.print). Descarga directa. Build verde."
-  },
-  {
-    "id": 25, "phase": 8, "name": "note-versions",
-    "title": "Historial de versiones de notas", "status": "done",
-    "notes": "Tabla note_versions. saveVersion/getVersions/deleteVersion. VersionHistoryPanel. Auto-save cada 10 autosaves. Build verde."
-  },
-
-  {
-    "id": 26, "phase": 9, "name": "note-templates",
-    "title": "Templates de notas", "status": "done",
-    "notes": "Tabla templates (3 builtin). TemplateSelector al crear nota. TemplatesView en sidebar. SaveAsTemplateModal en toolbar. Build verde."
-  },
-  {
-    "id": 27, "phase": 9, "name": "drag-drop-notes",
-    "title": "Arrastrar notas entre notebooks", "status": "pending",
-    "description": "Drag & drop en NoteList para mover notas a otro notebook. Usar @dnd-kit/core (instalar). Drop target en la lista de notebooks en el sidebar. Actualiza notebook_id en notes. Visual feedback durante el drag. Sin nueva tabla en DB.",
-    "depends_on": []
-  },
-
-  {
-    "id": 28, "phase": 10, "name": "share-note-public",
-    "title": "Compartir nota con link público", "status": "pending",
-    "description": "Tabla shared_notes ya creada (migration aplicada). Botón 'Compartir' en toolbar del editor. Modal: genera slug único (nanoid), copia link al portapapeles. Página pública app/(public)/n/[slug]/page.tsx — solo lectura, sin auth, renderiza TipTap read-only. Opción de desactivar link o poner fecha de expiración. lib/supabase/shared-notes.ts: createShareLink, getShareLink, deactivateShareLink. Incrementar view_count via RPC.",
+    "id": 28,
+    "phase": 10,
+    "name": "share-note-public",
+    "title": "Compartir nota con link público",
+    "status": "pending",
+    "description": "Tabla shared_notes ya creada. Botón 'Compartir' en toolbar del editor. Modal: genera slug único (nanoid), copia link al portapapeles. Opción desactivar/reactivar link o poner fecha de expiración. Página /n/[slug] pública (sin auth), Server Component, TipTap read-only. Incrementar view_count via RPC. lib/supabase/shared-notes.ts: createShareLink, getShareLink, deactivateShareLink. Excluir /n/:path* del middleware.",
     "depends_on": [],
     "db_tables": ["shared_notes"]
   },
   {
-    "id": 29, "phase": 10, "name": "notifications",
-    "title": "Notificaciones in-app", "status": "pending",
-    "description": "Tabla notifications ya creada (migration aplicada) con REPLICA IDENTITY FULL. Campana en Sidebar con badge de no leídas. Panel dropdown con lista de notificaciones. Tipos: space_invite, task_reminder, note_shared, space_removed. Marcar como leída/todas. Realtime: suscripción a INSERT en notifications del usuario. lib/supabase/notifications.ts: getNotifications, markAsRead, markAllRead, deleteNotification.",
+    "id": 29,
+    "phase": 10,
+    "name": "notifications",
+    "title": "Notificaciones in-app",
+    "status": "pending",
+    "description": "Tabla notifications ya creada (REPLICA IDENTITY FULL). Campana en Sidebar con badge de no leídas. Panel dropdown con lista. Tipos: space_invite, task_reminder, note_shared, space_removed. Marcar como leída/todas. Realtime: suscripción a INSERT en notifications. lib/supabase/notifications.ts.",
     "depends_on": [],
     "db_tables": ["notifications"]
   },
-
   {
-    "id": 30, "phase": 11, "name": "user-profile",
-    "title": "Perfil de usuario", "status": "pending",
-    "description": "Tabla user_profiles ya creada (migration aplicada) con trigger que crea perfil al registrarse. Página /dashboard/settings con tabs: Perfil (nombre display, avatar upload a bucket 'avatars', bio), Preferencias (tema dark/light/system, idioma, timezone), Notificaciones (toggle email). Mostrar avatar en sidebar en vez del botón de logout. lib/supabase/profile.ts: getProfile, updateProfile, uploadAvatar.",
+    "id": 30,
+    "phase": 11,
+    "name": "user-profile",
+    "title": "Perfil de usuario",
+    "status": "pending",
+    "description": "Tabla user_profiles ya creada con trigger auto-create. Página /dashboard/settings con tabs: Perfil (nombre, avatar bucket 'avatars', bio), Preferencias (tema dark/light/system, idioma, timezone), Notificaciones (toggle email). Avatar en sidebar. lib/supabase/profile.ts.",
     "depends_on": [],
     "db_tables": ["user_profiles"]
   },
   {
-    "id": 31, "phase": 11, "name": "light-mode",
-    "title": "Tema claro (light mode)", "status": "pending",
-    "description": "Los tokens CSS ya están en @theme de globals.css. Añadir variante light: [data-theme='light'] con colores inversos (background #f5f5f5, panel #ffffff, etc). Toggle en Sidebar y en Settings. Guardar preferencia en user_profiles.theme. Aplicar data-theme en <html> via uiStore. Sin nueva tabla en DB.",
+    "id": 31,
+    "phase": 11,
+    "name": "light-mode",
+    "title": "Tema claro (light mode)",
+    "status": "pending",
+    "description": "Tokens CSS para light mode en globals.css bajo [data-theme='light']. Toggle en Sidebar y Settings. Guardar preferencia en user_profiles.theme. Aplicar data-theme en <html> via uiStore.",
     "depends_on": [30]
   },
-
   {
-    "id": 32, "phase": 12, "name": "advanced-search",
-    "title": "Búsqueda avanzada con filtros", "status": "pending",
-    "description": "RPC search_notes_advanced() ya creada (migration aplicada). Panel de búsqueda avanzada accesible desde el sidebar (botón de filtros junto a la barra de búsqueda). Filtros: por notebook, por tag (multi-select), por rango de fechas, solo favoritos. Resultados muestran snippet del contenido con término resaltado. lib/supabase/search.ts: añadir searchNotesAdvanced(). SearchResults.tsx: modo avanzado toggle.",
-    "depends_on": [],
-    "db_tables": []
-  },
-  {
-    "id": 33, "phase": 12, "name": "dashboard-stats",
-    "title": "Dashboard con estadísticas", "status": "pending",
-    "description": "RPC get_user_stats() ya creada (migration aplicada). Mejorar HomePanel del dashboard con: grid de stats (notas, notebooks, tareas pendientes, archivos), gráfico de actividad de los últimos 7 días (notas creadas por día usando recharts ya instalado), tags más usados como nube de tags, notebooks más grandes. Reemplaza el HomePanel actual.",
+    "id": 32,
+    "phase": 12,
+    "name": "advanced-search",
+    "title": "Búsqueda avanzada con filtros",
+    "status": "pending",
+    "description": "RPC search_notes_advanced() ya creada. Panel de filtros: notebook, tag (multi-select), rango de fechas, solo favoritos. Resultados con snippet resaltado. lib/supabase/search.ts: añadir searchNotesAdvanced().",
     "depends_on": []
   },
-
   {
-    "id": 34, "phase": 13, "name": "onboarding",
-    "title": "Onboarding para nuevos usuarios", "status": "pending",
-    "description": "Al primer login (detectar via user_profiles.created_at = now()): modal de bienvenida multi-paso (3 pasos: nombre, crear primer notebook, primer nota desde template). Crear datos de ejemplo automáticamente. Tour guiado opcional con tooltip overlay en elementos del sidebar. Flag onboarding_completed en user_profiles. Sin nueva tabla en DB (usar user_profiles).",
+    "id": 33,
+    "phase": 12,
+    "name": "dashboard-stats",
+    "title": "Dashboard con estadísticas",
+    "status": "pending",
+    "description": "RPC get_user_stats() ya creada. HomePanel mejorado: grid de stats, gráfico de actividad 7 días (recharts), tags más usados, notebooks más grandes.",
+    "depends_on": []
+  },
+  {
+    "id": 34,
+    "phase": 13,
+    "name": "onboarding",
+    "title": "Onboarding para nuevos usuarios",
+    "status": "pending",
+    "description": "Al primer login: modal multi-paso (nombre → primer notebook → primera nota desde template). Flag onboarding_completed en user_profiles.",
     "depends_on": [30]
   },
   {
-    "id": 35, "phase": 13, "name": "task-reminders",
-    "title": "Recordatorios de tareas via email", "status": "pending",
-    "description": "Supabase Edge Function 'send-reminders' que corre cada hora (cron). Consulta tasks donde reminder_at <= now() AND is_completed = false AND reminder_sent = false. Envía email via Resend API. Añadir columna reminder_sent boolean a tasks. lib/supabase/tasks.ts: actualizar tipo Task. Edge Function en supabase/functions/send-reminders/index.ts.",
+    "id": 35,
+    "phase": 13,
+    "name": "task-reminders",
+    "title": "Recordatorios de tareas via email",
+    "status": "pending",
+    "description": "Edge Function 'send-reminders' cron cada hora. Envía email via Resend API. Columna reminder_sent boolean en tasks. supabase/functions/send-reminders/index.ts.",
     "depends_on": [],
     "db_tables": ["tasks (columna reminder_sent)"]
   },
-
   {
-    "id": 36, "phase": 14, "name": "tests-unit",
-    "title": "Tests unitarios — utils y lib/supabase", "status": "pending",
-    "description": "Instalar Vitest + @testing-library/react. Tests para: lib/utils/tiptap.ts (extractTextPreview), lib/supabase/notes.ts (mocks de Supabase), store/noteStore.ts, store/taskStore.ts, componentes puros (TaskItem, NoteCard). Configurar vitest.config.ts. Script npm run test en package.json. Meta: cobertura >70% en utils y stores.",
+    "id": 36,
+    "phase": 14,
+    "name": "tests-unit",
+    "title": "Tests unitarios — utils y lib/supabase",
+    "status": "pending",
+    "description": "Instalar Vitest + @testing-library/react. Tests para: lib/utils/tiptap.ts, store/noteStore.ts, store/taskStore.ts, TaskItem, NoteCard. Cobertura >70%.",
     "depends_on": []
   },
   {
-    "id": 37, "phase": 14, "name": "tests-e2e",
-    "title": "Tests E2E — flujos críticos", "status": "pending",
-    "description": "Instalar Playwright. Tests E2E para: login/logout, crear notebook + nota + editar, añadir tag a nota, crear task, subir archivo adjunto, búsqueda full-text. Configurar playwright.config.ts con baseURL localhost:3000. Scripts: npm run test:e2e. Variables de entorno de test separadas (.env.test). Usuario de prueba en Supabase.",
+    "id": 37,
+    "phase": 14,
+    "name": "tests-e2e",
+    "title": "Tests E2E — flujos críticos",
+    "status": "pending",
+    "description": "Playwright. Tests: login/logout, crear notebook + nota, añadir tag, crear task, subir archivo, búsqueda. playwright.config.ts. .env.test.",
     "depends_on": [36]
   }
 ]
