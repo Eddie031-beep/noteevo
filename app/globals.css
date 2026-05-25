@@ -193,3 +193,19 @@ ul[data-type="taskList"] li > div {
 .ProseMirror tr:hover td {
   background: var(--color-surface);
 }
+
+/* ── Animaciones ── */
+@keyframes noteCardEnter {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.note-card-enter {
+  animation: noteCardEnter 0.22s ease-out;
+}

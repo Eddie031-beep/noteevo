@@ -17,6 +17,8 @@ import { Table } from '@tiptap/extension-table'
 import { TableRow } from '@tiptap/extension-table-row'
 import { TableCell } from '@tiptap/extension-table-cell'
 import { TableHeader } from '@tiptap/extension-table-header'
+import Superscript from '@tiptap/extension-superscript'
+import Subscript from '@tiptap/extension-subscript'
 import { useNoteStore } from '@/store/noteStore'
 import { useNotebookStore } from '@/store/notebookStore'
 import { useSpaceStore } from '@/store/spaceStore'
@@ -30,6 +32,7 @@ import {
   Heading1, Heading2, Heading3,
   List, ListOrdered, CheckSquare,
   Code, FileCode,
+  Superscript as SuperscriptIcon, Subscript as SubscriptIcon, Eraser,
 } from 'lucide-react'
 import TagInput from './TagInput'
 import AttachmentPanel from './AttachmentPanel'
@@ -45,8 +48,12 @@ import InsertMenu from './InsertMenu'
 import { FontFamilySelector, FontSizeSelector, TextColorPicker } from './FormatDropdowns'
 import AiMenuExpanded from './AiMenuExpanded'
 import NoteActionsMenu from './NoteActionsMenu'
+import TableToolbar from './TableToolbar'
 import { saveVersion, getVersionCount } from '@/lib/supabase/versions'
 import { MermaidExtension } from '@/lib/editor/mermaid-extension'
+import { CalloutExtension } from '@/lib/editor/callout-extension'
+import { ToggleExtension } from '@/lib/editor/toggle-extension'
+import { TocExtension } from '@/lib/editor/toc-extension'
 import type { NoteVersion } from '@/types'
 
 function ToolbarButton({
@@ -131,6 +138,11 @@ export default function NoteEditor() {
       TableHeader,
       TableCell,
       MermaidExtension,
+      CalloutExtension,
+      ToggleExtension,
+      TocExtension,
+      Superscript,
+      Subscript,
     ],
     content: '',
     onSelectionUpdate: ({ editor }) => {
@@ -273,6 +285,12 @@ export default function NoteEditor() {
           <ToolbarButton title="Tachado" onClick={() => editor?.chain().focus().toggleStrike().run()} active={editor?.isActive('strike')}>
             <Strikethrough size={14} />
           </ToolbarButton>
+          <ToolbarButton title="Superíndice" onClick={() => editor?.chain().focus().toggleSuperscript().run()} active={editor?.isActive('superscript')}>
+            <SuperscriptIcon size={14} />
+          </ToolbarButton>
+          <ToolbarButton title="Subíndice" onClick={() => editor?.chain().focus().toggleSubscript().run()} active={editor?.isActive('subscript')}>
+            <SubscriptIcon size={14} />
+          </ToolbarButton>
           <ToolbarButton title="Resaltar" onClick={() => editor?.chain().focus().toggleHighlight().run()} active={editor?.isActive('highlight')}>
             <Highlighter size={14} />
           </ToolbarButton>
@@ -335,6 +353,12 @@ export default function NoteEditor() {
 
           <Divider />
 
+          <ToolbarButton title="Eliminar formato" onClick={() => editor?.chain().focus().clearNodes().unsetAllMarks().run()}>
+            <Eraser size={14} />
+          </ToolbarButton>
+
+          <Divider />
+
           {/* Insert Menu */}
           {editor && (
             <InsertMenu
@@ -350,7 +374,6 @@ export default function NoteEditor() {
           {editor && (
             <AiMenuExpanded
               editor={editor}
-              noteId={selectedNote.id}
               noteContent={editor.getText()}
               onSummarize={handleSummarize}
               onChat={() => setShowChat((v) => !v)}
@@ -400,6 +423,7 @@ export default function NoteEditor() {
             style={{ color: 'var(--color-foreground)' }}
           />
           <TagInput key={`${selectedNote.id}-${tagInputKey}`} noteId={selectedNote.id} />
+          {editor && <TableToolbar editor={editor} />}
           <EditorContent editor={editor} />
           <AttachmentPanel noteId={selectedNote.id} />
         </div>

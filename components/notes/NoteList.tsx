@@ -1,316 +1,143 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect } from 'react'
+import { Plus, Star } from 'lucide-react'
 import { useNoteStore } from '@/store/noteStore'
 import { useNotebookStore } from '@/store/notebookStore'
-import { getNotesByNotebook, createNote, trashNote, updateNote } from '@/lib/supabase/notes'
 import { extractTextPreview } from '@/lib/utils/tiptap'
-import { Plus, Trash2, FileText, FolderInput, Loader2, Copy, MoreHorizontal, LayoutTemplate } from 'lucide-react'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
-import { useDraggable } from '@dnd-kit/core'
-import { CSS } from '@dnd-kit/utilities'
 import type { Note } from '@/types'
-import SaveAsTemplateModal from '@/components/templates/SaveAsTemplateModal'
-import MoveNoteModal from '@/components/notes/MoveNoteModal'
 
-function NoteContextMenu({
-  note,
-  onClose,
-  onTrashed,
-  onDuplicated,
-}: {
-  note: Note
-  onClose: () => void
-  onTrashed: () => void
-  onDuplicated: (newNote: Note) => void
-}) {
-  const [showMoveModal, setShowMoveModal] = useState(false)
-  const [showSaveTemplate, setShowSaveTemplate] = useState(false)
-  const [loading, setLoading] = useState<string | null>(null)
-  const ref = useRef<HTMLDivElement>(null)
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
 
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        onClose()
-      }
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [onClose])
-
-  const handleDuplicate = async () => {
-    if (!note.notebook_id) return
-    setLoading('duplicate')
-    try {
-      const newNote = await createNote(note.notebook_id)
-      await updateNote(newNote.id, {
-        title: `${note.title} (copia)`,
-        content: note.content,
-      })
-      onDuplicated({ ...newNote, title: `${note.title} (copia)`, content: note.content })
-    } catch {
-      // silencioso
-    } finally {
-      setLoading(null)
-      onClose()
-    }
+  if (diffDays === 0) {
+    return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
   }
-
-  const handleTrash = async () => {
-    setLoading('trash')
-    try {
-      await trashNote(note.id)
-      onTrashed()
-    } catch {
-      // silencioso
-    } finally {
-      setLoading(null)
-      onClose()
-    }
-  }
-
-  return (
-    <>
-      <div
-        ref={ref}
-        className="absolute right-2 top-8 z-30 bg-panel border border-border rounded-xl shadow-2xl w-52 py-1 overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Mover a */}
-        <button
-          type="button"
-          onClick={() => setShowMoveModal(true)}
-          className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted hover:bg-surface hover:text-foreground transition cursor-pointer"
-        >
-          <FolderInput size={13} />
-          Mover a...
-        </button>
-
-        {/* Duplicar */}
-        <button
-          type="button"
-          onClick={handleDuplicate}
-          disabled={loading === 'duplicate'}
-          className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted hover:bg-surface hover:text-foreground transition cursor-pointer disabled:opacity-50"
-        >
-          {loading === 'duplicate' ? (
-            <Loader2 size={13} className="animate-spin" />
-          ) : (
-            <Copy size={13} />
-          )}
-          Duplicar
-        </button>
-
-        {/* Guardar como plantilla */}
-        <button
-          type="button"
-          onClick={() => setShowSaveTemplate(true)}
-          className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted hover:bg-surface hover:text-foreground transition cursor-pointer"
-        >
-          <LayoutTemplate size={13} />
-          Guardar como plantilla
-        </button>
-
-        <div className="my-1 border-t border-border" />
-
-        {/* Papelera */}
-        <button
-          type="button"
-          onClick={handleTrash}
-          disabled={loading === 'trash'}
-          className="w-full flex items-center gap-2 px-3 py-2 text-xs text-danger hover:bg-danger/10 transition cursor-pointer disabled:opacity-50"
-        >
-          {loading === 'trash' ? (
-            <Loader2 size={13} className="animate-spin" />
-          ) : (
-            <Trash2 size={13} />
-          )}
-          Mover a papelera
-        </button>
-      </div>
-
-      {showMoveModal && (
-        <MoveNoteModal
-          note={note}
-          onMoved={() => { onTrashed(); onClose() }}
-          onClose={() => setShowMoveModal(false)}
-        />
-      )}
-
-      {showSaveTemplate && (
-        <SaveAsTemplateModal
-          content={note.content}
-          defaultName={note.title !== 'Sin título' ? note.title : ''}
-          onSaved={() => {}}
-          onClose={() => { setShowSaveTemplate(false); onClose() }}
-        />
-      )}
-    </>
-  )
+  if (diffDays === 1) return 'Ayer'
+  if (diffDays < 7) return `Hace ${diffDays} días`
+  return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-function DraggableNote({
-  note,
-  isSelected,
-  onSelect,
-  onRemove,
-  onDuplicated,
-}: {
+interface NoteCardProps {
   note: Note
   isSelected: boolean
   onSelect: () => void
-  onRemove: () => void
-  onDuplicated: (newNote: Note) => void
-}) {
-  const [showMenu, setShowMenu] = useState(false)
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({
-      id: `note-${note.id}`,
-      data: { type: 'note', noteId: note.id, currentNotebookId: note.notebook_id },
-    })
+  index: number
+}
 
-  const style: React.CSSProperties = {
-    transform: CSS.Translate.toString(transform),
-    opacity: isDragging ? 0.4 : 1,
-    transition: isDragging ? undefined : 'opacity 150ms',
-  }
+function NoteCard({ note, isSelected, onSelect, index }: NoteCardProps) {
+  const preview = extractTextPreview(note.content, 80)
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
+    <button
+      type="button"
       onClick={onSelect}
-      className={`relative group px-4 py-3.5 border-b border-border cursor-grab active:cursor-grabbing transition ${
+      style={{
+        animationDelay: `${index * 35}ms`,
+        animationFillMode: 'both',
+      }}
+      className={[
+        'note-card-enter',
+        'w-full text-left px-4 py-3 relative',
+        'border-b border-border/30',
+        'transition-all duration-200 ease-out cursor-pointer group',
+        'border-l-2',
         isSelected
-          ? 'bg-elevated border-l-2 border-l-accent'
-          : 'hover:bg-surface'
-      }`}
+          ? 'bg-white/5 border-l-accent'
+          : 'border-l-transparent hover:bg-white/[0.03] hover:border-l-accent/30',
+      ].join(' ')}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-foreground truncate">
-            {note.title || 'Sin título'}
-          </p>
-          <p className="text-xs text-muted mt-1 line-clamp-2 leading-relaxed">
-            {extractTextPreview(note.content) || 'Sin contenido'}
-          </p>
-          <p className="text-xs text-subtle mt-1.5">
-            {format(new Date(note.updated_at), 'd MMM yyyy', { locale: es })}
-          </p>
-        </div>
+      {/* Title */}
+      <p
+        className={[
+          'text-sm font-medium leading-snug truncate transition-colors duration-150',
+          isSelected ? 'text-foreground' : 'text-foreground/85 group-hover:text-foreground',
+        ].join(' ')}
+      >
+        {note.title || 'Sin título'}
+      </p>
 
-        <button
-          type="button"
-          title="Opciones"
-          onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu) }}
-          className="opacity-0 group-hover:opacity-100 p-1.5 text-muted hover:text-foreground hover:bg-elevated rounded-lg transition cursor-pointer shrink-0 mt-0.5"
-        >
-          <MoreHorizontal size={14} />
-        </button>
-      </div>
-
-      {showMenu && (
-        <NoteContextMenu
-          note={note}
-          onClose={() => setShowMenu(false)}
-          onTrashed={() => { setShowMenu(false); onRemove() }}
-          onDuplicated={(newNote) => { setShowMenu(false); onDuplicated(newNote) }}
-        />
+      {/* Preview */}
+      {preview && (
+        <p className="text-xs text-muted mt-0.5 line-clamp-2 leading-relaxed">
+          {preview}
+        </p>
       )}
-    </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between mt-1.5">
+        <span className="text-[10px] text-subtle tabular-nums">
+          {formatDate(note.updated_at)}
+        </span>
+        {note.is_favorite && (
+          <Star size={10} className="text-amber-400 fill-amber-400 shrink-0" />
+        )}
+      </div>
+    </button>
   )
 }
 
 export default function NoteList() {
-  const { notes, setNotes, addNote, deleteNote, setSelectedNote, selectedNote } =
-    useNoteStore()
+  const { notes, selectedNote, setSelectedNote, createNote, fetchNotes } = useNoteStore()
   const { selectedNotebook } = useNotebookStore()
 
   useEffect(() => {
-    if (!selectedNotebook) return
-    const load = async () => {
-      try {
-        const data = await getNotesByNotebook(selectedNotebook.id)
-        setNotes(data)
-      } catch {
-        // error cargando notas
-      }
+    if (selectedNotebook?.id) {
+      fetchNotes(selectedNotebook.id)
     }
-    load()
-  }, [selectedNotebook, setNotes])
-
-  const handleCreate = async () => {
-    if (!selectedNotebook) return
-    try {
-      const note = await createNote(selectedNotebook.id)
-      addNote(note)
-      setSelectedNote(note)
-    } catch {
-      // error creando nota
-    }
-  }
-
-  if (!selectedNotebook) {
-    return (
-      <div className="w-72 h-screen bg-panel border-r border-border flex flex-col items-center justify-center gap-3 shrink-0">
-        <FileText size={32} className="text-subtle" />
-        <p className="text-sm text-muted">Selecciona una libreta</p>
-      </div>
-    )
-  }
+  }, [selectedNotebook?.id, fetchNotes])
 
   return (
-    <div className="w-72 h-screen bg-panel border-r border-border flex flex-col shrink-0">
+    <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <div className="h-14 px-4 border-b border-border flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
         <div className="min-w-0">
-          <h2 className="font-semibold text-foreground text-sm truncate">
-            {selectedNotebook.name}
+          <h2 className="text-sm font-semibold text-foreground truncate">
+            {selectedNotebook?.name ?? 'Notas'}
           </h2>
-          <p className="text-xs text-muted">
-            {notes.length} nota{notes.length !== 1 ? 's' : ''}
+          <p className="text-[11px] text-subtle">
+            {notes.length} {notes.length === 1 ? 'nota' : 'notas'}
           </p>
         </div>
-        <button
-          type="button"
-          title="Nueva nota"
-          onClick={handleCreate}
-          className="p-1.5 text-muted hover:text-accent hover:bg-accent/10 rounded-lg transition cursor-pointer shrink-0"
-        >
-          <Plus size={18} />
-        </button>
+
+        {selectedNotebook && (
+          <button
+            type="button"
+            title="Nueva nota"
+            onClick={() => createNote(selectedNotebook.id)}
+            className="p-1.5 rounded-lg hover:bg-surface text-muted hover:text-foreground transition-all duration-150 active:scale-90 shrink-0 cursor-pointer"
+          >
+            <Plus size={14} />
+          </button>
+        )}
       </div>
 
       {/* List */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto scrollbar-thin">
         {notes.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full gap-3">
-            <FileText size={32} className="text-subtle" />
-            <p className="text-sm text-muted">Sin notas aún</p>
-            <button
-              type="button"
-              onClick={handleCreate}
-              className="text-sm text-accent hover:text-accent-light transition cursor-pointer"
-            >
-              Crear primera nota
-            </button>
+          <div className="flex flex-col items-center justify-center h-full gap-3 px-6 text-center">
+            <p className="text-sm text-subtle">Sin notas aquí</p>
+            {selectedNotebook && (
+              <button
+                type="button"
+                onClick={() => createNote(selectedNotebook.id)}
+                className="text-xs text-accent hover:text-accent/80 transition cursor-pointer underline-offset-2 hover:underline"
+              >
+                Crear nota
+              </button>
+            )}
           </div>
         ) : (
-          notes.map((note) => (
-            <DraggableNote
+          notes.map((note, index) => (
+            <NoteCard
               key={note.id}
               note={note}
               isSelected={selectedNote?.id === note.id}
               onSelect={() => setSelectedNote(note)}
-              onRemove={() => deleteNote(note.id)}
-              onDuplicated={(newNote) => {
-                addNote(newNote)
-                setSelectedNote(newNote)
-              }}
+              index={index}
             />
           ))
         )}

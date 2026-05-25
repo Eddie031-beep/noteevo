@@ -8,7 +8,19 @@ import type { Editor } from '@tiptap/react'
 const FONTS = [
   { value: '', label: 'Sans Serif' },
   { value: 'Georgia, serif', label: 'Serif' },
+  {
+    value: 'var(--font-roboto-slab), "Rockwell", "Courier New", serif',
+    label: 'Slab Serif',
+  },
   { value: 'var(--font-geist-mono), monospace', label: 'Monospace' },
+  {
+    value: 'var(--font-dancing-script), "Brush Script MT", cursive',
+    label: 'Script',
+  },
+  {
+    value: 'var(--font-caveat), "Comic Sans MS", cursive',
+    label: 'Handwritten',
+  },
 ]
 
 export function FontFamilySelector({ editor }: { editor: Editor }) {
@@ -33,14 +45,16 @@ export function FontFamilySelector({ editor }: { editor: Editor }) {
         type="button"
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1 px-2 py-1.5 rounded text-xs text-muted hover:bg-surface hover:text-foreground transition cursor-pointer"
-        style={{ minWidth: 80 }}
+        style={{ minWidth: 88 }}
       >
-        <span className="truncate">{current.label}</span>
+        <span className="truncate" style={current.value ? { fontFamily: current.value } : {}}>
+          {current.label}
+        </span>
         <ChevronDown size={10} className="shrink-0" />
       </button>
 
       {open && (
-        <div className="absolute left-0 top-9 z-40 bg-panel border border-border rounded-xl shadow-2xl w-40 py-1">
+        <div className="absolute left-0 top-9 z-40 bg-panel border border-border rounded-xl shadow-2xl w-44 py-1">
           {FONTS.map((font) => {
             const isActive = current.value === font.value
             return (
@@ -55,11 +69,13 @@ export function FontFamilySelector({ editor }: { editor: Editor }) {
                   }
                   setOpen(false)
                 }}
-                className="w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-surface transition cursor-pointer"
+                className="w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-surface transition cursor-pointer"
                 style={font.value ? { fontFamily: font.value } : {}}
               >
-                <span className={isActive ? 'text-accent' : 'text-foreground'}>{font.label}</span>
-                {isActive && <Check size={11} className="text-accent" />}
+                <span className={isActive ? 'text-accent' : 'text-foreground'}>
+                  {font.label}
+                </span>
+                {isActive && <Check size={11} className="text-accent shrink-0" />}
               </button>
             )
           })}
@@ -144,7 +160,6 @@ export function TextColorPicker({ editor }: { editor: Editor }) {
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
 
-  // Get current color from editor
   const currentColor = editor.getAttributes('textStyle').color as string | undefined
 
   return (
@@ -155,7 +170,6 @@ export function TextColorPicker({ editor }: { editor: Editor }) {
         onClick={() => setOpen(!open)}
         className="flex items-center gap-0.5 p-1.5 rounded hover:bg-surface transition cursor-pointer"
       >
-        {/* A with color underline */}
         <span className="text-xs font-bold text-foreground leading-none relative">
           A
           <span
@@ -186,9 +200,7 @@ export function TextColorPicker({ editor }: { editor: Editor }) {
                 className="w-6 h-6 rounded-md border border-border/50 flex items-center justify-center transition hover:scale-110 cursor-pointer"
                 style={{ backgroundColor: value ?? 'transparent' }}
               >
-                {!value && (
-                  <span className="text-[9px] text-muted font-medium">A</span>
-                )}
+                {!value && <span className="text-[9px] text-muted font-medium">A</span>}
                 {value === currentColor && (
                   <Check size={10} className="text-white drop-shadow" />
                 )}

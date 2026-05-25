@@ -5,7 +5,7 @@ import {
   Plus, Search, Table, Minus, Quote,
   Heading1, Heading2, Heading3, List, ListOrdered,
   CheckSquare, ImageIcon, Paperclip, Code, GitBranch,
-  Calendar, Clock, Type,
+  Calendar, Clock, Type, AlertCircle, ChevronRight, BookOpen,
 } from 'lucide-react'
 import type { Editor } from '@tiptap/react'
 import { format } from 'date-fns'
@@ -63,6 +63,41 @@ export default function InsertMenu({ editor, imageInputRef, noteId }: InsertMenu
       icon: <Quote size={14} />, label: 'Cita',
       category: 'Esenciales', keywords: ['cita', 'quote', 'blockquote'],
       action: () => editor.chain().focus().toggleBlockquote().run(),
+    },
+    {
+      icon: <AlertCircle size={14} />,
+      label: 'Callout',
+      description: 'Destacar tips, advertencias o notas',
+      category: 'Esenciales',
+      keywords: ['callout', 'alerta', 'advertencia', 'tip', 'info', 'nota'],
+      action: () =>
+        editor.chain().focus().insertContent({
+          type: 'callout',
+          attrs: { type: 'info' },
+          content: [{ type: 'paragraph' }],
+        }).run(),
+    },
+    {
+      icon: <ChevronRight size={14} />,
+      label: 'Toggle',
+      description: 'Bloque colapsable',
+      category: 'Esenciales',
+      keywords: ['toggle', 'colapsar', 'expandir', 'ocultar', 'colapsable'],
+      action: () =>
+        editor.chain().focus().insertContent({
+          type: 'toggle',
+          attrs: { title: 'Toggle', open: true },
+          content: [{ type: 'paragraph' }],
+        }).run(),
+    },
+    {
+      icon: <BookOpen size={14} />,
+      label: 'Tabla de contenidos',
+      description: 'Índice auto-generado desde los títulos',
+      category: 'Esenciales',
+      keywords: ['toc', 'indice', 'tabla', 'contenidos', 'headings', 'titulos'],
+      action: () =>
+        editor.chain().focus().insertContent({ type: 'tableOfContents' }).run(),
     },
     // Texto
     {
