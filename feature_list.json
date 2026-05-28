@@ -58,7 +58,7 @@
     "phase": 11,
     "name": "user-profile",
     "title": "Perfil de usuario",
-    "status": "pending",
+    "status": "done",
     "description": "Tabla user_profiles ya creada con trigger auto-create. Página /dashboard/settings con tabs: Perfil (nombre, avatar bucket 'avatars', bio), Preferencias (tema dark/light/system, idioma, timezone), Notificaciones (toggle email). Avatar en sidebar. lib/supabase/profile.ts.",
     "depends_on": [],
     "db_tables": ["user_profiles"]

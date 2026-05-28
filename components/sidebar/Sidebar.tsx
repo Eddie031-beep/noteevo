@@ -1,20 +1,22 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useNotebookStore } from '@/store/notebookStore'
 import { useUIStore } from '@/store/uiStore'
 import { useTagStore } from '@/store/tagStore'
+import { useProfileStore } from '@/store/profileStore'
 import { getNotebooks, createNotebook, deleteNotebook, updateNotebook } from '@/lib/supabase/notebooks'
 import { getTags } from '@/lib/supabase/tags'
 import { getPendingTaskCount } from '@/lib/supabase/tasks'
 import { getMySpaces } from '@/lib/supabase/spaces'
+import { getProfile } from '@/lib/supabase/profile'
 import { useSpaceStore } from '@/store/spaceStore'
 import {
   Home, FileText, BookOpen, Star, Trash2, LogOut,
   Plus, X, Search, Tag, CheckSquare, Paperclip,
-  Calendar, Users, Sparkles, ChevronDown, ChevronRight, ChevronLeft, Share2, LayoutTemplate, Pencil,
+  Calendar, Users, Sparkles, ChevronDown, ChevronRight, ChevronLeft, Share2, LayoutTemplate, Pencil, Settings,
 } from 'lucide-react'
 import NotificationBell from './NotificationBell'
 import { useDroppable } from '@dnd-kit/core'
@@ -173,6 +175,7 @@ function DroppableNotebook({
 
 export default function Sidebar() {
   const router = useRouter()
+  const pathname = usePathname()
   const {
     notebooks, setNotebooks, addNotebook,
     deleteNotebook: removeNotebook,
@@ -182,6 +185,7 @@ export default function Sidebar() {
   const { currentView, setCurrentView, searchQuery, setSearchQuery } = useUIStore()
   const { setTags } = useTagStore()
   const { spaces, setSpaces, selectedSpace, setSelectedSpace, removeSpace } = useSpaceStore()
+  const { profile, setProfile } = useProfileStore()
 
   const [collapsed, setCollapsed] = useState(false)
   const [newName, setNewName] = useState('')
@@ -275,6 +279,12 @@ export default function Sidebar() {
     load()
   }, [])
 
+  useEffect(() => {
+    getProfile()
+      .then((p) => { if (p) setProfile(p) })
+      .catch(() => {})
+  }, [setProfile])
+
   const handleCreate = async () => {
     if (!newName.trim()) return
     setCreating(true)
@@ -305,22 +315,29 @@ export default function Sidebar() {
     router.refresh()
   }
 
+  const goToDashboard = () => {
+    if (pathname !== '/dashboard') router.push('/dashboard')
+  }
+
   const handleNav = (view: View) => {
     setCurrentView(view)
     setSelectedNotebook(null)
     setSearchQuery('')
+    goToDashboard()
   }
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setSearchQuery(value)
     setCurrentView(value.trim() ? 'search' : 'home')
+    goToDashboard()
   }
 
   const handleNotebookClick = (notebook: Notebook) => {
     setSelectedNotebook(notebook)
     setCurrentView('notebooks')
     setSearchQuery('')
+    goToDashboard()
   }
 
   const handleSpaceClick = (space: Space) => {
@@ -328,6 +345,7 @@ export default function Sidebar() {
     setCurrentView('spaces')
     setSearchQuery('')
     setSelectedNotebook(null)
+    goToDashboard()
   }
 
   const isNotebooksActive =
@@ -654,6 +672,41 @@ export default function Sidebar() {
       {/* ── Bottom actions ── */}
       <div className="border-t border-border p-2 shrink-0 space-y-0.5">
         <NotificationBell collapsed={collapsed} />
+
+        {/* User / Settings */}
+        <button
+          type="button"
+          title={collapsed ? 'Configuración' : undefined}
+          onClick={() => router.push('/dashboard/settings')}
+          className={`w-full flex items-center rounded-lg py-2 transition cursor-pointer ${
+            pathname === '/dashboard/settings'
+              ? 'bg-accent/15 text-accent'
+              : 'text-muted hover:bg-surface hover:text-foreground'
+          } ${collapsed ? 'justify-center px-2' : 'gap-2.5 px-3'}`}
+        >
+          {profile?.avatar_url ? (
+            <img
+              src={`${profile.avatar_url}?t=${new Date(profile.updated_at).getTime()}`}
+              alt="Avatar"
+              className="w-6 h-6 rounded-md object-cover shrink-0"
+            />
+          ) : (
+            <div className="w-6 h-6 rounded-md bg-accent/20 flex items-center justify-center shrink-0">
+              <span className="text-[10px] font-bold text-accent">
+                {(profile?.display_name || 'U').slice(0, 2).toUpperCase()}
+              </span>
+            </div>
+          )}
+          {!collapsed && (
+            <>
+              <span className="text-sm font-medium flex-1 text-left truncate">
+                {profile?.display_name || 'Mi perfil'}
+              </span>
+              <Settings size={14} className="shrink-0 opacity-50" />
+            </>
+          )}
+        </button>
+
         <button
           type="button"
           title={collapsed ? 'Cerrar sesión' : undefined}

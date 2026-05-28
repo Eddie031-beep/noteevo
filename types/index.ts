@@ -113,6 +113,19 @@ export interface SharedNote {
   created_at: string
 }
 
+export interface UserProfile {
+  id: string
+  display_name: string | null
+  avatar_url: string | null
+  bio: string | null
+  theme: 'dark' | 'light' | 'system'
+  language: string
+  timezone: string
+  email_notifications: boolean
+  created_at: string
+  updated_at: string
+}
+
 export type NotificationType = 'space_invite' | 'task_reminder' | 'note_shared' | 'space_removed'
 
 export interface Notification {

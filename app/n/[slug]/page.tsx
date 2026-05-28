@@ -26,11 +26,10 @@ export default async function PublicNotePage({ params }: PageProps) {
     )
   }
 
-  console.log('notifying owner...')
   try {
     await notifyNoteOwner(result.user_id, result.note_id, result.notes.title)
-  } catch (err) {
-    console.log('notifyNoteOwner threw:', err)
+  } catch {
+    // notification failure is non-critical
   }
 
   const note = result.notes

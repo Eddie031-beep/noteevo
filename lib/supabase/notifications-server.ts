@@ -19,10 +19,9 @@ export async function notifyNoteOwner(
     .limit(1)
     .maybeSingle()
 
-  console.log('notify: existing in last hour?', !!existing)
   if (existing) return
 
-  const { error } = await supabase.from('notifications').insert({
+  await supabase.from('notifications').insert({
     user_id: userId,
     type: 'note_shared',
     title: 'Alguien vio tu nota',
@@ -30,5 +29,4 @@ export async function notifyNoteOwner(
     is_read: false,
     data: { note_id: noteId },
   })
-  console.log('notify error:', error)
 }
