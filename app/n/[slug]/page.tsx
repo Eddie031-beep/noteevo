@@ -1,4 +1,5 @@
 import { getSharedNote } from '@/lib/supabase/shared-notes-server'
+import { notifyNoteOwner } from '@/lib/supabase/notifications-server'
 import NoteViewer from './NoteViewer'
 
 interface PageProps {
@@ -23,6 +24,13 @@ export default async function PublicNotePage({ params }: PageProps) {
         </div>
       </div>
     )
+  }
+
+  console.log('notifying owner...')
+  try {
+    await notifyNoteOwner(result.user_id, result.note_id, result.notes.title)
+  } catch (err) {
+    console.log('notifyNoteOwner threw:', err)
   }
 
   const note = result.notes

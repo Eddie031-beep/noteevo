@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Bell, Users, Clock, Share2, UserMinus, X, CheckCheck } from 'lucide-react'
+import { Bell, Users, Clock, Share2, UserMinus, X, CheckCheck, Trash2 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useNotifications } from '@/hooks/useNotifications'
@@ -19,7 +19,7 @@ interface NotificationBellProps {
 }
 
 export default function NotificationBell({ collapsed }: NotificationBellProps) {
-  const { notifications, unreadCount, markAsRead, markAllRead } = useNotifications()
+  const { notifications, unreadCount, markAsRead, markAllRead, deleteNotification } = useNotifications()
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -36,6 +36,11 @@ export default function NotificationBell({ collapsed }: NotificationBellProps) {
 
   const handleNotificationClick = async (n: Notification) => {
     if (!n.is_read) await markAsRead(n.id)
+  }
+
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation()
+    await deleteNotification(id)
   }
 
   return (
@@ -60,9 +65,9 @@ export default function NotificationBell({ collapsed }: NotificationBellProps) {
       </button>
 
       {open && (
-        <div className="absolute bottom-full left-0 mb-1 w-80 bg-elevated border border-border rounded-xl shadow-2xl z-50 overflow-hidden">
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <div className="absolute bottom-full left-0 mb-1 w-80 bg-elevated border border-border rounded-xl shadow-2xl z-50 flex flex-col" style={{ maxHeight: '420px' }}>
+          {/* Header — fixed */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
             <span className="text-sm font-semibold text-foreground">
               Notificaciones
               {unreadCount > 0 && (
@@ -93,8 +98,8 @@ export default function NotificationBell({ collapsed }: NotificationBellProps) {
             </div>
           </div>
 
-          {/* List */}
-          <div className="overflow-y-auto max-h-[360px]">
+          {/* Scrollable list */}
+          <div className="overflow-y-auto flex-1 min-h-0">
             {notifications.length === 0 ? (
               <div className="py-10 text-center">
                 <Bell size={22} className="mx-auto mb-2 text-subtle" />
@@ -105,7 +110,7 @@ export default function NotificationBell({ collapsed }: NotificationBellProps) {
                 <div
                   key={n.id}
                   onClick={() => handleNotificationClick(n)}
-                  className={`flex items-start gap-3 px-4 py-3 border-b border-border last:border-0 cursor-pointer transition-colors ${
+                  className={`group flex items-start gap-3 px-4 py-3 border-b border-border last:border-0 cursor-pointer transition-colors ${
                     n.is_read
                       ? 'hover:bg-surface'
                       : 'bg-accent/5 hover:bg-accent/10'
@@ -125,9 +130,19 @@ export default function NotificationBell({ collapsed }: NotificationBellProps) {
                       {formatDistanceToNow(new Date(n.created_at), { locale: es, addSuffix: true })}
                     </p>
                   </div>
-                  {!n.is_read && (
-                    <span className="w-2 h-2 rounded-full bg-accent shrink-0 mt-1.5" />
-                  )}
+                  <div className="flex items-center gap-1 shrink-0 ml-1">
+                    {!n.is_read && (
+                      <span className="w-2 h-2 rounded-full bg-accent mt-1" />
+                    )}
+                    <button
+                      type="button"
+                      title="Eliminar notificación"
+                      onClick={(e) => handleDelete(e, n.id)}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-subtle hover:text-danger transition rounded cursor-pointer"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
                 </div>
               ))
             )}

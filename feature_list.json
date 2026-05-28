@@ -38,7 +38,7 @@
     "phase": 10,
     "name": "share-note-public",
     "title": "Compartir nota con link público",
-    "status": "pending",
+    "status": "done",
     "description": "Tabla shared_notes ya creada. Botón 'Compartir' en toolbar del editor. Modal: genera slug único (nanoid), copia link al portapapeles. Opción desactivar/reactivar link o poner fecha de expiración. Página /n/[slug] pública (sin auth), Server Component, TipTap read-only. Incrementar view_count via RPC. lib/supabase/shared-notes.ts: createShareLink, getShareLink, deactivateShareLink. Excluir /n/:path* del middleware.",
     "depends_on": [],
     "db_tables": ["shared_notes"]
@@ -48,7 +48,7 @@
     "phase": 10,
     "name": "notifications",
     "title": "Notificaciones in-app",
-    "status": "pending",
+    "status": "done",
     "description": "Tabla notifications ya creada (REPLICA IDENTITY FULL). Campana en Sidebar con badge de no leídas. Panel dropdown con lista. Tipos: space_invite, task_reminder, note_shared, space_removed. Marcar como leída/todas. Realtime: suscripción a INSERT en notifications. lib/supabase/notifications.ts.",
     "depends_on": [],
     "db_tables": ["notifications"]

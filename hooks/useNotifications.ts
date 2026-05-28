@@ -31,21 +31,22 @@ export function useNotifications() {
 
   useEffect(() => {
     const supabase = createClient()
-
     let channel: ReturnType<typeof supabase.channel> | null = null
+    let cancelled = false
 
-    supabase.auth.getUser().then(({ data, error }) => {
-      if (error || !data.user) return
+    // getSession() reads from local storage — no network round-trip
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (cancelled || !session?.user) return
 
       channel = supabase
-        .channel('notifications-realtime')
+        .channel(`notifications-${session.user.id}`)
         .on(
           'postgres_changes',
           {
             event: 'INSERT',
             schema: 'public',
             table: 'notifications',
-            filter: `user_id=eq.${data.user.id}`,
+            filter: `user_id=eq.${session.user.id}`,
           },
           (payload) => {
             setNotifications((prev) => [payload.new as Notification, ...prev])
@@ -55,6 +56,7 @@ export function useNotifications() {
     })
 
     return () => {
+      cancelled = true
       if (channel) supabase.removeChannel(channel)
     }
   }, [])
