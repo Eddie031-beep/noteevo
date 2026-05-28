@@ -16,6 +16,7 @@ import {
   Plus, X, Search, Tag, CheckSquare, Paperclip,
   Calendar, Users, Sparkles, ChevronDown, ChevronRight, ChevronLeft, Share2, LayoutTemplate, Pencil,
 } from 'lucide-react'
+import NotificationBell from './NotificationBell'
 import { useDroppable } from '@dnd-kit/core'
 import type { Notebook, Space } from '@/types'
 
@@ -650,8 +651,9 @@ export default function Sidebar() {
         />
       </nav>
 
-      {/* ── Logout ── */}
-      <div className="border-t border-border p-2 shrink-0">
+      {/* ── Bottom actions ── */}
+      <div className="border-t border-border p-2 shrink-0 space-y-0.5">
+        <NotificationBell collapsed={collapsed} />
         <button
           type="button"
           title={collapsed ? 'Cerrar sesión' : undefined}

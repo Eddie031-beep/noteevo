@@ -44,5 +44,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
+  // /n/:path* is intentionally excluded — public shared-note pages require no auth
   matcher: ['/dashboard/:path*', '/login', '/register'],
 }

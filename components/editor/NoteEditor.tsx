@@ -41,6 +41,7 @@ import AiChatPanel from './AiChatPanel'
 import AiSmartTags from './AiSmartTags'
 import AiImproveToolbar from './AiImproveToolbar'
 import ExportModal from './ExportModal'
+import ShareControls from './ShareControls'
 import VersionHistoryPanel from './VersionHistoryPanel'
 import SaveAsTemplateModal from '@/components/templates/SaveAsTemplateModal'
 import MoveNoteModal from '@/components/notes/MoveNoteModal'
@@ -169,9 +170,11 @@ export default function NoteEditor() {
     if (syncedNoteIdRef.current === selectedNote.id) return
     syncedNoteIdRef.current = selectedNote.id
     if (titleRef.current) titleRef.current.value = selectedNote.title
-    editor.commands.setContent(
-      Object.keys(selectedNote.content).length > 0 ? selectedNote.content : ''
-    )
+    setTimeout(() => {
+      editor.commands.setContent(
+        Object.keys(selectedNote.content).length > 0 ? selectedNote.content : ''
+      )
+    }, 0)
   }, [selectedNote, editor])
 
   useEffect(() => {
@@ -383,6 +386,11 @@ export default function NoteEditor() {
 
           {/* Spacer */}
           <div className="flex-1" />
+
+          {/* Share controls */}
+          {selectedNote && (
+            <ShareControls noteId={selectedNote.id} noteTitle={selectedNote.title} />
+          )}
 
           {/* Note Actions ⋯ */}
           {selectedNote && (

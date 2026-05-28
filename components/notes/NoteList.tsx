@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useDraggable } from '@dnd-kit/core'
 import { Plus, Star } from 'lucide-react'
 import { useNoteStore } from '@/store/noteStore'
 import { useNotebookStore } from '@/store/notebookStore'
@@ -30,14 +31,22 @@ interface NoteCardProps {
 
 function NoteCard({ note, isSelected, onSelect, index }: NoteCardProps) {
   const preview = extractTextPreview(note.content, 80)
+  const { setNodeRef, listeners, attributes, isDragging } = useDraggable({
+    id: note.id,
+    data: { type: 'note', noteId: note.id, currentNotebookId: note.notebook_id },
+  })
 
   return (
     <button
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
       type="button"
       onClick={onSelect}
       style={{
         animationDelay: `${index * 35}ms`,
         animationFillMode: 'both',
+        opacity: isDragging ? 0.4 : 1,
       }}
       className={[
         'note-card-enter',
@@ -91,7 +100,7 @@ export default function NoteList() {
   }, [selectedNotebook?.id, fetchNotes])
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="w-72 h-screen bg-panel border-r border-border flex flex-col shrink-0">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
         <div className="min-w-0">

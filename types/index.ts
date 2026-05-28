@@ -100,3 +100,28 @@ export interface Template {
   created_at: string
   updated_at: string
 }
+
+export interface SharedNote {
+  id: string
+  note_id: string
+  user_id: string
+  public_slug: string
+  is_active: boolean
+  access_level: 'none' | 'view'
+  view_count: number
+  expires_at: string | null
+  created_at: string
+}
+
+export type NotificationType = 'space_invite' | 'task_reminder' | 'note_shared' | 'space_removed'
+
+export interface Notification {
+  id: string
+  user_id: string
+  type: NotificationType
+  title: string
+  body: string | null
+  data: Record<string, unknown> | null
+  is_read: boolean
+  created_at: string
+}
