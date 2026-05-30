@@ -11,12 +11,13 @@ import { getNotebooks, createNotebook, deleteNotebook, updateNotebook } from '@/
 import { getTags } from '@/lib/supabase/tags'
 import { getPendingTaskCount } from '@/lib/supabase/tasks'
 import { getMySpaces } from '@/lib/supabase/spaces'
-import { getProfile } from '@/lib/supabase/profile'
+import { getProfile, updateProfile } from '@/lib/supabase/profile'
 import { useSpaceStore } from '@/store/spaceStore'
 import {
   Home, FileText, BookOpen, Star, Trash2, LogOut,
   Plus, X, Search, Tag, CheckSquare, Paperclip,
   Calendar, Users, Sparkles, ChevronDown, ChevronRight, ChevronLeft, Share2, LayoutTemplate, Pencil, Settings,
+  Sun, Moon, Monitor,
 } from 'lucide-react'
 import NotificationBell from './NotificationBell'
 import { useDroppable } from '@dnd-kit/core'
@@ -182,7 +183,7 @@ export default function Sidebar() {
     renameNotebook,
     setSelectedNotebook, selectedNotebook,
   } = useNotebookStore()
-  const { currentView, setCurrentView, searchQuery, setSearchQuery } = useUIStore()
+  const { currentView, setCurrentView, searchQuery, setSearchQuery, theme, setTheme } = useUIStore()
   const { setTags } = useTagStore()
   const { spaces, setSpaces, selectedSpace, setSelectedSpace, removeSpace } = useSpaceStore()
   const { profile, setProfile } = useProfileStore()
@@ -281,9 +282,14 @@ export default function Sidebar() {
 
   useEffect(() => {
     getProfile()
-      .then((p) => { if (p) setProfile(p) })
+      .then((p) => {
+        if (p) {
+          setProfile(p)
+          if (p.theme) setTheme(p.theme)
+        }
+      })
       .catch(() => {})
-  }, [setProfile])
+  }, [setProfile, setTheme])
 
   const handleCreate = async () => {
     if (!newName.trim()) return
@@ -306,6 +312,15 @@ export default function Sidebar() {
     e.stopPropagation()
     await deleteNotebook(id)
     removeNotebook(id)
+  }
+
+  const themeIcon = theme === 'light' ? <Sun size={18} /> : theme === 'system' ? <Monitor size={18} /> : <Moon size={18} />
+  const themeLabel = theme === 'light' ? 'Modo claro' : theme === 'system' ? 'Sistema' : 'Modo oscuro'
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : theme === 'light' ? 'system' : 'dark'
+    setTheme(next)
+    updateProfile({ theme: next }).catch(() => {})
   }
 
   const handleLogout = async () => {
@@ -390,7 +405,7 @@ export default function Sidebar() {
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition ${
               currentView === 'search'
                 ? 'bg-accent/10 ring-1 ring-accent/30'
-                : 'bg-surface'
+                : 'bg-surface border border-border'
             }`}
           >
             <Search size={13} className="text-muted shrink-0" />
@@ -672,6 +687,21 @@ export default function Sidebar() {
       {/* ── Bottom actions ── */}
       <div className="border-t border-border p-2 shrink-0 space-y-0.5">
         <NotificationBell collapsed={collapsed} />
+
+        {/* Theme toggle */}
+        <button
+          type="button"
+          title={collapsed ? themeLabel : undefined}
+          onClick={toggleTheme}
+          className={`w-full flex items-center rounded-lg py-2 transition cursor-pointer text-muted hover:bg-surface hover:text-foreground ${
+            collapsed ? 'justify-center px-2' : 'gap-2.5 px-3'
+          }`}
+        >
+          {themeIcon}
+          {!collapsed && (
+            <span className="text-sm font-medium flex-1 text-left truncate">{themeLabel}</span>
+          )}
+        </button>
 
         {/* User / Settings */}
         <button

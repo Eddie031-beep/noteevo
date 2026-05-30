@@ -68,7 +68,7 @@
     "phase": 11,
     "name": "light-mode",
     "title": "Tema claro (light mode)",
-    "status": "pending",
+    "status": "done",
     "description": "Tokens CSS para light mode en globals.css bajo [data-theme='light']. Toggle en Sidebar y Settings. Guardar preferencia en user_profiles.theme. Aplicar data-theme en <html> via uiStore.",
     "depends_on": [30]
   },

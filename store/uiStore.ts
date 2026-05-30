@@ -5,6 +5,8 @@ type View =
   | 'search' | 'tags-view' | 'notebooks-view' | 'tasks' | 'files'
   | 'calendar' | 'spaces' | 'shared' | 'settings' | 'templates'
 
+export type Theme = 'dark' | 'light' | 'system'
+
 interface UIStore {
   currentView: View
   setCurrentView: (view: View) => void
@@ -14,6 +16,8 @@ interface UIStore {
   setFocusMode: (v: boolean) => void
   isCheatsheetOpen: boolean
   setCheatsheetOpen: (v: boolean) => void
+  theme: Theme
+  setTheme: (theme: Theme) => void
 }
 
 export const useUIStore = create<UIStore>((set) => ({
@@ -25,4 +29,6 @@ export const useUIStore = create<UIStore>((set) => ({
   setFocusMode: (v) => set({ isFocusMode: v }),
   isCheatsheetOpen: false,
   setCheatsheetOpen: (v) => set({ isCheatsheetOpen: v }),
+  theme: 'dark',
+  setTheme: (theme) => set({ theme }),
 }))

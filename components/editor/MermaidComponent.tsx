@@ -7,39 +7,55 @@ import {
   GitBranch, GripVertical, MoreHorizontal,
   Trash2, Check, X, ClipboardCopy,
 } from 'lucide-react'
+import { useUIStore } from '@/store/uiStore'
 
 type ViewMode = 'code' | 'split' | 'preview'
 
-let mermaidInstance: typeof import('mermaid').default | null = null
+let mermaidModule: typeof import('mermaid').default | null = null
 let renderCount = 0
 
 async function getMermaid() {
-  if (mermaidInstance) return mermaidInstance
+  if (mermaidModule) return mermaidModule
   const mod = await import('mermaid')
-  mermaidInstance = mod.default
-  mermaidInstance.initialize({
-    startOnLoad: false,
-    theme: 'dark',
-    themeVariables: {
-      background: '#1a1a1a',
-      mainBkg: '#242424',
-      nodeBorder: '#2d2d2d',
-      primaryColor: '#1a7a4a',
-      primaryTextColor: '#e8e8e8',
-      primaryBorderColor: '#1a7a4a',
-      lineColor: '#8a8a8a',
-      secondaryColor: '#242424',
-      tertiaryColor: '#2a2a2a',
-      fontFamily: 'var(--font-geist-sans), sans-serif',
-    },
-  })
-  return mermaidInstance
+  mermaidModule = mod.default
+  mermaidModule.initialize({ startOnLoad: false })
+  return mermaidModule
+}
+
+function getMermaidTheme(isDark: boolean) {
+  return isDark
+    ? {
+        theme: 'dark' as const,
+        themeVariables: {
+          background: '#1a1a1a',
+          mainBkg: '#242424',
+          nodeBorder: '#2d2d2d',
+          primaryColor: '#1a7a4a',
+          primaryTextColor: '#e8e8e8',
+          primaryBorderColor: '#1a7a4a',
+          lineColor: '#8a8a8a',
+          secondaryColor: '#242424',
+          tertiaryColor: '#2a2a2a',
+          fontFamily: 'var(--font-geist-sans), sans-serif',
+        },
+      }
+    : {
+        theme: 'default' as const,
+        themeVariables: {
+          primaryColor: '#1a7a4a',
+          primaryTextColor: '#1a1a1a',
+          primaryBorderColor: '#1a7a4a',
+          lineColor: '#6b6b6b',
+          fontFamily: 'var(--font-geist-sans), sans-serif',
+        },
+      }
 }
 
 export default function MermaidComponent({
   node, updateAttributes, deleteNode, selected,
 }: NodeViewProps) {
   const code = (node.attrs.code as string) ?? ''
+  const { theme } = useUIStore()
 
   const [mode, setMode] = useState<ViewMode>('preview')
   const [draftCode, setDraftCode] = useState(code)
@@ -57,6 +73,8 @@ export default function MermaidComponent({
     setError(null)
     try {
       const m = await getMermaid()
+      const isDark = document.documentElement.getAttribute('data-theme') !== 'light'
+      m.initialize({ startOnLoad: false, ...getMermaidTheme(isDark) })
       const id = `mermaid-${++renderCount}`
       const result = await m.render(id, source)
       const svgContent = typeof result === 'object' ? result.svg : result
@@ -70,7 +88,7 @@ export default function MermaidComponent({
 
   useEffect(() => {
     renderDiagram(code)
-  }, [code, renderDiagram])
+  }, [code, theme, renderDiagram])
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {

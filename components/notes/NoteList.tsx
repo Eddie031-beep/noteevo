@@ -55,8 +55,8 @@ function NoteCard({ note, isSelected, onSelect, index }: NoteCardProps) {
         'transition-all duration-200 ease-out cursor-pointer group',
         'border-l-2',
         isSelected
-          ? 'bg-white/5 border-l-accent'
-          : 'border-l-transparent hover:bg-white/[0.03] hover:border-l-accent/30',
+          ? 'bg-foreground/5 border-l-accent'
+          : 'border-l-transparent hover:bg-foreground/[0.03] hover:border-l-accent/30',
       ].join(' ')}
     >
       {/* Title */}

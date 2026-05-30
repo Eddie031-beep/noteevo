@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { User, Settings, Bell, ArrowLeft, Camera, Check, Loader2 } from 'lucide-react'
 import { getProfile, updateProfile, uploadAvatar } from '@/lib/supabase/profile'
 import { useProfileStore } from '@/store/profileStore'
+import { useUIStore } from '@/store/uiStore'
 import type { UserProfile } from '@/types'
 
 type Tab = 'perfil' | 'preferencias' | 'notificaciones'
@@ -57,6 +58,7 @@ function SaveButton({
 export default function SettingsPage() {
   const router = useRouter()
   const { setProfile: setStoreProfile } = useProfileStore()
+  const { setTheme: setStoreTheme } = useUIStore()
 
   const [activeTab, setActiveTab] = useState<Tab>('perfil')
   const [profile, setLocalProfile] = useState<UserProfile | null>(null)
@@ -89,6 +91,7 @@ export default function SettingsPage() {
         setDisplayName(p.display_name ?? '')
         setBio(p.bio ?? '')
         setTheme(p.theme ?? 'dark')
+        setStoreTheme(p.theme ?? 'dark')
         setLanguage(p.language ?? 'es')
         setTimezone(p.timezone ?? 'America/Panama')
         setEmailNotifications(p.email_notifications ?? true)
@@ -140,6 +143,7 @@ export default function SettingsPage() {
       const updated = await updateProfile({ theme, language, timezone })
       setLocalProfile(updated)
       setStoreProfile(updated)
+      setStoreTheme(theme)
       showSaved('preferencias')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar las preferencias')
