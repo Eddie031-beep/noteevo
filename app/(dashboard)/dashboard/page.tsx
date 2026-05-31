@@ -11,6 +11,7 @@ import FavoriteNotes from '@/components/notes/FavoriteNotes'
 import TrashNotes from '@/components/notes/TrashNotes'
 import SearchResults from '@/components/notes/SearchResults'
 import AdvancedSearchPanel from '@/components/notes/AdvancedSearchPanel'
+import DashboardStats from '@/components/dashboard/DashboardStats'
 import TaskList from '@/components/tasks/TaskList'
 import FilesView from '@/components/files/FilesView'
 import CalendarView from '@/components/calendar/CalendarView'
@@ -39,28 +40,15 @@ function HomePanel() {
 
   return (
     <div className="flex-1 overflow-y-auto bg-background">
-      <div className="max-w-2xl mx-auto px-10 py-12 flex flex-col gap-8">
+      <div className="max-w-5xl mx-auto px-10 py-12 flex flex-col gap-8">
         {/* Greeting */}
         <div>
           <h1 className="text-3xl font-semibold text-foreground">{greeting}</h1>
           <p className="text-muted text-sm mt-1">Tu espacio para pensar y crear</p>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: 'Libretas', value: notebooks.length, icon: <BookOpen size={18} /> },
-          ].map(({ label, value, icon }) => (
-            <div
-              key={label}
-              className="bg-panel border border-border rounded-xl p-4 flex flex-col gap-2"
-            >
-              <span className="text-muted">{icon}</span>
-              <p className="text-2xl font-bold text-foreground">{value}</p>
-              <p className="text-xs text-muted">{label}</p>
-            </div>
-          ))}
-        </div>
+        {/* Stats + charts */}
+        <DashboardStats />
 
         {/* Notebooks grid */}
         {notebooks.length > 0 && (

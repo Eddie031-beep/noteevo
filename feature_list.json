@@ -86,8 +86,8 @@
     "phase": 12,
     "name": "dashboard-stats",
     "title": "Dashboard con estadísticas",
-    "status": "pending",
-    "description": "RPC get_user_stats() ya creada. HomePanel mejorado: grid de stats, gráfico de actividad 7 días (recharts), tags más usados, notebooks más grandes.",
+    "status": "done",
+    "description": "RPC get_user_stats() + nueva RPC get_dashboard_extras() (activity_7d, top_tags, top_notebooks). HomePanel mejorado: grid de 7 stats, gráfico de área de actividad 7 días (recharts), etiquetas más usadas y libretas más grandes con barras. lib/supabase/stats.ts, components/dashboard/DashboardStats.tsx.",
     "depends_on": []
   },
   {
