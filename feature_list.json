@@ -104,8 +104,8 @@
     "phase": 13,
     "name": "task-reminders",
     "title": "Recordatorios de tareas via email",
-    "status": "pending",
-    "description": "Edge Function 'send-reminders' cron cada hora. Envía email via Resend API. Columna reminder_sent boolean en tasks. supabase/functions/send-reminders/index.ts.",
+    "status": "done",
+    "description": "Edge Function 'send-reminders' desplegada (ACTIVE). Columna reminder_sent en tasks + índice parcial. RPC get_due_task_reminders() (security definer, solo service_role) devuelve tareas vencidas con email respetando email_notifications. Envío vía Resend API. PENDIENTE manual del owner: supabase secrets set RESEND_API_KEY + cron horario (ver supabase/functions/send-reminders/README.md).",
     "depends_on": [],
     "db_tables": ["tasks (columna reminder_sent)"]
   },
