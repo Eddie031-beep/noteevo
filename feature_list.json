@@ -113,9 +113,9 @@
     "id": 36,
     "phase": 14,
     "name": "tests-unit",
-    "title": "Tests unitarios — utils y lib/supabase",
-    "status": "pending",
-    "description": "Instalar Vitest + @testing-library/react. Tests para: lib/utils/tiptap.ts, store/noteStore.ts, store/taskStore.ts, TaskItem, NoteCard. Cobertura >70%.",
+    "title": "Tests unitarios — utils y stores",
+    "status": "done",
+    "description": "Vitest + jsdom + @testing-library configurados (vitest.config.ts, vitest.setup.ts). 20 tests en tests/: tiptap.test.ts (extractTextPreview), noteStore.test.ts, taskStore.test.ts. Cobertura global 81.5% (>70%). Scripts npm: test, test:watch, test:coverage. Nota: TaskItem/NoteCard no existen como archivos (UI inline en TaskList/NoteList), por eso se testearon los módulos puros.",
     "depends_on": []
   },
   {
