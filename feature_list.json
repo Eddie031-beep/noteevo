@@ -95,8 +95,8 @@
     "phase": 13,
     "name": "onboarding",
     "title": "Onboarding para nuevos usuarios",
-    "status": "pending",
-    "description": "Al primer login: modal multi-paso (nombre → primer notebook → primera nota desde template). Flag onboarding_completed en user_profiles.",
+    "status": "done",
+    "description": "Modal multi-paso (bienvenida+nombre → primera libreta → primera nota) en components/onboarding/OnboardingModal.tsx, montado en (dashboard)/layout. Columna onboarding_completed en user_profiles (default false; backfill=true para usuarios con libretas). Se muestra al primer login si onboarding_completed=false; botón Omitir. updateProfile (upsert) persiste el flag.",
     "depends_on": [30]
   },
   {

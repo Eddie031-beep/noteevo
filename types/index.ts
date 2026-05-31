@@ -122,6 +122,7 @@ export interface UserProfile {
   language: string
   timezone: string
   email_notifications: boolean
+  onboarding_completed: boolean
   created_at: string
   updated_at: string
 }

@@ -12,6 +12,7 @@ import {
 import { useState } from 'react'
 import Sidebar from '@/components/sidebar/Sidebar'
 import KeyboardShortcutsCheatsheet from '@/components/KeyboardShortcutsCheatsheet'
+import OnboardingModal from '@/components/onboarding/OnboardingModal'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useUIStore } from '@/store/uiStore'
 import { useNoteStore } from '@/store/noteStore'
@@ -68,6 +69,7 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
           {children}
         </main>
         <KeyboardShortcutsCheatsheet />
+        <OnboardingModal />
       </div>
 
       <DragOverlay>
