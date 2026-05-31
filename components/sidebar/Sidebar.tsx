@@ -17,13 +17,13 @@ import {
   Home, FileText, BookOpen, Star, Trash2, LogOut,
   Plus, X, Search, Tag, CheckSquare, Paperclip,
   Calendar, Users, Sparkles, ChevronDown, ChevronRight, ChevronLeft, Share2, LayoutTemplate, Pencil, Settings,
-  Sun, Moon, Monitor,
+  Sun, Moon, Monitor, SlidersHorizontal,
 } from 'lucide-react'
 import NotificationBell from './NotificationBell'
 import { useDroppable } from '@dnd-kit/core'
 import type { Notebook, Space } from '@/types'
 
-type View = 'home' | 'notebooks' | 'all-notes' | 'favorites' | 'trash' | 'search' | 'tags-view' | 'notebooks-view' | 'tasks' | 'files' | 'calendar' | 'spaces' | 'shared' | 'settings' | 'templates'
+type View = 'home' | 'notebooks' | 'all-notes' | 'favorites' | 'trash' | 'search' | 'advanced-search' | 'tags-view' | 'notebooks-view' | 'tasks' | 'files' | 'calendar' | 'spaces' | 'shared' | 'settings' | 'templates'
 
 interface NavItemProps {
   icon: React.ReactNode
@@ -470,6 +470,13 @@ export default function Sidebar() {
           label="Favoritos"
           active={currentView === 'favorites'}
           onClick={() => handleNav('favorites')}
+          collapsed={collapsed}
+        />
+        <NavItem
+          icon={<SlidersHorizontal size={18} />}
+          label="Búsqueda avanzada"
+          active={currentView === 'advanced-search'}
+          onClick={() => handleNav('advanced-search')}
           collapsed={collapsed}
         />
 

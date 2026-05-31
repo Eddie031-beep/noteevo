@@ -23,10 +23,15 @@ export async function updateProfile(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('No autenticado')
 
+  // Usar upsert en lugar de update: si la fila de perfil no existe (p. ej.
+  // usuarios creados antes del trigger on_auth_user_created), la crea en vez
+  // de fallar con 406. Las políticas RLS de INSERT y UPDATE ya lo permiten.
   const { data, error } = await supabase
     .from('user_profiles')
-    .update({ ...updates, updated_at: new Date().toISOString() })
-    .eq('id', user.id)
+    .upsert(
+      { id: user.id, ...updates, updated_at: new Date().toISOString() },
+      { onConflict: 'id' }
+    )
     .select()
     .single()
 

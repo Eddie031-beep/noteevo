@@ -77,7 +77,7 @@
     "phase": 12,
     "name": "advanced-search",
     "title": "Búsqueda avanzada con filtros",
-    "status": "pending",
+    "status": "done",
     "description": "RPC search_notes_advanced() ya creada. Panel de filtros: notebook, tag (multi-select), rango de fechas, solo favoritos. Resultados con snippet resaltado. lib/supabase/search.ts: añadir searchNotesAdvanced().",
     "depends_on": []
   },

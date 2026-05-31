@@ -42,3 +42,6 @@ next-env.d.ts
 
 # claude code local settings
 .claude/
+
+# e2e test artifacts (screenshots, reports)
+/e2e-out/

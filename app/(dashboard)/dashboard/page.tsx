@@ -10,6 +10,7 @@ import NoteEditor from '@/components/editor/NoteEditor'
 import FavoriteNotes from '@/components/notes/FavoriteNotes'
 import TrashNotes from '@/components/notes/TrashNotes'
 import SearchResults from '@/components/notes/SearchResults'
+import AdvancedSearchPanel from '@/components/notes/AdvancedSearchPanel'
 import TaskList from '@/components/tasks/TaskList'
 import FilesView from '@/components/files/FilesView'
 import CalendarView from '@/components/calendar/CalendarView'
@@ -256,6 +257,7 @@ export default function DashboardPage() {
   const showFavorites = currentView === 'favorites'
   const showTrash = currentView === 'trash'
   const showSearch = currentView === 'search'
+  const showAdvancedSearch = currentView === 'advanced-search'
   const showTags = currentView === 'tags-view'
   const showTasks = currentView === 'tasks'
   const showFiles = currentView === 'files'
@@ -264,7 +266,7 @@ export default function DashboardPage() {
   const showShared = currentView === 'shared'
   const showTemplates = currentView === 'templates'
 
-  const showEditor = !showHome && !showTags && !showTasks && !showFiles && !showCalendar && !showSpaces && !showShared && !showTemplates
+  const showEditor = !showHome && !showAdvancedSearch && !showTags && !showTasks && !showFiles && !showCalendar && !showSpaces && !showShared && !showTemplates
 
   return (
     <div className="flex h-full bg-background">
@@ -276,6 +278,7 @@ export default function DashboardPage() {
           {showFavorites && <FavoriteNotes />}
           {showTrash && <TrashNotes />}
           {showSearch && <SearchResults />}
+          {showAdvancedSearch && <AdvancedSearchPanel />}
           {showTags && <TagsPanel />}
           {showTasks && <TaskList />}
           {showFiles && <FilesView />}
