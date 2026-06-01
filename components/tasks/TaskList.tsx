@@ -183,6 +183,7 @@ export default function TaskList() {
           </button>
           <button
             type="button"
+            data-testid="new-task-btn"
             onClick={() => setShowModal(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-accent text-white text-xs font-medium rounded-lg hover:bg-accent-light transition cursor-pointer"
           >

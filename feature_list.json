@@ -123,8 +123,8 @@
     "phase": 14,
     "name": "tests-e2e",
     "title": "Tests E2E — flujos críticos",
-    "status": "pending",
-    "description": "Playwright. Tests: login/logout, crear notebook + nota, añadir tag, crear task, subir archivo, búsqueda. playwright.config.ts. .env.test.",
+    "status": "done",
+    "description": "Playwright (@playwright/test 1.60). playwright.config.ts con webServer (npm run dev), proyectos setup→chromium→cleanup, storageState compartido. .env.test (gitignored) con cuenta de prueba. 7 specs en e2e/: auth (login + credenciales inválidas), zz-logout (corre al final porque signOut revoca sesión global), notebooks-notes, tags, files (upload vía attachment-input), search, tasks. Helpers: actions.ts (createNotebook/createNote), supabase-admin.ts (cleanup por prefijo 'E2E-' + storage), env.ts (loader .env sin deps), constants.ts (PREFIX). data-testid añadidos a los componentes. Datos creados con prefijo único 'E2E-' y borrados en teardown. Scripts npm: test:e2e, test:e2e:headed, test:e2e:ui, test:e2e:report. Resultado: 10/10 tests en verde. Cuenta de prueba: drakepoll35@gmail.com.",
     "depends_on": [36]
   }
 ]

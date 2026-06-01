@@ -91,6 +91,7 @@ export default function LoginPage() {
 
           <button
             type="button"
+            data-testid="login-submit"
             onClick={handleLogin}
             disabled={loading}
             className="w-full py-2.5 bg-accent text-white text-sm font-medium rounded-lg hover:bg-accent-light disabled:opacity-50 transition cursor-pointer"

@@ -219,6 +219,7 @@ export default function AttachmentPanel({ noteId }: { noteId: string }) {
       <input
         ref={inputRef}
         id={`attach-input-${noteId}`}
+        data-testid="attachment-input"
         type="file"
         title="Seleccionar archivos"
         multiple

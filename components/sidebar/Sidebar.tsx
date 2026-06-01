@@ -411,6 +411,7 @@ export default function Sidebar() {
             <Search size={13} className="text-muted shrink-0" />
             <input
               type="text"
+              data-testid="sidebar-search"
               placeholder="Buscar notas..."
               value={searchQuery}
               onChange={handleSearchChange}
@@ -499,6 +500,7 @@ export default function Sidebar() {
               <button
                 type="button"
                 title="Nueva libreta"
+                data-testid="new-notebook-btn"
                 onClick={() => setShowInput(!showInput)}
                 className="p-0.5 text-muted hover:text-accent transition cursor-pointer rounded"
               >
@@ -510,6 +512,7 @@ export default function Sidebar() {
               <div className="flex gap-1 px-2 pb-1">
                 <input
                   type="text"
+                  data-testid="notebook-name-input"
                   placeholder="Nombre..."
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
@@ -520,6 +523,7 @@ export default function Sidebar() {
                 />
                 <button
                   type="button"
+                  data-testid="notebook-create-submit"
                   onClick={handleCreate}
                   disabled={creating}
                   className="px-2 py-1 bg-accent text-white text-xs rounded-md hover:bg-accent-light disabled:opacity-50 cursor-pointer transition"
@@ -747,6 +751,7 @@ export default function Sidebar() {
         <button
           type="button"
           title={collapsed ? 'Cerrar sesión' : undefined}
+          data-testid="logout-btn"
           onClick={handleLogout}
           className={`w-full flex items-center gap-2.5 rounded-lg py-2 text-sm text-muted hover:bg-danger/10 hover:text-danger transition cursor-pointer ${
             collapsed ? 'justify-center px-2' : 'px-3'

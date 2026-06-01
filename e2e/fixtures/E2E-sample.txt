@@ -1,0 +1,2 @@
+Archivo de prueba para el test E2E de subida de adjuntos de NoteEvo.
+Si ves esto en la cuenta de prueba, el teardown no lo limpió.

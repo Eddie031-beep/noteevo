@@ -134,6 +134,7 @@ export default function TagInput({ noteId }: Props) {
       {!open ? (
         <button
           type="button"
+          data-testid="tag-open-btn"
           onClick={() => {
             setOpen(true)
             setTimeout(() => inputRef.current?.focus(), 0)
@@ -148,6 +149,7 @@ export default function TagInput({ noteId }: Props) {
           <input
             ref={inputRef}
             type="text"
+            data-testid="tag-input"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}

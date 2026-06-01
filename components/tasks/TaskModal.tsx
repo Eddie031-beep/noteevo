@@ -78,6 +78,7 @@ export default function TaskModal({ onClose, onSave, initialDate }: Props) {
           <input
             ref={titleRef}
             type="text"
+            data-testid="task-title-input"
             placeholder="Título de la tarea"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -171,6 +172,7 @@ export default function TaskModal({ onClose, onSave, initialDate }: Props) {
           </button>
           <button
             type="button"
+            data-testid="task-submit"
             onClick={handleSave}
             disabled={!title.trim() || saving}
             className="px-4 py-2 text-sm bg-accent text-white rounded-lg hover:bg-accent-light disabled:opacity-40 transition cursor-pointer font-medium"

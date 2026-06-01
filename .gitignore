@@ -45,3 +45,5 @@ next-env.d.ts
 
 # e2e test artifacts (screenshots, reports)
 /e2e-out/
+# e2e stored auth session (cookies/localStorage de la cuenta de prueba)
+/e2e/.auth/

@@ -42,6 +42,7 @@ function NoteCard({ note, isSelected, onSelect, index }: NoteCardProps) {
       {...listeners}
       {...attributes}
       type="button"
+      data-testid="note-card"
       onClick={onSelect}
       style={{
         animationDelay: `${index * 35}ms`,
@@ -116,6 +117,7 @@ export default function NoteList() {
           <button
             type="button"
             title="Nueva nota"
+            data-testid="new-note-btn"
             onClick={() => createNote(selectedNotebook.id)}
             className="p-1.5 rounded-lg hover:bg-surface text-muted hover:text-foreground transition-all duration-150 active:scale-90 shrink-0 cursor-pointer"
           >

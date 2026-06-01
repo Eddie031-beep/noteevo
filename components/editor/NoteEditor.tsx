@@ -423,6 +423,7 @@ export default function NoteEditor() {
           <input
             ref={titleRef}
             type="text"
+            data-testid="note-title-input"
             defaultValue={selectedNote.title}
             onChange={isReadOnly ? undefined : handleTitleChange}
             readOnly={isReadOnly}
