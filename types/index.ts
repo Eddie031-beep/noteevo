@@ -45,6 +45,8 @@ export interface Task {
   is_completed: boolean
   completed_at: string | null
   created_at: string
+  reminder_7days_sent: boolean
+  reminder_1day_sent: boolean
 }
 
 export interface Attachment {

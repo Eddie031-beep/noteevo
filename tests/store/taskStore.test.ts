@@ -16,6 +16,8 @@ function makeTask(overrides: Partial<Task> = {}): Task {
     is_completed: false,
     completed_at: null,
     created_at: '2026-01-01T00:00:00Z',
+    reminder_7days_sent: false,
+    reminder_1day_sent: false,
     ...overrides,
   } as Task
 }
