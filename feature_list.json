@@ -126,5 +126,23 @@
     "status": "done",
     "description": "Playwright (@playwright/test 1.60). playwright.config.ts con webServer (npm run dev), proyectos setup→chromium→cleanup, storageState compartido. .env.test (gitignored) con cuenta de prueba. 7 specs en e2e/: auth (login + credenciales inválidas), zz-logout (corre al final porque signOut revoca sesión global), notebooks-notes, tags, files (upload vía attachment-input), search, tasks. Helpers: actions.ts (createNotebook/createNote), supabase-admin.ts (cleanup por prefijo 'E2E-' + storage), env.ts (loader .env sin deps), constants.ts (PREFIX). data-testid añadidos a los componentes. Datos creados con prefijo único 'E2E-' y borrados en teardown. Scripts npm: test:e2e, test:e2e:headed, test:e2e:ui, test:e2e:report. Resultado: 10/10 tests en verde. Cuenta de prueba: drakepoll35@gmail.com.",
     "depends_on": [36]
+  },
+  {
+    "id": 38,
+    "phase": 15,
+    "name": "recordatorios-duales",
+    "title": "Recordatorios duales de tareas por due_date",
+    "status": "done",
+    "description": "Reemplaza el recordatorio único basado en reminder_at por dos avisos independientes calculados desde due_date: 7 días antes y 1 día antes. La Edge Function send-reminders usa el RPC get_due_date_reminders y evalúa cada aviso por separado, marcando reminder_7days_sent / reminder_1day_sent solo cuando su email se envía con éxito. Asunto y plantilla HTML por tipo de aviso. Nuevas columnas reminder_7days_sent y reminder_1day_sent en tasks (la columna reminder_sent se mantiene por compatibilidad pero queda fuera del flujo). types/index.ts y tests/store/taskStore.test.ts actualizados. README de la function actualizado.",
+    "depends_on": [35]
+  },
+  {
+    "id": 39,
+    "phase": 15,
+    "name": "urgencia-calendario",
+    "title": "Indicadores de urgencia en el calendario",
+    "status": "done",
+    "description": "CalendarView resalta tareas según su due_date respecto a hoy: 'overdue' (vence hoy o ya venció) en rojo y 'soon' (próximos 7 días) en amarillo. Aplica a pills de tarea, dots por día y borde lateral del día en las vistas mes/semana, más etiquetas 'Vence hoy/vencida' y 'Vence pronto' en la vista de día. La urgencia por vencimiento tiene prioridad visual sobre el color por prioridad; las tareas completadas no se resaltan.",
+    "depends_on": [15]
   }
 ]
