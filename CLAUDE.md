@@ -31,10 +31,11 @@ Repo: `Eddie031-beep/noteevo`
 
 ---
 
-## Estado actual del proyecto — Phases 1–9 (parcial) COMPLETAS ✅
+## Estado actual del proyecto — Phases 1–14 COMPLETAS ✅ (roadmap 100%)
 
-Todas las features de las fases 1 a 9 (id 1–26) están implementadas con build verde.
-Feature id:27 (drag & drop) está **pendiente**.
+Las 37 features del roadmap (id 1–37, fases 1 a 14) están implementadas con
+build verde. No queda ninguna feature pendiente del roadmap formal — cualquier
+trabajo nuevo se registra como Phase 15+ en `feature_list.json`.
 
 **Resumen de lo que existe:**
 - Auth completo (login, registro, middleware)
@@ -52,6 +53,16 @@ Feature id:27 (drag & drop) está **pendiente**.
 - Exportar nota: Markdown y PDF (window.print)
 - Historial de versiones (tabla `note_versions`, panel lateral)
 - Templates: selector al crear nota, vista gallery, guardar como plantilla
+- Drag & drop de notas entre notebooks (`@dnd-kit/core`)
+- Compartir nota con link público (`/n/[slug]`, tabla `shared_notes`)
+- Notificaciones in-app (tabla `notifications`, Realtime)
+- Perfil de usuario (tabla `user_profiles`, `/settings`)
+- Tema claro / light mode
+- Búsqueda avanzada con filtros (RPC `search_notes_advanced`)
+- Dashboard con estadísticas (RPC `get_user_stats`, recharts)
+- Onboarding multi-paso para nuevos usuarios
+- Recordatorios de tareas por email (Supabase Edge Function + Resend)
+- Tests unitarios (Vitest) y E2E (Playwright)
 
 ### Mejoras de editor aplicadas (fuera del roadmap formal)
 
@@ -91,30 +102,26 @@ Feature id:27 (drag & drop) está **pendiente**.
 
 ---
 
-## Phases 10–14 — PENDIENTES (roadmap)
+## Roadmap — COMPLETO ✅ (37/37 features)
 
-### Phase 9 — Productividad
-- **27** — Drag & drop de notas entre notebooks (`@dnd-kit/core`, instalar) **PENDIENTE**
+Todas las fases del roadmap están cerradas (`status: "done"` en `feature_list.json`):
 
-### Phase 10 — Compartir (id: 28–29)
-- **28** — Nota pública con link (tabla `shared_notes` ya en DB)
-- **29** — Notificaciones in-app (tabla `notifications` ya en DB, Realtime)
+| Phase | Features | Estado |
+|---|---|---|
+| 9 — Productividad | 26 Templates · 27 Drag & drop | ✅ |
+| 10 — Compartir | 28 Link público · 29 Notificaciones in-app | ✅ |
+| 11 — Perfil y tema | 30 Perfil · 31 Tema claro | ✅ |
+| 12 — Búsqueda y stats | 32 Búsqueda avanzada · 33 Dashboard | ✅ |
+| 13 — Onboarding y recordatorios | 34 Onboarding · 35 Recordatorios email | ✅ |
+| 14 — Tests | 36 Unitarios (Vitest) · 37 E2E (Playwright) | ✅ |
 
-### Phase 11 — Perfil y tema (id: 30–31)
-- **30** — Perfil de usuario (tabla `user_profiles` ya en DB con trigger)
-- **31** — Tema claro (light mode)
+### Mejoras fuera del roadmap (sin id en `feature_list.json`)
+- **Recordatorios duales por `due_date`** — avisos independientes de 7 días y 1 día
+  (RPC `get_due_date_reminders`, flags `reminder_7days_sent` / `reminder_1day_sent`)
+- **Indicadores de urgencia en el calendario** — pills/dots rojo (vencida) y amarillo (próxima)
 
-### Phase 12 — Búsqueda y stats (id: 32–33)
-- **32** — Búsqueda avanzada con filtros (RPC `search_notes_advanced` ya en DB)
-- **33** — Dashboard con estadísticas (RPC `get_user_stats` ya en DB, recharts)
-
-### Phase 13 — Onboarding y recordatorios (id: 34–35)
-- **34** — Onboarding multi-paso
-- **35** — Recordatorios de tasks via email (Supabase Edge Function + Resend)
-
-### Phase 14 — Tests (id: 36–37)
-- **36** — Tests unitarios (Vitest)
-- **37** — Tests E2E (Playwright)
+> Cualquier trabajo nuevo a partir de aquí se registra como **Phase 15+** en
+> `feature_list.json` (entrada `pending` → `done` al cerrar con build verde).
 
 ---
 
@@ -129,6 +136,7 @@ notes        (id, user_id, notebook_id, title, content jsonb, is_favorite, is_tr
 tags         (id, user_id, name, created_at)
 note_tags    (note_id, tag_id)
 tasks        (id, user_id, note_id, title, description, due_date, reminder_at,
+              reminder_7days_sent, reminder_1day_sent,
               priority, is_flagged, is_completed, completed_at, created_at)
 attachments  (id, user_id, note_id, file_name, file_type, file_size,
               storage_path, created_at)
