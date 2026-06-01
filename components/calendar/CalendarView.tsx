@@ -29,6 +29,54 @@ const PRIORITY_DOT: Record<Task['priority'], string> = {
 
 const DAY_LABELS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 
+const MS_PER_DAY = 24 * 60 * 60 * 1000
+
+// Urgencia de una tarea según su due_date respecto a hoy:
+//   'overdue' → vence hoy o ya venció (rojo)
+//   'soon'    → vence dentro de los próximos 7 días (amarillo)
+//   'none'    → sin due_date, completada o lejana
+type DueUrgency = 'overdue' | 'soon' | 'none'
+
+function dueUrgency(task: Task, today: Date): DueUrgency {
+  if (!task.due_date || task.is_completed) return 'none'
+  const [year, month, dayNum] = task.due_date.split('T')[0].split('-').map(Number)
+  const due = new Date(year, month - 1, dayNum)
+  const startToday = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  const diffDays = Math.round((due.getTime() - startToday.getTime()) / MS_PER_DAY)
+  if (diffDays <= 0) return 'overdue'
+  if (diffDays <= 7) return 'soon'
+  return 'none'
+}
+
+const URGENCY_PILL: Record<Exclude<DueUrgency, 'none'>, string> = {
+  overdue: 'bg-red-500/20 text-red-300 ring-1 ring-red-500/60',
+  soon: 'bg-yellow-500/15 text-yellow-300 ring-1 ring-yellow-500/50',
+}
+
+const URGENCY_DOT: Record<Exclude<DueUrgency, 'none'>, string> = {
+  overdue: 'bg-red-400',
+  soon: 'bg-yellow-400',
+}
+
+// Clase de la "pastilla" de tarea: la urgencia por vencimiento tiene
+// prioridad visual sobre el color por prioridad.
+function pillClass(task: Task, today: Date): string {
+  const urgency = dueUrgency(task, today)
+  if (urgency !== 'none') return URGENCY_PILL[urgency]
+  return PRIORITY_PILL[task.priority]
+}
+
+// Urgencia máxima de un conjunto de tareas (para el indicador del día).
+function dayUrgency(tasks: Task[], today: Date): DueUrgency {
+  let result: DueUrgency = 'none'
+  for (const t of tasks) {
+    const u = dueUrgency(t, today)
+    if (u === 'overdue') return 'overdue'
+    if (u === 'soon') result = 'soon'
+  }
+  return result
+}
+
 function buildMonthGrid(date: Date): Date[][] {
   const start = startOfWeek(startOfMonth(date), { weekStartsOn: 1 })
   const end = endOfWeek(endOfMonth(date), { weekStartsOn: 1 })
@@ -169,6 +217,7 @@ function MonthView({ current, tasks, onDayClick }: {
   current: Date; tasks: Task[]; onDayClick: (d: Date) => void
 }) {
   const weeks = buildMonthGrid(current)
+  const today = new Date()
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Day labels */}
@@ -186,15 +235,26 @@ function MonthView({ current, tasks, onDayClick }: {
             {week.map((day, di) => {
               const dayTasks = tasksForDay(tasks, day)
               const inMonth = isSameMonth(day, current)
-              const today = isToday(day)
+              const isCurrentDay = isToday(day)
+              const urgency = dayUrgency(dayTasks, today)
               return (
                 <div key={di} onClick={() => onDayClick(day)}
-                  className={`p-2 cursor-pointer hover:bg-surface transition group ${!inMonth ? 'opacity-30' : ''}`}>
+                  className={`p-2 cursor-pointer hover:bg-surface transition group ${!inMonth ? 'opacity-30' : ''} ${
+                    urgency === 'overdue' ? 'border-l-2 border-red-500'
+                      : urgency === 'soon' ? 'border-l-2 border-yellow-500'
+                      : ''
+                  }`}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className={`text-xs font-semibold w-5 h-5 flex items-center justify-center rounded-full ${
-                      today ? 'bg-accent text-white' : 'text-foreground'
-                    }`}>
-                      {format(day, 'd')}
+                    <span className="flex items-center gap-1">
+                      <span className={`text-xs font-semibold w-5 h-5 flex items-center justify-center rounded-full ${
+                        isCurrentDay ? 'bg-accent text-white' : 'text-foreground'
+                      }`}>
+                        {format(day, 'd')}
+                      </span>
+                      {urgency !== 'none' && (
+                        <span title={urgency === 'overdue' ? 'Tareas vencidas o que vencen hoy' : 'Tareas que vencen pronto'}
+                          className={`w-1.5 h-1.5 rounded-full ${URGENCY_DOT[urgency]}`} />
+                      )}
                     </span>
                     <button type="button" title="Crear tarea"
                       onClick={(e) => { e.stopPropagation(); onDayClick(day) }}
@@ -205,7 +265,7 @@ function MonthView({ current, tasks, onDayClick }: {
                   <div className="space-y-0.5">
                     {dayTasks.slice(0, 2).map((t) => (
                       <div key={t.id} title={t.title}
-                        className={`text-[10px] px-1.5 py-0.5 rounded truncate ${PRIORITY_PILL[t.priority]} ${t.is_completed ? 'opacity-40 line-through' : ''}`}>
+                        className={`text-[10px] px-1.5 py-0.5 rounded truncate ${pillClass(t, today)} ${t.is_completed ? 'opacity-40 line-through' : ''}`}>
                         {t.title}
                       </div>
                     ))}
@@ -228,19 +288,27 @@ function WeekView({ current, tasks, onDayClick }: {
   current: Date; tasks: Task[]; onDayClick: (d: Date) => void
 }) {
   const days = buildWeekDays(current)
+  const today = new Date()
   return (
     <div className="flex-1 overflow-y-auto flex flex-col">
       {/* Day headers */}
       <div className="grid grid-cols-7 border-b border-border shrink-0 divide-x divide-border">
         {days.map((day, i) => {
-          const today = isToday(day)
+          const isCurrentDay = isToday(day)
+          const urgency = dayUrgency(tasksForDay(tasks, day), today)
           return (
             <div key={i} className="py-3 text-center">
               <p className="text-[11px] text-muted uppercase tracking-wider">{DAY_LABELS[i]}</p>
-              <span className={`mt-1 inline-flex items-center justify-center w-7 h-7 rounded-full text-sm font-semibold ${
-                today ? 'bg-accent text-white' : 'text-foreground'
-              }`}>
-                {format(day, 'd')}
+              <span className="mt-1 inline-flex items-center gap-1">
+                <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-sm font-semibold ${
+                  isCurrentDay ? 'bg-accent text-white' : 'text-foreground'
+                }`}>
+                  {format(day, 'd')}
+                </span>
+                {urgency !== 'none' && (
+                  <span title={urgency === 'overdue' ? 'Tareas vencidas o que vencen hoy' : 'Tareas que vencen pronto'}
+                    className={`w-1.5 h-1.5 rounded-full ${URGENCY_DOT[urgency]}`} />
+                )}
               </span>
             </div>
           )
@@ -260,7 +328,7 @@ function WeekView({ current, tasks, onDayClick }: {
               <div className="space-y-1">
                 {dayTasks.map((t) => (
                   <div key={t.id} title={t.title}
-                    className={`text-[11px] px-2 py-1 rounded-lg truncate ${PRIORITY_PILL[t.priority]} ${t.is_completed ? 'opacity-40 line-through' : ''}`}>
+                    className={`text-[11px] px-2 py-1 rounded-lg truncate ${pillClass(t, today)} ${t.is_completed ? 'opacity-40 line-through' : ''}`}>
                     {t.title}
                   </div>
                 ))}
@@ -278,6 +346,7 @@ function DayView({ current, tasks, onAdd }: {
   current: Date; tasks: Task[]; onAdd: () => void
 }) {
   const dayTasks = tasksForDay(tasks, current)
+  const today = new Date()
   return (
     <div className="flex-1 overflow-y-auto px-6 py-6">
       <div className="max-w-lg mx-auto">
@@ -297,16 +366,30 @@ function DayView({ current, tasks, onAdd }: {
           </div>
         ) : (
           <div className="space-y-2">
-            {dayTasks.map((t) => (
-              <div key={t.id}
-                className={`flex items-center gap-3 p-3.5 bg-panel border border-border rounded-xl ${t.is_completed ? 'opacity-55' : ''}`}>
-                <div className={`w-2 h-2 rounded-full shrink-0 ${PRIORITY_DOT[t.priority]}`} />
-                <span className={`text-sm text-foreground flex-1 ${t.is_completed ? 'line-through text-muted' : ''}`}>
-                  {t.title}
-                </span>
-                {t.is_completed && <span className="text-xs text-subtle">Completada</span>}
-              </div>
-            ))}
+            {dayTasks.map((t) => {
+              const urgency = dueUrgency(t, today)
+              const urgencyBorder = urgency === 'overdue'
+                ? 'border-red-500/60'
+                : urgency === 'soon' ? 'border-yellow-500/50' : 'border-border'
+              return (
+                <div key={t.id}
+                  className={`flex items-center gap-3 p-3.5 bg-panel border rounded-xl ${urgencyBorder} ${t.is_completed ? 'opacity-55' : ''}`}>
+                  <div className={`w-2 h-2 rounded-full shrink-0 ${
+                    urgency !== 'none' ? URGENCY_DOT[urgency] : PRIORITY_DOT[t.priority]
+                  }`} />
+                  <span className={`text-sm text-foreground flex-1 ${t.is_completed ? 'line-through text-muted' : ''}`}>
+                    {t.title}
+                  </span>
+                  {urgency === 'overdue' && !t.is_completed && (
+                    <span className="text-xs text-red-400 font-medium">Vence hoy/vencida</span>
+                  )}
+                  {urgency === 'soon' && !t.is_completed && (
+                    <span className="text-xs text-yellow-400 font-medium">Vence pronto</span>
+                  )}
+                  {t.is_completed && <span className="text-xs text-subtle">Completada</span>}
+                </div>
+              )
+            })}
           </div>
         )}
       </div>
