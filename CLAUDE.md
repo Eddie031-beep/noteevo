@@ -102,7 +102,7 @@ trabajo nuevo se registra como Phase 15+ en `feature_list.json`.
 
 ---
 
-## Roadmap — COMPLETO ✅ (37/37 features)
+## Roadmap — COMPLETO ✅ (39/39 features)
 
 Todas las fases del roadmap están cerradas (`status: "done"` en `feature_list.json`):
 
@@ -114,13 +114,14 @@ Todas las fases del roadmap están cerradas (`status: "done"` en `feature_list.j
 | 12 — Búsqueda y stats | 32 Búsqueda avanzada · 33 Dashboard | ✅ |
 | 13 — Onboarding y recordatorios | 34 Onboarding · 35 Recordatorios email | ✅ |
 | 14 — Tests | 36 Unitarios (Vitest) · 37 E2E (Playwright) | ✅ |
+| 15 — Mejoras tareas/calendario | 38 Recordatorios duales · 39 Urgencia en calendario | ✅ |
 
-### Mejoras fuera del roadmap (sin id en `feature_list.json`)
-- **Recordatorios duales por `due_date`** — avisos independientes de 7 días y 1 día
+**Phase 15 — detalle:**
+- **38 Recordatorios duales por `due_date`** — avisos independientes de 7 días y 1 día
   (RPC `get_due_date_reminders`, flags `reminder_7days_sent` / `reminder_1day_sent`)
-- **Indicadores de urgencia en el calendario** — pills/dots rojo (vencida) y amarillo (próxima)
+- **39 Indicadores de urgencia en el calendario** — pills/dots rojo (vencida) y amarillo (próxima)
 
-> Cualquier trabajo nuevo a partir de aquí se registra como **Phase 15+** en
+> Cualquier trabajo nuevo a partir de aquí se registra como **Phase 16+** en
 > `feature_list.json` (entrada `pending` → `done` al cerrar con build verde).
 
 ---
