@@ -16,120 +16,100 @@
 
 ---
 
-## Phases 1–9 ✅ (completadas — id 1–26 + drag-drop id 27)
+## Phases 1–15 ✅ (completadas — id 1–39)
 
-Todas las features id:1–27 están done. No re-verificar.
+Todas las features id:1–39 están done. No re-verificar.
 
-### Nota: mejoras de editor aplicadas (fuera del roadmap)
-Las siguientes mejoras se aplicaron durante sesiones de refinamiento:
-- Bloques TipTap personalizados: **Callout**, **Toggle**, **TOC** (`lib/editor/`)
-- Extensiones TipTap: **Superscript**, **Subscript** en toolbar
-- Botón **Eraser** (eliminar formato) en toolbar
+### Resumen de mejoras fuera del roadmap aplicadas en phases 1–15
+- Bloques TipTap: **Callout**, **Toggle**, **TOC** (`lib/editor/`)
+- Extensiones TipTap: **Superscript**, **Subscript**, **Eraser** en toolbar
 - 6 fuentes en `FormatDropdowns.tsx` (Slab Serif, Script, Handwritten vía Google Fonts)
-- **TableToolbar** (`components/editor/TableToolbar.tsx`) — BubbleMenu para tablas
-- **NoteList** mejorado — animación de entrada, fechas relativas, borde accent
-- **AiMenuExpanded v2** — submenús hover para Resumir/Tono/Ayúdame/Traducir/Convertir
-- **transform_route.ts** — 30+ acciones de transformación de texto
+- **TableToolbar** — BubbleMenu para gestión de tablas
+- **NoteList** — animación de entrada, fechas relativas, borde accent
+- **AiMenuExpanded v2** — 30+ acciones con submenús hover
+- Recordatorios duales por `due_date` (flags `reminder_7days_sent` / `reminder_1day_sent`)
+- Indicadores de urgencia en CalendarView (rojo/amarillo)
 
 ---
 
-## Phase 10 — Compartir
+## Phase 16 — Mejoras UI/UX + Features pendientes
 
-### Nota pública (id: 28)
-- [ ] Tabla `shared_notes` (ya creada, verificar RLS)
-- [ ] Botón "Compartir" en toolbar del editor
-- [ ] Modal muestra el link generado y botón "Copiar"
-- [ ] Opción para desactivar/reactivar el link
-- [ ] Opción para poner fecha de expiración (opcional)
-- [ ] Página `/n/[slug]` es pública (sin auth), Server Component
-- [ ] `/n/:path*` excluido del middleware de auth
-- [ ] La página pública renderiza TipTap en modo read-only
-- [ ] `view_count` se incrementa en cada visita
-- [ ] `lib/supabase/shared-notes.ts`: `createShareLink`, `getShareLink`, `getSharedNote`, `deactivateShareLink`
+### Tags: vista y gestión completa (id:40)
+- [ ] Vista `tags-view` rediseñada: grid de cards con nombre + conteo de notas
+- [ ] Click en etiqueta → filtra notas que la tienen
+- [ ] Renombrar etiqueta inline
+- [ ] Eliminar etiqueta con confirmación (+ elimina relaciones `note_tags`)
+- [ ] Búsqueda/filtro de etiquetas en la vista
+- [ ] RPC `get_tags_with_count()` creada en Supabase
+- [ ] `lib/supabase/tags.ts`: `renameTag()`, `deleteTagWithRelations()`, `getTagsWithCount()`
 
-### Notificaciones in-app (id: 29)
-- [ ] Tabla `notifications` (ya creada con REPLICA IDENTITY FULL)
-- [ ] Campana en Sidebar con badge rojo con número de no leídas
-- [ ] Panel dropdown al click con lista de notificaciones
-- [ ] Cada notificación: icono por tipo, título, body, tiempo relativo
-- [ ] Click en notificación la marca como leída
-- [ ] Botón "Marcar todas como leídas"
-- [ ] Realtime: nueva notificación aparece sin recargar
-- [ ] `lib/supabase/notifications.ts`: `getNotifications`, `markAsRead`, `markAllRead`, `deleteNotification`
-- [ ] Hook `useNotifications` para Realtime
+### Templates: arreglos y mejoras (id:41)
+- [ ] Fix: contenido de plantilla se aplica correctamente al nuevo editor (bloques custom)
+- [ ] Fix: preview en `TemplatesView` renderiza bloques (no solo texto plano)
+- [ ] Nuevas categorías: `research`, `project`, `learning`
+- [ ] 3 plantillas builtin nuevas: Investigación, Plan de aprendizaje, Brainstorm
+- [ ] Botón "Eliminar" para plantillas personales en `TemplatesView` (con confirmación)
+- [ ] `deleteTemplate(id)` ya existe en `lib/supabase/templates.ts` — conectar con UI
 
----
+### Tasks: rediseño UI + modal mejorado (id:42)
+- [ ] `TaskList.tsx`: cards rediseñadas — dot de color para prioridad, pill fecha urgente
+- [ ] Checkbox más grande (24px) con animación al completar
+- [ ] Panel de filtros colapsable (drawer), chips de filtros activos en header
+- [ ] `TaskModal.tsx`: selector de prioridad visual con colores
+- [ ] Date picker con `min` relativo a hoy
+- [ ] Selector de nota a vincular en el modal
+- [ ] Botón "Guardar" prominente y claro
 
-## Phase 11 — Perfil y tema
+### Files: rediseño UI al estilo Evernote (id:43)
+- [ ] Vista grid para imágenes: cards cuadradas 200×200 con thumbnail + nombre
+- [ ] Vista lista para docs: fila compacta con icono tipado, metadata
+- [ ] Toggle vista grid/lista en header
+- [ ] Drag & drop para subir desde `FilesView` (no solo desde nota)
+- [ ] Breadcrumb "nota origen" clickeable que navega a la nota
+- [ ] Ordenar por: Nombre / Fecha / Tamaño
+- [ ] Previsualización de imagen al click (lightbox con `<dialog>`)
 
-### Perfil de usuario (id: 30)
-- [ ] Tabla `user_profiles` (ya creada con trigger auto-create)
-- [ ] Página `/dashboard/settings` con tabs: Perfil / Preferencias / Notificaciones
-- [ ] Tab Perfil: editar nombre display, bio, subir avatar (bucket `avatars`)
-- [ ] Avatar visible en sidebar
-- [ ] Tab Preferencias: toggle dark/light/system, idioma, timezone
-- [ ] Tab Notificaciones: toggle para notificaciones por email
-- [ ] `lib/supabase/profile.ts`: `getProfile`, `updateProfile`, `uploadAvatar`
-- [ ] `store/profileStore.ts` con: `profile`, `setProfile`
+### Calendar: mejoras visuales y creación de eventos (id:44)
+- [ ] Cabecera más clara, mejor contraste y jerarquía visual
+- [ ] Vista mes: celdas más altas para más tareas visibles
+- [ ] Vista semana: línea de "hora actual"
+- [ ] Mini-popover de creación rápida al click en día/hora
+- [ ] Soporte hora inicio/fin en tareas del calendario
+- [ ] Días con tareas coloreados según urgencia
 
-### Light mode (id: 31)
-- [ ] Variables CSS para light mode definidas en `globals.css` bajo `[data-theme='light']`
-- [ ] Toggle en Sidebar y en Settings
-- [ ] Preferencia guardada en `user_profiles.theme`
-- [ ] `data-theme` aplicado en `<html>` via `uiStore` o `profileStore`
-- [ ] Todos los componentes se ven bien en light mode (revisar colores hardcodeados)
+### Spaces: rediseño UI + mejoras de permisos (id:45)
+- [ ] `SpacesView.tsx`: cards más grandes con descripción, contador miembros/libretas
+- [ ] Color/banner de identificación por space
+- [ ] `SpaceDetailView.tsx`: tabla de miembros más clara (columnas Nombre, Rol, Fecha, Acciones)
+- [ ] Al invitar, mostrar avatar/iniciales del usuario antes de confirmar
+- [ ] Indicador del rol propio en el header del space
+- [ ] `SharedWithMeView.tsx`: mostrar dueño del space, nº miembros, fecha de unión
 
----
+### NoteEditor: rediseño layout y breathing room (id:46)
+- [ ] Área de escritura con `max-w-3xl` centrada (no full-width)
+- [ ] `py-12` de padding vertical
+- [ ] Título `text-4xl` con más espacio inferior
+- [ ] Separador visual sutil título/tags → cuerpo editor
+- [ ] Toolbar: grupos visuales más claros con divisores visibles
+- [ ] Focus mode: `max-w-2xl` + toolbar oculta (solo aparece en hover)
+- [ ] Toolbar scrollable horizontalmente en móvil
 
-## Phase 12 — Búsqueda y stats
+### IA en Sidebar: panel lateral de IA (id:47)
+- [ ] Entrada "Asistente IA" en `Sidebar.tsx` (icono Sparkles, siempre activo)
+- [ ] `currentView === 'ai-assistant'` en `uiStore.ts`
+- [ ] `components/ai/AiAssistantView.tsx`: chat general con Groq streaming
+- [ ] Selector de contexto: Sin nota / Nota activa / Resumen general
+- [ ] Acciones rápidas: "Resumir mis notas de hoy", "¿Qué tengo pendiente?", "Sugerir tareas"
+- [ ] Rate limit 20 mensajes/día (acción `'ai_assistant'` en tabla `ai_usage`)
+- [ ] Route Handler `app/api/ai/assistant/route.ts` (streaming, Groq)
 
-### Búsqueda avanzada (id: 32)
-- [ ] RPC `search_notes_advanced` ya creada y funcional
-- [ ] Panel de filtros: notebook, tags (multi-select), rango de fechas, solo favoritos
-- [ ] Los filtros se combinan (AND)
-- [ ] Resultados muestran snippet con término resaltado
-- [ ] `lib/supabase/search.ts`: añadir `searchNotesAdvanced()`
-
-### Dashboard con stats (id: 33)
-- [ ] RPC `get_user_stats()` ya creada y funcional
-- [ ] `HomePanel` mejorado: grid de stats, gráfico actividad (recharts), tags top, notebooks más grandes
-- [ ] Datos se cargan una sola vez al montar
-
----
-
-## Phase 13 — Onboarding y recordatorios
-
-### Onboarding (id: 34)
-- [ ] Detectar primer login via `user_profiles.created_at`
-- [ ] Modal multi-paso: nombre → crear notebook → primera nota
-- [ ] Los pasos son opcionales (botón "Saltar")
-- [ ] Flag `onboarding_completed` en `user_profiles`
-
-### Recordatorios de tasks (id: 35)
-- [ ] Columna `reminder_sent boolean default false` añadida a `tasks`
-- [ ] Edge Function `send-reminders` en `supabase/functions/send-reminders/index.ts`
-- [ ] Cron configurado en Supabase: cada hora
-- [ ] Envía email via Resend API
-- [ ] Marca `reminder_sent = true` después de enviar
-- [ ] `RESEND_API_KEY` en secrets de Supabase Edge Functions
-
----
-
-## Phase 14 — Tests
-
-### Tests unitarios (id: 36)
-- [ ] Vitest instalado y configurado (`vitest.config.ts`, alias `@/*`)
-- [ ] Script `"test": "vitest"` en `package.json`
-- [ ] Tests para `lib/utils/tiptap.ts` (extractTextPreview)
-- [ ] Tests para `store/noteStore.ts` y `store/taskStore.ts`
-- [ ] Tests para `TaskItem`
-- [ ] Mock de `lib/supabase/client.ts`
-- [ ] Cobertura >70% en utils y stores
-
-### Tests E2E (id: 37)
-- [ ] Playwright instalado, `playwright.config.ts` con `baseURL: 'http://localhost:3000'`
-- [ ] Script `"test:e2e": "playwright test"` en `package.json`
-- [ ] `.env.test` con usuario de prueba
-- [ ] Test: login → dashboard → logout
-- [ ] Test: crear notebook → nota → escribir título → autosave
-- [ ] Test: añadir tag, crear task, búsqueda básica
+### Compartir nota: modo edición colaborativa (id:48)
+- [ ] Columna `access_level` en `shared_notes` ya tiene `'none' | 'view'`, añadir `'edit'`
+  (migración SQL: `ALTER TABLE shared_notes ALTER COLUMN access_level TYPE text;`)
+- [ ] `ShareControls.tsx`: habilitar opción "Anyone with the link can edit" (actualmente disabled)
+- [ ] `app/n/[slug]/page.tsx`: si `access_level === 'edit'` → renderizar editor en modo editable
+- [ ] Guardar cambios via `updateSharedNoteContent(slug, content)` con service role, debounce 1500ms
+- [ ] Indicador "Guardado" / "Guardando..." en la página pública
+- [ ] `lib/supabase/shared-notes-server.ts`: añadir `updateSharedNoteContent()`
+- [ ] Renombrar `NoteViewer.tsx` → `NotePublicEditor.tsx` con prop `editable: boolean`
+- [ ] Solo permitir edición si `is_active = true` y `expires_at` no vencido
