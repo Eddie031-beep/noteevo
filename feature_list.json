@@ -53,7 +53,8 @@
     "phase": 16,
     "name": "templates-fix-mejoras",
     "title": "Templates: arreglos y mejoras",
-    "status": "pending",
+    "status": "done",
+    "notes": "lib/editor/extensions.ts (nuevo): array sharedEditorExtensions único, reutilizado por NoteEditor (refactor) y el preview. components/templates/TemplatePreview.tsx (nuevo): render read-only con extensiones completas → los bloques custom (Callout/Toggle/TOC) se ven en el preview en vez de texto plano, y se importan/renderizan correctamente al usar la plantilla. 3 plantillas builtin nuevas que usan bloques custom: Investigación (research, Callout+Toggle+TOC), Plan de aprendizaje (learning, Callout+Toggle), Brainstorm (project, Callout+Toggle). Categorías nuevas research/project/learning en TemplatesView, SaveAsTemplateModal y getCategoryInfo. Botón 'Eliminar plantilla' con confirmación inline en TemplateDetail (solo personales) → deleteTemplate() + refresco de lista. Build verde, lint sin errores nuevos.",
     "description": "Fix: bloques custom (Callout/Toggle/TOC) se aplican correctamente al usar plantilla. Fix: preview en TemplatesView renderiza bloques. Nuevas categorías: research/project/learning. 3 nuevas plantillas builtin. Botón eliminar plantillas personales.",
     "depends_on": []
   },

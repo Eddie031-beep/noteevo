@@ -3,28 +3,35 @@
 import { useEffect, useState } from 'react'
 import {
   LayoutTemplate, Loader2, ArrowLeft, Tag,
-  BookOpen, ChevronDown, Check, Sparkles,
+  BookOpen, ChevronDown, Check, Sparkles, Trash2,
 } from 'lucide-react'
-import { getTemplates } from '@/lib/supabase/templates'
+import { getTemplates, deleteTemplate } from '@/lib/supabase/templates'
 import { createNote, updateNote } from '@/lib/supabase/notes'
 import { useNotebookStore } from '@/store/notebookStore'
 import { useNoteStore } from '@/store/noteStore'
 import { useUIStore } from '@/store/uiStore'
 import { extractTextPreview } from '@/lib/utils/tiptap'
+import TemplatePreview from './TemplatePreview'
 import type { Template, Notebook } from '@/types'
 
 const CATEGORIES: { key: string; label: string; color: string; bg: string }[] = [
-  { key: 'meeting', label: 'Reuniones',  color: 'text-blue-400',   bg: 'bg-blue-500/10 border-blue-500/20' },
-  { key: 'journal', label: 'Diario',     color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20' },
-  { key: 'work',    label: 'Trabajo',    color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20' },
-  { key: 'personal',label: 'Personal',  color: 'text-accent',     bg: 'bg-accent/10 border-accent/20' },
+  { key: 'meeting',  label: 'Reuniones',  color: 'text-blue-400',   bg: 'bg-blue-500/10 border-blue-500/20' },
+  { key: 'journal',  label: 'Diario',     color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20' },
+  { key: 'work',     label: 'Trabajo',    color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20' },
+  { key: 'research', label: 'Investigación', color: 'text-cyan-400', bg: 'bg-cyan-500/10 border-cyan-500/20' },
+  { key: 'project',  label: 'Proyecto',   color: 'text-green-400',  bg: 'bg-green-500/10 border-green-500/20' },
+  { key: 'learning', label: 'Aprendizaje', color: 'text-pink-400',  bg: 'bg-pink-500/10 border-pink-500/20' },
+  { key: 'personal', label: 'Personal',   color: 'text-accent',     bg: 'bg-accent/10 border-accent/20' },
 ]
 
 function getCategoryInfo(key: string | null) {
-  return CATEGORIES.find((c) => c.key === key) ?? CATEGORIES[3]
+  return CATEGORIES.find((c) => c.key === key)
+    ?? CATEGORIES.find((c) => c.key === 'personal')!
 }
 
-type FilterKey = 'all' | 'meeting' | 'journal' | 'work' | 'personal' | 'mine'
+type FilterKey =
+  | 'all' | 'meeting' | 'journal' | 'work'
+  | 'research' | 'project' | 'learning' | 'personal' | 'mine'
 
 // ── Notebook picker ────────────────────────────────────────────────────────
 function NotebookPicker({
@@ -86,9 +93,11 @@ function NotebookPicker({
 function TemplateDetail({
   template,
   onBack,
+  onDeleted,
 }: {
   template: Template
   onBack: () => void
+  onDeleted: (id: string) => void
 }) {
   const { notebooks, setSelectedNotebook } = useNotebookStore()
   const { addNote, setSelectedNote } = useNoteStore()
@@ -100,9 +109,22 @@ function TemplateDetail({
   const [importing, setImporting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   const catInfo = getCategoryInfo(template.category)
-  const preview = extractTextPreview(template.content, 800)
+
+  const handleDelete = async () => {
+    setDeleting(true)
+    setError(null)
+    try {
+      await deleteTemplate(template.id)
+      onDeleted(template.id)
+    } catch {
+      setError('Error al eliminar la plantilla. Intenta de nuevo.')
+      setDeleting(false)
+    }
+  }
 
   const handleImport = async () => {
     if (!selectedNotebook) {
@@ -153,18 +175,8 @@ function TemplateDetail({
               <div className="px-8 py-6 border-b border-border">
                 <h2 className="text-2xl font-bold text-foreground">{template.name}</h2>
               </div>
-              <div className="px-8 py-6">
-                {preview ? (
-                  <div className="space-y-2">
-                    {preview.split('\n').filter(Boolean).map((line, i) => (
-                      <p key={i} className="text-sm text-muted leading-relaxed">
-                        {line}
-                      </p>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-subtle italic">Sin contenido de vista previa</p>
-                )}
+              <div className="px-8 py-6 tiptap-preview text-sm">
+                <TemplatePreview content={template.content} />
               </div>
             </div>
           </div>
@@ -221,6 +233,46 @@ function TemplateDetail({
                 Se creará una nota nueva en la libreta seleccionada
               </p>
             </div>
+
+            {!template.is_builtin && (
+              <div className="pt-1">
+                {confirmDelete ? (
+                  <div className="space-y-2 p-3 bg-danger/5 border border-danger/20 rounded-xl">
+                    <p className="text-xs text-foreground">
+                      ¿Eliminar <span className="font-semibold">{template.name}</span>? Esta acción no se puede deshacer.
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handleDelete}
+                        disabled={deleting}
+                        className="flex-1 py-2 bg-danger text-white text-xs font-semibold rounded-lg hover:opacity-90 disabled:opacity-40 transition cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        {deleting && <Loader2 size={13} className="animate-spin" />}
+                        {deleting ? 'Eliminando...' : 'Sí, eliminar'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDelete(false)}
+                        disabled={deleting}
+                        className="flex-1 py-2 bg-surface border border-border text-muted text-xs rounded-lg hover:text-foreground transition cursor-pointer"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDelete(true)}
+                    className="w-full py-2 text-xs text-muted hover:text-danger border border-border hover:border-danger/30 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    <Trash2 size={13} />
+                    Eliminar plantilla
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -306,6 +358,10 @@ export default function TemplatesView() {
         <TemplateDetail
           template={selected}
           onBack={() => setSelected(null)}
+          onDeleted={(id) => {
+            setTemplates((prev) => prev.filter((t) => t.id !== id))
+            setSelected(null)
+          }}
         />
       </div>
     )
@@ -325,6 +381,9 @@ export default function TemplatesView() {
             { key: 'all' as FilterKey,      label: `Todas (${templates.length})` },
             { key: 'meeting' as FilterKey,  label: 'Reuniones' },
             { key: 'work' as FilterKey,     label: 'Trabajo' },
+            { key: 'research' as FilterKey, label: 'Investigación' },
+            { key: 'project' as FilterKey,  label: 'Proyecto' },
+            { key: 'learning' as FilterKey, label: 'Aprendizaje' },
             { key: 'journal' as FilterKey,  label: 'Diario' },
             { key: 'personal' as FilterKey, label: 'Personal' },
             ...(mineCount > 0 ? [{ key: 'mine' as FilterKey, label: `Mis plantillas (${mineCount})` }] : []),

@@ -261,4 +261,231 @@ export const BUILTIN_TEMPLATES: Omit<Template, 'created_at' | 'updated_at' | 'us
       ],
     },
   },
+  {
+    id: 'builtin-research',
+    name: 'Investigación',
+    description: 'Pregunta, fuentes, hallazgos y conclusiones',
+    category: 'research',
+    is_builtin: true,
+    content: {
+      type: 'doc',
+      content: [
+        {
+          type: 'heading', attrs: { level: 2 },
+          content: [{ type: 'text', text: '🔬 Investigación' }],
+        },
+        { type: 'tableOfContents' },
+        {
+          type: 'callout', attrs: { type: 'info' },
+          content: [
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', marks: [{ type: 'bold' }], text: 'Pregunta de investigación: ' },
+                { type: 'text', text: 'Define aquí qué quieres averiguar.' },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'heading', attrs: { level: 3 },
+          content: [{ type: 'text', text: 'Contexto' }],
+        },
+        { type: 'paragraph', content: [{ type: 'text', text: '' }] },
+        {
+          type: 'heading', attrs: { level: 3 },
+          content: [{ type: 'text', text: 'Hallazgos' }],
+        },
+        {
+          type: 'bulletList',
+          content: [
+            { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: '' }] }] },
+          ],
+        },
+        {
+          type: 'toggle', attrs: { title: 'Fuentes y referencias', open: false },
+          content: [
+            {
+              type: 'bulletList',
+              content: [
+                { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: '' }] }] },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'heading', attrs: { level: 3 },
+          content: [{ type: 'text', text: 'Conclusiones' }],
+        },
+        { type: 'paragraph', content: [{ type: 'text', text: '' }] },
+        {
+          type: 'heading', attrs: { level: 3 },
+          content: [{ type: 'text', text: 'Próximos pasos' }],
+        },
+        {
+          type: 'taskList',
+          content: [
+            {
+              type: 'taskItem', attrs: { checked: false },
+              content: [{ type: 'paragraph', content: [{ type: 'text', text: '' }] }],
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    id: 'builtin-learning',
+    name: 'Plan de aprendizaje',
+    description: 'Objetivos, recursos, progreso y repaso',
+    category: 'learning',
+    is_builtin: true,
+    content: {
+      type: 'doc',
+      content: [
+        {
+          type: 'heading', attrs: { level: 2 },
+          content: [{ type: 'text', text: '📚 Plan de aprendizaje' }],
+        },
+        {
+          type: 'callout', attrs: { type: 'tip' },
+          content: [
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', marks: [{ type: 'bold' }], text: '¿Qué quiero aprender? ' },
+                { type: 'text', text: 'Resume tu meta en una frase.' },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', marks: [{ type: 'bold' }], text: 'Plazo estimado: ' },
+            { type: 'text', text: '' },
+          ],
+        },
+        {
+          type: 'heading', attrs: { level: 3 },
+          content: [{ type: 'text', text: 'Objetivos' }],
+        },
+        {
+          type: 'taskList',
+          content: [
+            {
+              type: 'taskItem', attrs: { checked: false },
+              content: [{ type: 'paragraph', content: [{ type: 'text', text: '' }] }],
+            },
+          ],
+        },
+        {
+          type: 'heading', attrs: { level: 3 },
+          content: [{ type: 'text', text: 'Recursos' }],
+        },
+        {
+          type: 'bulletList',
+          content: [
+            { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: '' }] }] },
+          ],
+        },
+        {
+          type: 'heading', attrs: { level: 3 },
+          content: [{ type: 'text', text: 'Progreso semanal' }],
+        },
+        {
+          type: 'toggle', attrs: { title: 'Notas y apuntes', open: true },
+          content: [
+            { type: 'paragraph', content: [{ type: 'text', text: '' }] },
+          ],
+        },
+        {
+          type: 'callout', attrs: { type: 'warning' },
+          content: [
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', marks: [{ type: 'bold' }], text: 'Repasar: ' },
+                { type: 'text', text: 'Anota lo que aún no domines.' },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    id: 'builtin-brainstorm',
+    name: 'Brainstorm',
+    description: 'Lluvia de ideas, criterios y selección',
+    category: 'project',
+    is_builtin: true,
+    content: {
+      type: 'doc',
+      content: [
+        {
+          type: 'heading', attrs: { level: 2 },
+          content: [{ type: 'text', text: '💡 Brainstorm' }],
+        },
+        {
+          type: 'callout', attrs: { type: 'success' },
+          content: [
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', marks: [{ type: 'bold' }], text: 'Tema: ' },
+                { type: 'text', text: '¿Sobre qué estamos generando ideas?' },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'heading', attrs: { level: 3 },
+          content: [{ type: 'text', text: 'Todas las ideas (sin filtrar)' }],
+        },
+        {
+          type: 'bulletList',
+          content: [
+            { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: '' }] }] },
+            { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: '' }] }] },
+            { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: '' }] }] },
+          ],
+        },
+        {
+          type: 'toggle', attrs: { title: 'Ideas descartadas (y por qué)', open: false },
+          content: [
+            {
+              type: 'bulletList',
+              content: [
+                { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: '' }] }] },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'heading', attrs: { level: 3 },
+          content: [{ type: 'text', text: 'Criterios de selección' }],
+        },
+        {
+          type: 'bulletList',
+          content: [
+            { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: '' }] }] },
+          ],
+        },
+        {
+          type: 'heading', attrs: { level: 3 },
+          content: [{ type: 'text', text: 'Ideas seleccionadas' }],
+        },
+        {
+          type: 'taskList',
+          content: [
+            {
+              type: 'taskItem', attrs: { checked: false },
+              content: [{ type: 'paragraph', content: [{ type: 'text', text: '' }] }],
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]

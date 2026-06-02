@@ -16,6 +16,9 @@ const CATEGORIES = [
   { value: 'personal', label: 'Personal' },
   { value: 'work', label: 'Trabajo' },
   { value: 'meeting', label: 'Reuniones' },
+  { value: 'research', label: 'Investigación' },
+  { value: 'project', label: 'Proyecto' },
+  { value: 'learning', label: 'Aprendizaje' },
   { value: 'journal', label: 'Diario' },
 ]
 
