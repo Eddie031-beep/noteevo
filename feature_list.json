@@ -43,7 +43,8 @@
     "phase": 16,
     "name": "tags-view-completa",
     "title": "Tags: vista y gestión completa",
-    "status": "pending",
+    "status": "done",
+    "notes": "TagsView.tsx (componente nuevo full-width): grid de cards con nombre + conteo de notas + fecha. Búsqueda/filtro. Renombrar inline (doble click o botón). Eliminar con confirmación inline (borra relaciones note_tags). Click en etiqueta → panel de notas asociadas; click en nota navega al editor. RPC get_tags_with_count() (security invoker, cuenta notas no-trashed). lib/supabase/tags.ts: getTagsWithCount(), renameTag(), deleteTagWithRelations(), getNotesByTag(). tagStore.updateTag(). Build verde, lint limpio en el archivo nuevo.",
     "description": "Vista tags-view rediseñada con grid de cards (nombre + conteo de notas). Click en etiqueta filtra notas. Renombrar y eliminar etiquetas con confirmación. RPC get_tags_with_count(). lib/supabase/tags.ts: renameTag(), deleteTagWithRelations(), getTagsWithCount().",
     "depends_on": []
   },

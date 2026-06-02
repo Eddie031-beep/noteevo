@@ -6,6 +6,7 @@ interface TagStore {
   setTags: (tags: Tag[]) => void
   addTag: (tag: Tag) => void
   removeTag: (id: string) => void
+  updateTag: (id: string, name: string) => void
 }
 
 export const useTagStore = create<TagStore>((set) => ({
@@ -17,4 +18,10 @@ export const useTagStore = create<TagStore>((set) => ({
     })),
   removeTag: (id) =>
     set((state) => ({ tags: state.tags.filter((t) => t.id !== id) })),
+  updateTag: (id, name) =>
+    set((state) => ({
+      tags: state.tags
+        .map((t) => (t.id === id ? { ...t, name } : t))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    })),
 }))

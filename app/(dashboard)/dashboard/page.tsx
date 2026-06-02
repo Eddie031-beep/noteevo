@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useUIStore } from '@/store/uiStore'
 import { useNotebookStore } from '@/store/notebookStore'
 import { useNoteStore } from '@/store/noteStore'
-import { useTagStore } from '@/store/tagStore'
 import NoteList from '@/components/notes/NoteList'
 import NoteEditor from '@/components/editor/NoteEditor'
 import FavoriteNotes from '@/components/notes/FavoriteNotes'
@@ -18,11 +17,12 @@ import CalendarView from '@/components/calendar/CalendarView'
 import SpacesView from '@/components/spaces/SpacesView'
 import SharedWithMeView from '@/components/spaces/SharedWithMeView'
 import TemplatesView from '@/components/templates/TemplatesView'
+import TagsView from '@/components/tags/TagsView'
 import { getAllNotesWithNotebook, createQuickNote, type NoteWithNotebook } from '@/lib/supabase/notes'
 import { extractTextPreview } from '@/lib/utils/tiptap'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { BookOpen, FileText, Tag, Plus } from 'lucide-react'
+import { BookOpen, FileText, Plus } from 'lucide-react'
 
 function HomePanel() {
   const { notebooks } = useNotebookStore()
@@ -87,41 +87,6 @@ function HomePanel() {
                 Crea una libreta desde el sidebar para empezar
               </p>
             </div>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-function TagsPanel() {
-  const { tags } = useTagStore()
-
-  return (
-    <div className="w-72 h-screen bg-panel border-r border-border flex flex-col shrink-0">
-      <div className="p-4 border-b border-border">
-        <h2 className="font-semibold text-foreground">Etiquetas</h2>
-        <p className="text-xs text-muted mt-0.5">
-          {tags.length} etiqueta{tags.length !== 1 ? 's' : ''}
-        </p>
-      </div>
-      <div className="flex-1 overflow-y-auto p-4">
-        {tags.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <span
-                key={tag.id}
-                className="inline-flex items-center gap-1.5 px-3 py-1 bg-accent/10 text-accent text-xs rounded-full border border-accent/20"
-              >
-                <Tag size={11} />
-                {tag.name}
-              </span>
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-3 py-12 text-center">
-            <Tag size={28} className="text-subtle" />
-            <p className="text-sm text-muted">Sin etiquetas aún</p>
           </div>
         )}
       </div>
@@ -267,7 +232,7 @@ export default function DashboardPage() {
           {showTrash && <TrashNotes />}
           {showSearch && <SearchResults />}
           {showAdvancedSearch && <AdvancedSearchPanel />}
-          {showTags && <TagsPanel />}
+          {showTags && <TagsView />}
           {showTasks && <TaskList />}
           {showFiles && <FilesView />}
           {showCalendar && <CalendarView />}

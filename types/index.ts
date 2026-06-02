@@ -32,6 +32,13 @@ export interface NoteTag {
   tag_id: string
 }
 
+export interface TagWithCount {
+  id: string
+  name: string
+  note_count: number
+  created_at: string
+}
+
 export interface Task {
   id: string
   user_id: string
