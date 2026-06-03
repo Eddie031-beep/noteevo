@@ -14,12 +14,14 @@ interface SaveAsTemplateModalProps {
 
 const CATEGORIES = [
   { value: 'personal', label: 'Personal' },
-  { value: 'work', label: 'Trabajo' },
-  { value: 'meeting', label: 'Reuniones' },
-  { value: 'research', label: 'Investigación' },
-  { value: 'project', label: 'Proyecto' },
-  { value: 'learning', label: 'Aprendizaje' },
-  { value: 'journal', label: 'Diario' },
+  { value: 'trabajo', label: 'Trabajo' },
+  { value: 'reuniones', label: 'Reuniones' },
+  { value: 'diario', label: 'Diario' },
+  { value: 'educacion', label: 'Educación' },
+  { value: 'viaje', label: 'Viaje' },
+  { value: 'finanzas', label: 'Finanzas' },
+  { value: 'salud', label: 'Salud' },
+  { value: 'proyecto', label: 'Proyecto' },
 ]
 
 export default function SaveAsTemplateModal({

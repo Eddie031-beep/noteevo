@@ -44,19 +44,71 @@
     "name": "tags-view-completa",
     "title": "Tags: vista y gestión completa",
     "status": "done",
-    "notes": "TagsView.tsx (componente nuevo full-width): grid de cards con nombre + conteo de notas + fecha. Búsqueda/filtro. Renombrar inline (doble click o botón). Eliminar con confirmación inline (borra relaciones note_tags). Click en etiqueta → panel de notas asociadas; click en nota navega al editor. RPC get_tags_with_count() (security invoker, cuenta notas no-trashed). lib/supabase/tags.ts: getTagsWithCount(), renameTag(), deleteTagWithRelations(), getNotesByTag(). tagStore.updateTag(). Build verde, lint limpio en el archivo nuevo.",
+    "notes": "TagsView.tsx (full-width): grid de cards con nombre + conteo de notas + fecha. Búsqueda/filtro. Renombrar inline (doble click o botón). Eliminar con confirmación inline (borra relaciones note_tags). Click en etiqueta → panel de notas asociadas; click en nota navega al editor. RPC get_tags_with_count() (security invoker, cuenta notas no-trashed). lib/supabase/tags.ts: getTagsWithCount(), renameTag(), deleteTagWithRelations(), getNotesByTag(). tagStore.updateTag(). Build verde. Commit b2ff6a0.",
     "description": "Vista tags-view rediseñada con grid de cards (nombre + conteo de notas). Click en etiqueta filtra notas. Renombrar y eliminar etiquetas con confirmación. RPC get_tags_with_count(). lib/supabase/tags.ts: renameTag(), deleteTagWithRelations(), getTagsWithCount().",
     "depends_on": []
   },
   {
     "id": 41,
     "phase": 16,
-    "name": "templates-fix-mejoras",
-    "title": "Templates: arreglos y mejoras",
+    "name": "templates-galeria-completa",
+    "title": "Templates: galería completa estilo Notion",
     "status": "done",
-    "notes": "lib/editor/extensions.ts (nuevo): array sharedEditorExtensions único, reutilizado por NoteEditor (refactor) y el preview. components/templates/TemplatePreview.tsx (nuevo): render read-only con extensiones completas → los bloques custom (Callout/Toggle/TOC) se ven en el preview en vez de texto plano, y se importan/renderizan correctamente al usar la plantilla. 3 plantillas builtin nuevas que usan bloques custom: Investigación (research, Callout+Toggle+TOC), Plan de aprendizaje (learning, Callout+Toggle), Brainstorm (project, Callout+Toggle). Categorías nuevas research/project/learning en TemplatesView, SaveAsTemplateModal y getCategoryInfo. Botón 'Eliminar plantilla' con confirmación inline en TemplateDetail (solo personales) → deleteTemplate() + refresco de lista. Build verde, lint sin errores nuevos.",
-    "description": "Fix: bloques custom (Callout/Toggle/TOC) se aplican correctamente al usar plantilla. Fix: preview en TemplatesView renderiza bloques. Nuevas categorías: research/project/learning. 3 nuevas plantillas builtin. Botón eliminar plantillas personales.",
-    "depends_on": []
+    "notes": "Galería estilo Notion. builtin-templates.ts reescrito con helpers JSON (DRY) + 16 plantillas nuevas en 9 categorías ES (personal/trabajo/reuniones/diario/educacion/viaje/finanzas/salud/proyecto), usando bloques custom (Callout/Toggle/TOC/tablas/codeBlock). lib/editor/extensions.ts (sharedEditorExtensions) reutilizado. TemplatePreview.tsx (read-only, todas las extensiones) usado para preview grande y thumbnail. TemplatesView.tsx rediseñado: grid 3/2/1 cols, cards con thumbnail real (TipTap scale(0.45)+pointer-events-none+overflow-hidden), badges 'Oficial NoteEvo'/'Mía', fila Destacadas (4), filtros por categoría dinámicos + buscador. Modal de detalle a pantalla completa: preview grande + selector de libreta que recuerda la última via localStorage('noteevo-last-template-notebook') + 'Usar esta plantilla' (createNote+updateNote con content JSON tal cual → redirige al editor) + eliminar personales con confirmación. SaveAsTemplateModal con las 9 categorías. Build verde, lint limpio.",
+    "description": "Rediseño completo de la galería de plantillas inspirado en Notion. Ver CHECKPOINTS.md id:41 para lista completa de checkpoints.",
+    "depends_on": [],
+    "detail": {
+      "categorias": [
+        "personal",
+        "trabajo",
+        "reuniones",
+        "diario",
+        "educacion",
+        "viaje",
+        "finanzas",
+        "salud",
+        "proyecto"
+      ],
+      "plantillas_builtin_nuevas": [
+        { "nombre": "Agenda semanal", "categoria": "personal", "descripcion": "Plan semanal con tareas, horarios y notas por día" },
+        { "nombre": "Plan de proyecto", "categoria": "proyecto", "descripcion": "Fases, stakeholders, tareas y fechas de entrega" },
+        { "nombre": "Asignación / Tarea escolar", "categoria": "educacion", "descripcion": "Instrucciones, recursos, materiales y milestones" },
+        { "nombre": "Programación 101", "categoria": "educacion", "descripcion": "Estructura de curso con TOC, objetivos y bloques de código" },
+        { "nombre": "Notas de clase", "categoria": "educacion", "descripcion": "Fecha, clase, grabación, notas y resumen automático" },
+        { "nombre": "Ecuaciones clave (Matemáticas)", "categoria": "educacion", "descripcion": "TOC con secciones por tema, fórmulas en código inline" },
+        { "nombre": "Lista de compras", "categoria": "personal", "descripcion": "Categorías de productos con checkboxes por sección" },
+        { "nombre": "Diario diario", "categoria": "diario", "descripcion": "AM/PM, metas del día, sentimientos, reflexión y expectativas" },
+        { "nombre": "Lista de lectura", "categoria": "personal", "descripcion": "Por leer, leyendo actualmente, leídos y recomendaciones" },
+        { "nombre": "Plan de viaje", "categoria": "viaje", "descripcion": "Overview, vuelos, alojamiento, actividades y presupuesto" },
+        { "nombre": "Gestión de proyectos", "categoria": "proyecto", "descripcion": "Project overview con tabla de estado, fases y equipo" },
+        { "nombre": "CRM / Gestión de clientes", "categoria": "trabajo", "descripcion": "Tabla de clientes, último contacto, crédito y responsable" },
+        { "nombre": "Nota de candidato", "categoria": "trabajo", "descripcion": "Info del aplicante, revisión, recursos y milestones de entrevista" },
+        { "nombre": "Información de contacto", "categoria": "trabajo", "descripcion": "Datos básicos, comunicación, dirección y facturación" },
+        { "nombre": "Lluvia de ideas", "categoria": "proyecto", "descripcion": "Notas de reunión, brainstorming kick-off y recomendaciones" },
+        { "nombre": "Notas de reunión", "categoria": "reuniones", "descripcion": "Detalles, objetivos, tabla de equipo, checklist y acuerdos" }
+      ],
+      "ui_galeria": {
+        "layout": "Grid 3 columnas en desktop, 2 en tablet, 1 en móvil",
+        "card": "Thumbnail del contenido real (TipTap read-only miniaturizado) + título + categoría pill + descripción corta",
+        "filtros": "Pills de categoría en header (todas + por categoría). Búsqueda por nombre.",
+        "featured": "Fila de destacadas al tope antes del grid (las 4 más usadas o las builtin más recientes)",
+        "badge": "Badge 'Oficial NoteEvo' en plantillas builtin. Badge 'Mía' en plantillas personales."
+      },
+      "flujo_importar": {
+        "paso1": "Click en card → abre modal de detalle/preview a pantalla completa",
+        "paso2": "Modal muestra: preview grande del contenido (TipTap read-only), título, descripción, categoría",
+        "paso3": "Selector de libreta destino (dropdown con todas las libretas del usuario)",
+        "paso4": "Botón 'Usar esta plantilla' → crea nota nueva en libreta seleccionada con el contenido",
+        "paso5": "Redirige automáticamente al editor con la nota nueva abierta",
+        "nota": "El selector de libreta recuerda la última usada (localStorage key 'noteevo-last-template-notebook')"
+      },
+      "fixes_tecnicos": [
+        "Bloques custom (Callout/Toggle/TOC) deben registrarse en el editor read-only del preview",
+        "El preview miniaturizado usa scale(0.45) + pointer-events-none en un contenedor overflow-hidden",
+        "Al importar, usar updateNote() con el content JSON de la plantilla tal cual (no convertir a texto)",
+        "deleteTemplate(id) ya existe en lib/supabase/templates.ts — solo conectar con botón en UI"
+      ]
+    }
   },
   {
     "id": 42,

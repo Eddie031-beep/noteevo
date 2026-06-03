@@ -129,10 +129,25 @@
 - Al renombrar: `UPDATE tags SET name = $1 WHERE id = $2 AND user_id = auth.uid()`
 - Al eliminar: borrar primero `note_tags` donde `tag_id = id`, luego borrar `tags`
 
-#### id:41 — Templates
-- Los bloques custom (Callout, Toggle, TOC) necesitan que las extensiones estén registradas
-  en el editor del preview. Usar un editor TipTap read-only con todas las extensiones.
-- `builtin-templates.ts`: añadir 3 plantillas nuevas con categorías `research`, `project`, `learning`
+#### id:41 — Templates galería estilo Notion
+- **Thumbnail técnico**: envolver `<EditorContent editor={previewEditor} />` en un `div` con
+  `style={{ transform: 'scale(0.45)', transformOrigin: 'top left', pointerEvents: 'none', width: '222%' }}`
+  dentro de un contenedor `overflow-hidden` de tamaño fijo (ej. `w-full h-48`).
+  El editor de preview se crea con `useEditor({ editable: false, ... })` con **todas** las extensiones
+  (StarterKit + Callout + Toggle + TOC + Mermaid + Table + etc.) para que los bloques custom rendericen.
+- **16 plantillas builtin**: cada una es un objeto TipTap JSON completo con headings, listas,
+  taskLists, callouts y toggles según corresponda. Seguir el patrón de las 4 existentes en
+  `lib/templates/builtin-templates.ts`.
+- **Categorías**: el campo `category` en el tipo `Template` ya es `string | null`, no hay
+  cambio de schema. Solo añadir las nuevas cadenas: `'educacion'`, `'viaje'`, `'finanzas'`,
+  `'salud'`, `'proyecto'`.
+- **localStorage para libreta**: al importar, leer/escribir `'noteevo-last-template-notebook'`
+  con el id de la última libreta usada para pre-seleccionar el dropdown.
+- **Flujo importar**: `createNote(notebookId)` → `updateNote(note.id, { title, content })` →
+  `addNote()` → `setSelectedNote()` → `setCurrentView('notebooks')`. Mismo patrón que
+  `TemplateDetail` existente, solo moverlo al nuevo modal.
+- `deleteTemplate(id)` ya existe en `lib/supabase/templates.ts` — solo añadir botón
+  con `window.confirm()` o modal de confirmación en las cards de plantillas personales.
 
 #### id:42 — Tasks
 - El panel de filtros colapsable: usar estado local `showFilters` + `AnimatePresence` o

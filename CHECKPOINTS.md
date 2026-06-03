@@ -43,13 +43,49 @@ Todas las features id:1–39 están done. No re-verificar.
 - [ ] RPC `get_tags_with_count()` creada en Supabase
 - [ ] `lib/supabase/tags.ts`: `renameTag()`, `deleteTagWithRelations()`, `getTagsWithCount()`
 
-### Templates: arreglos y mejoras (id:41)
-- [ ] Fix: contenido de plantilla se aplica correctamente al nuevo editor (bloques custom)
-- [ ] Fix: preview en `TemplatesView` renderiza bloques (no solo texto plano)
-- [ ] Nuevas categorías: `research`, `project`, `learning`
-- [ ] 3 plantillas builtin nuevas: Investigación, Plan de aprendizaje, Brainstorm
-- [ ] Botón "Eliminar" para plantillas personales en `TemplatesView` (con confirmación)
-- [ ] `deleteTemplate(id)` ya existe en `lib/supabase/templates.ts` — conectar con UI
+### Templates: galería completa estilo Notion (id:41)
+
+**Plantillas builtin a añadir en `lib/templates/builtin-templates.ts`:**
+- [ ] Agenda semanal (personal) — plan semanal con tabla días + tareas + notas
+- [ ] Plan de proyecto (proyecto) — fases, stakeholders, tabla de estado, fechas
+- [ ] Asignación / Tarea escolar (educacion) — instrucciones, recursos, milestones
+- [ ] Programación 101 (educacion) — TOC, objetivos, bloques de código
+- [ ] Notas de clase (educacion) — fecha, clase, grabación, resumen
+- [ ] Ecuaciones clave Matemáticas (educacion) — TOC con fórmulas en code inline
+- [ ] Lista de compras (personal) — categorías con checkboxes
+- [ ] Diario diario (diario) — AM/PM, metas, sentimientos, reflexión
+- [ ] Lista de lectura (personal) — por leer / leyendo / leídos / recomendaciones
+- [ ] Plan de viaje (viaje) — overview, vuelos, alojamiento, actividades, presupuesto
+- [ ] Gestión de proyectos (proyecto) — tabla de estado, fases, equipo
+- [ ] CRM / Gestión de clientes (trabajo) — tabla clientes, contacto, responsable
+- [ ] Nota de candidato (trabajo) — info aplicante, revisión, milestones entrevista
+- [ ] Información de contacto (trabajo) — datos básicos, comunicación, facturación
+- [ ] Lluvia de ideas (proyecto) — meeting notes, brainstorming, recomendaciones
+- [ ] Notas de reunión (reuniones) — detalles, objetivos, tabla equipo, checklist
+
+**Categorías nuevas en `builtin-templates.ts`:**
+- [ ] Añadir: `educacion`, `viaje`, `finanzas`, `salud`, `proyecto` (además de las existentes)
+
+**Galería (`TemplatesView.tsx`) — rediseño completo:**
+- [ ] Grid 3 columnas desktop / 2 tablet / 1 móvil
+- [ ] Card con thumbnail real (TipTap read-only miniaturizado: `scale(0.45)` + `pointer-events-none` + `overflow-hidden`)
+- [ ] Card muestra: thumbnail + título + pill de categoría + descripción corta
+- [ ] Badge "Oficial NoteEvo" en builtin, badge "Mía" en personales
+- [ ] Fila "Destacadas" al tope (4 plantillas más relevantes)
+- [ ] Filtros por categoría en header (pills: Todas + una por categoría)
+- [ ] Buscador por nombre en el header
+
+**Flujo de importar — modal de detalle:**
+- [ ] Click en card → modal/drawer a pantalla completa
+- [ ] Modal: preview grande del contenido (TipTap read-only con todas las extensiones, incluidos bloques custom)
+- [ ] Selector de libreta destino (dropdown) — recuerda última usada via `localStorage('noteevo-last-template-notebook')`
+- [ ] Botón "Usar esta plantilla" → crea nota en libreta seleccionada → redirige al editor
+
+**Fixes técnicos:**
+- [ ] Extensiones Callout/Toggle/TOC registradas en el editor read-only del preview (no solo en NoteEditor)
+- [ ] Al importar: usar `content` JSON de la plantilla directamente en `updateNote()` (no convertir a texto)
+- [ ] Botón "Eliminar" para plantillas personales con confirmación (`deleteTemplate(id)` ya existe)
+- [ ] `TemplateSelector.tsx` (modal al crear nota): también usa el nuevo flujo con preview
 
 ### Tasks: rediseño UI + modal mejorado (id:42)
 - [ ] `TaskList.tsx`: cards rediseñadas — dot de color para prioridad, pill fecha urgente

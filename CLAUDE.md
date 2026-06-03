@@ -131,7 +131,7 @@ Las siguientes mejoras y features nuevas están planificadas. Se implementan en 
 una por una, siempre con build verde antes de marcar done.
 
 ### id:40 — Tags: vista y gestión completa
-**Estado: pending**
+**Estado: done ✅ (commit b2ff6a0)**
 La vista de etiquetas actual solo muestra un listado plano de chips. Necesita:
 - Vista `/dashboard` con `currentView === 'tags-view'` rediseñada: grid de tarjetas por etiqueta
   mostrando nombre + conteo de notas asociadas + fecha de creación
@@ -142,16 +142,38 @@ La vista de etiquetas actual solo muestra un listado plano de chips. Necesita:
 - `lib/supabase/tags.ts`: añadir `renameTag(id, newName)`, `deleteTagWithRelations(id)`, `getTagsWithCount()`
 - RPC `get_tags_with_count()` en Supabase que retorna `{id, name, note_count, created_at}`
 
-### id:41 — Templates: arreglos y mejoras
-**Estado: pending**
-- Fix: al usar una plantilla desde `TemplateSelector`, el contenido se aplica correctamente
-  al nuevo editor (actualmente puede no renderizar bien los bloques custom Callout/Toggle/TOC)
-- Fix: `TemplatesView` — el preview de la plantilla debe mostrar los bloques custom renderizados
-  (actualmente muestra texto plano porque usa `extractTextPreview`)
-- Mejora: añadir categorías adicionales: `research`, `project`, `learning`
-- Añadir 3 plantillas builtin nuevas: Investigación, Plan de aprendizaje, Brainstorm
-- Añadir botón "Eliminar" en `TemplatesView` para plantillas personales (con confirmación)
-- `lib/supabase/templates.ts`: ya existe `deleteTemplate(id)`, solo conectar con UI
+### id:41 — Templates: galería completa estilo Notion
+**Estado: done ✅**
+Rediseño total de la galería de plantillas inspirado en Notion/Evernote. El objetivo es que
+las plantillas se sientan como un producto propio con valor real, no solo un selector básico.
+
+**16 plantillas builtin nuevas** distribuidas en 9 categorías:
+`personal`, `trabajo`, `reuniones`, `diario`, `educacion`, `viaje`, `finanzas`, `salud`, `proyecto`
+
+Plantillas: Agenda semanal, Plan de proyecto, Asignación escolar, Programación 101,
+Notas de clase, Ecuaciones clave (Matemáticas), Lista de compras, Diario diario,
+Lista de lectura, Plan de viaje, Gestión de proyectos, CRM/Clientes, Nota de candidato,
+Información de contacto, Lluvia de ideas, Notas de reunión.
+
+**Galería (`TemplatesView.tsx`) — rediseño completo:**
+- Grid 3 col desktop / 2 tablet / 1 móvil
+- Cards con **thumbnail real** del contenido: editor TipTap read-only escalado a `scale(0.45)`,
+  `pointer-events-none`, `overflow-hidden` dentro del card
+- Badge "Oficial NoteEvo" en builtin / "Mía" en personales
+- Fila "Destacadas" al tope (4 plantillas)
+- Filtros por categoría (pills) + buscador por nombre
+
+**Flujo de importar — modal de detalle:**
+1. Click en card → modal a pantalla completa
+2. Preview grande (TipTap read-only con **todas** las extensiones incluyendo Callout/Toggle/TOC)
+3. Selector de libreta destino (recuerda última via `localStorage`)
+4. "Usar esta plantilla" → crea nota → redirige al editor con nota abierta
+
+**Archivos a crear/modificar:**
+- `lib/templates/builtin-templates.ts` — añadir 16 plantillas nuevas con contenido TipTap JSON rico
+- `components/templates/TemplatesView.tsx` — rediseño completo
+- `components/templates/TemplateSelector.tsx` — actualizar con nuevo flujo de preview
+- No hay cambios en DB (las plantillas builtin viven en código)
 
 ### id:42 — Tasks: rediseño UI + modal mejorado
 **Estado: pending**
