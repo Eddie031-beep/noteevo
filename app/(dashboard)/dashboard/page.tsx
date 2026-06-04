@@ -18,6 +18,7 @@ import SpacesView from '@/components/spaces/SpacesView'
 import SharedWithMeView from '@/components/spaces/SharedWithMeView'
 import TemplatesView from '@/components/templates/TemplatesView'
 import TagsView from '@/components/tags/TagsView'
+import AiAssistantView from '@/components/ai/AiAssistantView'
 import { getAllNotesWithNotebook, createQuickNote, type NoteWithNotebook } from '@/lib/supabase/notes'
 import { extractTextPreview } from '@/lib/utils/tiptap'
 import { format } from 'date-fns'
@@ -218,8 +219,9 @@ export default function DashboardPage() {
   const showSpaces = currentView === 'spaces'
   const showShared = currentView === 'shared'
   const showTemplates = currentView === 'templates'
+  const showAiAssistant = currentView === 'ai-assistant'
 
-  const showEditor = !showHome && !showAdvancedSearch && !showTags && !showTasks && !showFiles && !showCalendar && !showSpaces && !showShared && !showTemplates
+  const showEditor = !showHome && !showAdvancedSearch && !showTags && !showTasks && !showFiles && !showCalendar && !showSpaces && !showShared && !showTemplates && !showAiAssistant
 
   return (
     <div className="flex h-full bg-background">
@@ -239,6 +241,7 @@ export default function DashboardPage() {
           {showSpaces && <SpacesView />}
           {showShared && <SharedWithMeView />}
           {showTemplates && <TemplatesView />}
+          {showAiAssistant && <AiAssistantView />}
         </>
       )}
       {showEditor && <NoteEditor />}

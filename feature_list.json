@@ -162,8 +162,9 @@
     "phase": 16,
     "name": "ai-sidebar-assistant",
     "title": "IA en Sidebar: panel lateral de IA",
-    "status": "pending",
+    "status": "done",
     "description": "Entrada 'Asistente IA' en Sidebar (Sparkles, siempre activo). currentView 'ai-assistant' en uiStore. AiAssistantView.tsx: chat general con Groq streaming. Selector contexto. Acciones rápidas. Rate limit 20/día. Route Handler app/api/ai/assistant/route.ts.",
+    "notes": "View 'ai-assistant' en uiStore + entrada Sparkles en Sidebar tras Calendario. AiAssistantView.tsx: chat streaming (ReadableStream), selector de contexto (Sin nota / Nota activa / Todas mis notas), acciones rápidas, historial en memoria. Contexto 'all' carga perezosa de getAllNotesWithNotebook + extractTextPreview. Route /api/ai/assistant: rate limit 20/día con action 'ai_assistant' (sin CHECK constraint en ai_usage), system prompt con/ sin contexto.",
     "depends_on": []
   },
   {

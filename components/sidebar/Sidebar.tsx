@@ -23,7 +23,7 @@ import NotificationBell from './NotificationBell'
 import { useDroppable } from '@dnd-kit/core'
 import type { Notebook, Space } from '@/types'
 
-type View = 'home' | 'notebooks' | 'all-notes' | 'favorites' | 'trash' | 'search' | 'advanced-search' | 'tags-view' | 'notebooks-view' | 'tasks' | 'files' | 'calendar' | 'spaces' | 'shared' | 'settings' | 'templates'
+type View = 'home' | 'notebooks' | 'all-notes' | 'favorites' | 'trash' | 'search' | 'advanced-search' | 'tags-view' | 'notebooks-view' | 'tasks' | 'files' | 'calendar' | 'spaces' | 'shared' | 'settings' | 'templates' | 'ai-assistant'
 
 interface NavItemProps {
   icon: React.ReactNode
@@ -618,6 +618,13 @@ export default function Sidebar() {
           label="Calendario"
           active={currentView === 'calendar'}
           onClick={() => handleNav('calendar')}
+          collapsed={collapsed}
+        />
+        <NavItem
+          icon={<Sparkles size={18} />}
+          label="Asistente IA"
+          active={currentView === 'ai-assistant'}
+          onClick={() => handleNav('ai-assistant')}
           collapsed={collapsed}
         />
         {/* Spaces section */}

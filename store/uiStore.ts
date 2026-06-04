@@ -3,7 +3,7 @@ import { create } from 'zustand'
 type View =
   | 'home' | 'notebooks' | 'all-notes' | 'favorites' | 'trash'
   | 'search' | 'advanced-search' | 'tags-view' | 'notebooks-view' | 'tasks' | 'files'
-  | 'calendar' | 'spaces' | 'shared' | 'settings' | 'templates'
+  | 'calendar' | 'spaces' | 'shared' | 'settings' | 'templates' | 'ai-assistant'
 
 export type Theme = 'dark' | 'light' | 'system'
 

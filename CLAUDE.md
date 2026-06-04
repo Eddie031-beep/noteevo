@@ -264,7 +264,16 @@ El editor actual ocupa todo el ancho y se siente abrumador. Cambios:
 - En móvil: toolbar scrollable horizontalmente
 
 ### id:47 — IA en Sidebar: panel lateral de IA
-**Estado: pending**
+**Estado: done ✅**
+- View `'ai-assistant'` en `uiStore` + entrada "Asistente IA" (Sparkles) en
+  `Sidebar` tras Calendario; render full-width en `dashboard/page.tsx`
+- `components/ai/AiAssistantView.tsx`: chat general con streaming (`ReadableStream`),
+  selector de contexto (Sin nota / Nota activa / Todas mis notas), acciones
+  rápidas e historial en memoria (se borra al recargar)
+- Contexto "Todas mis notas": carga perezosa de `getAllNotesWithNotebook` +
+  `extractTextPreview` (resumen de títulos + preview)
+- `app/api/ai/assistant/route.ts`: rate limit 20/día con `action='ai_assistant'`
+  en `ai_usage` (sin CHECK constraint), prompt de sistema con/sin contexto
 Añadir una sección de IA accesible desde el sidebar izquierdo (no solo desde el editor):
 - Nueva opción en el sidebar: "Asistente IA" con icono Sparkles
 - `currentView === 'ai-assistant'` en `uiStore`
