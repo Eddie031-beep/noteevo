@@ -12,7 +12,6 @@ export async function getShareLink(noteId: string): Promise<SharedNote | null> {
     .select('*')
     .eq('note_id', noteId)
     .maybeSingle()
-  // eslint-disable-next-line no-console
   if (error) console.error('[shared-notes] getShareLink error:', error)
   return data ?? null
 }
@@ -38,7 +37,6 @@ export async function createShareLink(noteId: string): Promise<SharedNote> {
     .select()
     .single()
 
-  // eslint-disable-next-line no-console
   if (error) console.error('[shared-notes] createShareLink insert error:', error)
   if (error) throw new Error(error.message)
   return data

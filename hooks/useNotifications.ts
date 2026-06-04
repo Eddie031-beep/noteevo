@@ -26,6 +26,8 @@ export function useNotifications() {
   }, [])
 
   useEffect(() => {
+    // Carga inicial de notificaciones al montar.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load()
   }, [load])
 

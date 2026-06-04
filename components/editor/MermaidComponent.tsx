@@ -87,6 +87,8 @@ export default function MermaidComponent({
   }, [])
 
   useEffect(() => {
+    // Renderizado intencional del diagrama al montar o cambiar el código/tema.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     renderDiagram(code)
   }, [code, theme, renderDiagram])
 
@@ -118,7 +120,7 @@ export default function MermaidComponent({
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const DiagramView = () => (
+  const diagramView = (
     <div className="flex items-center justify-center p-6 min-h-[140px] bg-panel">
       {rendering ? (
         <div className="flex items-center gap-2 text-xs text-muted">
@@ -145,7 +147,7 @@ export default function MermaidComponent({
     </div>
   )
 
-  const CodeEditor = () => (
+  const codeEditor = (
     <textarea
       value={draftCode}
       onChange={(e) => setDraftCode(e.target.value)}
@@ -272,15 +274,15 @@ export default function MermaidComponent({
         </div>
 
         {/* ── Contenido según modo ── */}
-        {mode === 'code' && <CodeEditor />}
-        {mode === 'preview' && <DiagramView />}
+        {mode === 'code' && codeEditor}
+        {mode === 'preview' && diagramView}
         {mode === 'split' && (
           <div className="flex divide-x divide-border">
             <div className="w-1/2">
-              <CodeEditor />
+              {codeEditor}
             </div>
             <div className="w-1/2">
-              <DiagramView />
+              {diagramView}
             </div>
           </div>
         )}

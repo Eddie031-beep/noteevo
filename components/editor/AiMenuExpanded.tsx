@@ -179,7 +179,6 @@ interface Props {
 // ── Component ──────────────────────────────────────────────────────────────
 export default function AiMenuExpanded({
   editor,
-  noteContent: _noteContent,
   onSummarize,
   onChat,
   onSmartTags,

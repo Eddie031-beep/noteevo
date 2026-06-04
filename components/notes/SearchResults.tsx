@@ -18,6 +18,8 @@ export default function SearchResults() {
 
   useEffect(() => {
     if (!searchQuery.trim()) {
+      // Reset intencional de resultados cuando la búsqueda queda vacía.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setResults([])
       return
     }

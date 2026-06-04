@@ -1,5 +1,12 @@
 'use client'
 
+/*
+ * react-hooks/refs: falso positivo. El array `items` contiene closures `action`
+ * que referencian `imageInputRef.current`, pero esos closures solo se ejecutan en
+ * los handlers onClick, no durante el render. Filter/map solo leen label/keywords/category.
+ */
+/* eslint-disable react-hooks/refs */
+
 import { useEffect, useRef, useState } from 'react'
 import {
   Plus, Search, Table, Minus, Quote,

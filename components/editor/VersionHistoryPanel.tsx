@@ -40,6 +40,8 @@ export default function VersionHistoryPanel({
     }
   }
 
+  // Recarga el historial cuando cambia la nota; load() es estable para este efecto.
+  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
   useEffect(() => { load() }, [noteId])
 
   const handleSave = async () => {

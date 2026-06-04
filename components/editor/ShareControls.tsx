@@ -28,6 +28,8 @@ export default function ShareControls({ noteId, noteTitle }: ShareControlsProps)
 
   useEffect(() => {
     let cancelled = false
+    // Reset + carga del estado de compartir al cambiar de nota (patrón intencional).
+    /* eslint-disable-next-line react-hooks/set-state-in-effect */
     setSharedNote(null)
     setLoading(true)
     getShareLink(noteId)

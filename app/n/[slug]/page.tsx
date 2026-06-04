@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { getSharedNote } from '@/lib/supabase/shared-notes-server'
 import { notifyNoteOwner } from '@/lib/supabase/notifications-server'
 import NoteViewer from './NoteViewer'
@@ -18,9 +19,9 @@ export default async function PublicNotePage({ params }: PageProps) {
         <div className="text-center">
           <p className="text-foreground font-medium">Link no disponible</p>
           <p className="text-muted text-sm mt-1">Esta nota no existe o el enlace fue desactivado.</p>
-          <a href="/" className="text-accent text-sm mt-4 inline-block hover:underline">
+          <Link href="/" className="text-accent text-sm mt-4 inline-block hover:underline">
             Ir a NoteEvo
-          </a>
+          </Link>
         </div>
       </div>
     )
@@ -38,9 +39,9 @@ export default async function PublicNotePage({ params }: PageProps) {
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border px-6 py-3 flex items-center justify-between">
         <span className="text-sm font-semibold text-accent">NoteEvo</span>
-        <a href="/register" className="text-xs text-muted hover:text-foreground transition">
+        <Link href="/register" className="text-xs text-muted hover:text-foreground transition">
           Crear cuenta gratis
-        </a>
+        </Link>
       </header>
 
       <main className="max-w-2xl mx-auto px-6 py-10">
@@ -53,7 +54,7 @@ export default async function PublicNotePage({ params }: PageProps) {
       <footer className="border-t border-border px-6 py-6 text-center">
         <p className="text-xs text-muted">
           Nota compartida con{' '}
-          <a href="/" className="text-accent hover:underline">NoteEvo</a>
+          <Link href="/" className="text-accent hover:underline">NoteEvo</Link>
           {' '}— tu segundo cerebro
         </p>
       </footer>
