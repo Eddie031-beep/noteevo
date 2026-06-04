@@ -287,7 +287,17 @@ Añadir una sección de IA accesible desde el sidebar izquierdo (no solo desde e
 - Añadir entrada en `Sidebar.tsx` (siempre visible, no `disabled`)
 
 ### id:48 — Compartir nota: opción "Cualquiera con el link puede editar"
-**Estado: pending**
+**Estado: done ✅**
+- `access_level` ahora `'none' | 'view' | 'edit'` (columna text, sin CHECK constraint)
+- `ShareControls`: opción "Anyone with the link can edit" habilitada; al activar
+  desde cero crea el link (`view`) y lo promociona a `edit`
+- `NoteViewer` → renombrado a **`NotePublicEditor`** (props `editable` + `slug`);
+  cuando `editable`, TipTap editable con autosave debounce 1500ms e indicador
+  Guardando / Guardado / Error. `initializedRef` evita autosave en el `setContent`
+  inicial
+- Endpoint público `app/api/shared/update/route.ts` → `updateSharedNoteContent`
+  (cliente admin/service role) que valida `is_active` + `access_level='edit'` +
+  no expirado + cota de tamaño 500KB antes de escribir `notes.content`
 Actualmente solo existe "view" (solo lectura). Añadir modo edición colaborativa:
 - Nueva columna en `shared_notes`: `access_level text default 'none'` → ya existe con valores `'none' | 'view'`, añadir `'edit'`
 - `ShareControls.tsx`: habilitar la opción "Anyone with the link can edit" (actualmente disabled)
@@ -384,7 +394,8 @@ app/
 │   ├── ai/transform/route.ts
 │   ├── ai/assistant/route.ts      ← Phase 16 (id:47)
 │   ├── spaces/invite/route.ts
-│   └── spaces/lookup-user/route.ts ← Phase 16 (id:45)
+│   ├── spaces/lookup-user/route.ts ← Phase 16 (id:45)
+│   └── shared/update/route.ts      ← Phase 16 (id:48, público sin auth)
 ├── globals.css
 └── middleware.ts
 
@@ -513,6 +524,7 @@ RESEND_API_KEY=                  # Phase 13
 | Rejilla semanal con `HOUR_HEIGHT=48` y línea de hora viva (Phase 16 id:44) | Posicionamiento absoluto de eventos por minutos; línea de "ahora" refrescada cada 60s |
 | Color de space determinista por `id` (Phase 16 id:45) | Evita migración/columna; visualmente equivalente a "color aleatorio al crear" y estable entre sesiones. `lib/utils/space-color.ts` |
 | `/api/spaces/lookup-user` solo owner/admin (Phase 16 id:45) | Preview de usuario antes de invitar sin convertir el endpoint en oráculo de enumeración de emails |
+| Edición pública colaborativa con service role (Phase 16 id:48) | `/api/shared/update` no requiere auth; `updateSharedNoteContent` valida is_active + access_level='edit' + no expirado + cota 500KB antes de escribir. NoteViewer→NotePublicEditor con prop `editable`; autosave debounce 1500ms |
 
 ---
 

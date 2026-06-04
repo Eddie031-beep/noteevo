@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { getSharedNote } from '@/lib/supabase/shared-notes-server'
 import { notifyNoteOwner } from '@/lib/supabase/notifications-server'
-import NoteViewer from './NoteViewer'
+import NotePublicEditor from './NotePublicEditor'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -34,6 +34,7 @@ export default async function PublicNotePage({ params }: PageProps) {
   }
 
   const note = result.notes
+  const canEdit = result.access_level === 'edit'
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -48,7 +49,11 @@ export default async function PublicNotePage({ params }: PageProps) {
         <h1 className="text-3xl font-bold text-foreground mb-6">
           {note.title || 'Sin título'}
         </h1>
-        <NoteViewer content={note.content ?? {}} />
+        <NotePublicEditor
+          content={note.content ?? {}}
+          editable={canEdit}
+          slug={slug}
+        />
       </main>
 
       <footer className="border-t border-border px-6 py-6 text-center">

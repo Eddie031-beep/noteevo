@@ -10,7 +10,7 @@ interface ShareControlsProps {
   noteTitle: string
 }
 
-type AccessLevel = 'none' | 'view'
+type AccessLevel = 'none' | 'view' | 'edit'
 
 export default function ShareControls({ noteId, noteTitle }: ShareControlsProps) {
   const [sharedNote, setSharedNote] = useState<SharedNote | null>(null)
@@ -60,13 +60,19 @@ export default function ShareControls({ noteId, noteTitle }: ShareControlsProps)
     if (updating) return
     setUpdating(true)
     try {
+      const isActive = level !== 'none'
       if (!sharedNote) {
-        if (level === 'view') {
-          const created = await createShareLink(noteId)
+        if (level === 'none') return
+        // createShareLink crea con access_level 'view'; si se pidió 'edit',
+        // se promociona inmediatamente.
+        const created = await createShareLink(noteId)
+        if (level === 'edit') {
+          await updateShareLink(created.id, { access_level: 'edit', is_active: true })
+          setSharedNote({ ...created, access_level: 'edit', is_active: true })
+        } else {
           setSharedNote(created)
         }
       } else {
-        const isActive = level === 'view'
         await updateShareLink(sharedNote.id, { access_level: level, is_active: isActive })
         setSharedNote({ ...sharedNote, access_level: level, is_active: isActive })
       }
@@ -147,17 +153,20 @@ export default function ShareControls({ noteId, noteTitle }: ShareControlsProps)
                 {accessLevel === 'view' && <Check size={12} className="mt-1 text-accent shrink-0" />}
               </button>
 
-              {/* Edit — disabled */}
+              {/* Edit */}
               <button
                 type="button"
-                disabled
-                className="w-full flex items-start gap-3 px-3 py-2.5 text-xs cursor-not-allowed opacity-40"
+                onClick={() => handleAccessChange('edit')}
+                className="w-full flex items-start gap-3 px-3 py-2.5 text-xs transition cursor-pointer hover:bg-surface"
               >
                 <PenLine size={13} className="mt-0.5 shrink-0 text-muted" />
                 <span className="flex-1 text-left">
-                  <span className="font-medium block text-muted">Anyone with the link can edit</span>
-                  <span className="text-muted text-[11px]">Próximamente</span>
+                  <span className={`font-medium block ${accessLevel === 'edit' ? 'text-foreground' : 'text-muted'}`}>
+                    Anyone with the link can edit
+                  </span>
+                  <span className="text-muted text-[11px]">Cualquiera con el link puede editar la nota</span>
                 </span>
+                {accessLevel === 'edit' && <Check size={12} className="mt-1 text-accent shrink-0" />}
               </button>
             </div>
           )}

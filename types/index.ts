@@ -118,7 +118,7 @@ export interface SharedNote {
   user_id: string
   public_slug: string
   is_active: boolean
-  access_level: 'none' | 'view'
+  access_level: 'none' | 'view' | 'edit'
   view_count: number
   expires_at: string | null
   created_at: string

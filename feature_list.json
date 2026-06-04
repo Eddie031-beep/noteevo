@@ -172,8 +172,9 @@
     "phase": 16,
     "name": "share-note-edit",
     "title": "Compartir nota: modo edición colaborativa",
-    "status": "pending",
+    "status": "done",
     "description": "access_level añade valor 'edit'. ShareControls habilita opción editar. Página /n/[slug] renderiza editor editable si access_level='edit'. Guardar con service role + debounce 1500ms. Indicador Guardado/Guardando. NoteViewer → NotePublicEditor con prop editable.",
+    "notes": "access_level ahora 'none'|'view'|'edit' (text, sin CHECK constraint en DB). ShareControls: opción 'edit' habilitada; al crear desde cero promociona view→edit. NoteViewer renombrado a NotePublicEditor (prop editable+slug). Autosave debounce 1500ms vía nuevo endpoint público /api/shared/update → updateSharedNoteContent (admin/service role) que valida is_active + access_level='edit' + no expirado + cota de tamaño 500KB. Indicador Guardando/Guardado/Error. initializedRef evita autosave en el setContent inicial.",
     "depends_on": [28]
   }
 ]

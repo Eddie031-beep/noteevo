@@ -44,7 +44,7 @@ export async function createShareLink(noteId: string): Promise<SharedNote> {
 
 export async function updateShareLink(
   id: string,
-  updates: { is_active?: boolean; access_level?: 'none' | 'view' }
+  updates: { is_active?: boolean; access_level?: 'none' | 'view' | 'edit' }
 ): Promise<void> {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
