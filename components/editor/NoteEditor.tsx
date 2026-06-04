@@ -63,7 +63,7 @@ function ToolbarButton({
 }
 
 function Divider() {
-  return <div className="w-px h-4 bg-border mx-0.5 shrink-0" />
+  return <div className="w-px h-5 bg-border mx-1 shrink-0" />
 }
 
 export default function NoteEditor() {
@@ -234,8 +234,18 @@ export default function NoteEditor() {
   return (
     <div className="flex-1 flex flex-col h-screen overflow-hidden bg-background">
       {/* ── Toolbar ── */}
+      {/* En focus mode la toolbar se oculta y se revela al pasar el cursor por
+          la franja superior. En móvil hace scroll horizontal en vez de wrap. */}
       {!isReadOnly && (
-        <div className="flex flex-wrap items-center gap-0.5 px-3 py-1.5 border-b border-border bg-panel shrink-0">
+        <div className={isFocusMode ? 'group/tb absolute inset-x-0 top-0 z-30' : 'shrink-0'}>
+          {isFocusMode && <div className="h-2 w-full" aria-hidden />}
+          <div
+            className={`flex flex-nowrap sm:flex-wrap items-center gap-0.5 px-3 py-1.5 border-b border-border bg-panel overflow-x-auto sm:overflow-x-visible ${
+              isFocusMode
+                ? 'shadow-xl opacity-0 -translate-y-full pointer-events-none transition-all duration-200 group-hover/tb:opacity-100 group-hover/tb:translate-y-0 group-hover/tb:pointer-events-auto'
+                : ''
+            }`}
+          >
 
           {/* Formato básico */}
           <ToolbarButton title="Negrita" onClick={() => editor?.chain().focus().toggleBold().run()} active={editor?.isActive('bold')}>
@@ -373,30 +383,35 @@ export default function NoteEditor() {
             className="hidden"
             onChange={handleImageUpload}
           />
+          </div>
         </div>
       )}
 
       {/* ── Content ── */}
       <div className="flex-1 flex overflow-hidden relative">
         <div
-          className="flex-1 overflow-y-auto px-10 py-8 bg-background"
+          className="flex-1 overflow-y-auto px-6 sm:px-10 py-12 bg-background"
           onMouseUp={handleEditorMouseUp}
         >
-          <input
-            ref={titleRef}
-            type="text"
-            data-testid="note-title-input"
-            defaultValue={selectedNote.title}
-            onChange={isReadOnly ? undefined : handleTitleChange}
-            readOnly={isReadOnly}
-            placeholder="Sin título"
-            className={`w-full text-3xl font-bold text-foreground border-none outline-none mb-4 bg-transparent placeholder-subtle ${isReadOnly ? 'cursor-default' : ''}`}
-            style={{ color: 'var(--color-foreground)' }}
-          />
-          <TagInput key={`${selectedNote.id}-${tagInputKey}`} noteId={selectedNote.id} />
-          {editor && <TableToolbar editor={editor} />}
-          <EditorContent editor={editor} />
-          <AttachmentPanel noteId={selectedNote.id} />
+          <div className={`mx-auto w-full transition-[max-width] duration-300 ${isFocusMode ? 'max-w-2xl' : 'max-w-3xl'}`}>
+            <input
+              ref={titleRef}
+              type="text"
+              data-testid="note-title-input"
+              defaultValue={selectedNote.title}
+              onChange={isReadOnly ? undefined : handleTitleChange}
+              readOnly={isReadOnly}
+              placeholder="Sin título"
+              className={`w-full text-4xl font-bold text-foreground border-none outline-none mb-3 bg-transparent placeholder-subtle leading-tight ${isReadOnly ? 'cursor-default' : ''}`}
+              style={{ color: 'var(--color-foreground)' }}
+            />
+            <TagInput key={`${selectedNote.id}-${tagInputKey}`} noteId={selectedNote.id} />
+            {/* Separador sutil entre título/tags y el cuerpo */}
+            <div className="border-b border-border/60 my-5" />
+            {editor && <TableToolbar editor={editor} />}
+            <EditorContent editor={editor} />
+            <AttachmentPanel noteId={selectedNote.id} />
+          </div>
         </div>
 
         {/* Side panels */}

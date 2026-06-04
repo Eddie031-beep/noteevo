@@ -244,7 +244,15 @@ Evernote muestra los archivos como grid de cards cuando son imágenes, y lista c
   - Fecha de cuando el usuario se unió
 
 ### id:46 — NoteEditor: rediseño layout y breathing room
-**Estado: pending**
+**Estado: done ✅**
+- Cuerpo de escritura envuelto en `max-w-3xl mx-auto` centrado (`max-w-2xl` en
+  focus mode, con transición de ancho); `py-12`; `px-6 sm:px-10`
+- Título `text-4xl font-bold leading-tight`; separador `border-b border-border/60`
+  entre el bloque título+tags y el cuerpo del editor
+- Dividers de toolbar más visibles (`h-5`, `mx-1`)
+- Focus mode: toolbar `absolute` oculta por defecto, se revela al pasar el cursor
+  por la franja superior (`group/tb` + `opacity`/`translate`)
+- Móvil: toolbar `flex-nowrap overflow-x-auto`, `sm:flex-wrap`
 El editor actual ocupa todo el ancho y se siente abrumador. Cambios:
 - Ancho máximo del área de escritura: `max-w-3xl` centrado (actualmente `px-10` full width)
 - Padding vertical aumentado: `py-12` en vez de `py-8`

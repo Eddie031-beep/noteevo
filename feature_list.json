@@ -152,8 +152,9 @@
     "phase": 16,
     "name": "note-editor-layout",
     "title": "NoteEditor: rediseño layout y breathing room",
-    "status": "pending",
+    "status": "done",
     "description": "Área de escritura max-w-3xl centrada. py-12 padding vertical. Título text-4xl. Separador sutil título/cuerpo. Toolbar con grupos visuales claros. Focus mode: max-w-2xl + toolbar oculta on hover. Toolbar scrollable en móvil.",
+    "notes": "Cuerpo envuelto en max-w-3xl mx-auto (max-w-2xl en focus mode, transición de ancho). py-12, título text-4xl con leading-tight, separador border-b border-border/60 bajo título+tags. Dividers de toolbar más visibles (h-5, mx-1). Focus mode: toolbar absolute con reveal on hover de franja superior (group/tb, opacity+translate). Móvil: flex-nowrap overflow-x-auto, sm:flex-wrap. isFocusMode ahora consumido (resuelve warning de lint).",
     "depends_on": []
   },
   {
