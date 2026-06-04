@@ -195,7 +195,7 @@ Inspirado en Linear/Evernote Tasks:
   - Botón "Guardar" más prominente
 
 ### id:43 — Files: rediseño UI al estilo Evernote
-**Estado: pending**
+**Estado: done ✅ (commit d98feee)**
 Evernote muestra los archivos como grid de cards cuando son imágenes, y lista cuando son docs.
 - Vista grid para imágenes: cards cuadradas con thumbnail grande (200×200), nombre debajo
 - Vista lista para docs: fila compacta con icono tipado, nombre, tamaño, nota origen, fecha
