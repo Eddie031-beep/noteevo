@@ -129,3 +129,15 @@ export async function getAllNotesWithNotebook(): Promise<NoteWithNotebook[]> {
 export async function createQuickNote(notebookId: string): Promise<Note> {
   return createNote(notebookId)
 }
+
+export async function getNoteById(id: string): Promise<Note | null> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('notes')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle()
+
+  if (error) throw new Error(error.message)
+  return data ?? null
+}

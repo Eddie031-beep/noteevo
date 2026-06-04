@@ -124,8 +124,8 @@
     "phase": 16,
     "name": "files-ui-evernote",
     "title": "Files: rediseño UI al estilo Evernote",
-    "status": "pending",
-    "description": "Vista grid para imágenes (cards 200x200). Vista lista para docs. Toggle grid/lista. Drag & drop en FilesView. Breadcrumb nota origen clickeable. Ordenar por nombre/fecha/tamaño. Lightbox con <dialog>.",
+    "status": "done",
+    "description": "Vista grid (cards cuadradas con thumbnail) + lista, toggle en header. Filtros por tipo (Imágenes/PDFs/Audio/Video/Otros) con conteo. Orden por Fecha/Nombre/Tamaño. Lightbox con <dialog> nativo para imágenes. Drag & drop sobre FilesView con modal selector de nota destino. Breadcrumb nota origen clickeable (getNoteById + navega al editor).",
     "depends_on": []
   },
   {
