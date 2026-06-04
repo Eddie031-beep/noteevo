@@ -10,7 +10,7 @@ import type { TaskWithContext } from '@/lib/supabase/tasks'
 import TaskModal from './TaskModal'
 import {
   Plus, Flag, Calendar, CheckSquare, Trash2,
-  ChevronDown, BookOpen, SlidersHorizontal,
+  ChevronDown, BookOpen, SlidersHorizontal, X,
 } from 'lucide-react'
 import { format, parseISO, isToday, isPast, isWithinInterval, addDays, startOfDay } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -21,10 +21,10 @@ type StatusFilter = 'all' | 'pending' | 'completed'
 type PriorityFilter = 'all' | 'high' | 'medium' | 'low'
 type DateFilter = 'all' | 'today' | 'week' | 'overdue'
 
-const PRIORITY_COLOR: Record<Task['priority'], string> = {
-  low: 'text-blue-400',
-  medium: 'text-yellow-400',
-  high: 'text-red-400',
+const PRIORITY_DOT: Record<Task['priority'], string> = {
+  low: 'bg-blue-400',
+  medium: 'bg-yellow-400',
+  high: 'bg-red-400',
 }
 
 const PRIORITY_LABEL: Record<Task['priority'], string> = {
@@ -42,6 +42,17 @@ function matchesDateFilter(task: Task, filter: DateFilter): boolean {
   if (filter === 'week') return isWithinInterval(due, { start: today, end: addDays(today, 7) })
   if (filter === 'overdue') return isPast(due) && !isToday(due)
   return true
+}
+
+/** Estilo del pill de fecha según urgencia. */
+function dueDatePill(task: Task): string {
+  if (!task.due_date) return ''
+  const due = parseISO(task.due_date)
+  const today = startOfDay(new Date())
+  if (isPast(due) && !isToday(due) && !task.is_completed) return 'bg-danger/15 text-danger'
+  if (isToday(due) || isWithinInterval(due, { start: today, end: addDays(today, 2) }))
+    return 'bg-yellow-500/15 text-yellow-500'
+  return 'bg-surface text-muted'
 }
 
 export default function TaskList() {
@@ -92,12 +103,14 @@ export default function TaskList() {
     due_date: string
     priority: Task['priority']
     is_flagged: boolean
+    note_id: string | null
   }) => {
     const task = await createTask(data.title, {
       description: data.description || undefined,
       due_date: data.due_date || undefined,
       priority: data.priority,
       is_flagged: data.is_flagged,
+      note_id: data.note_id ?? undefined,
     })
     addTask(task)
   }
@@ -140,6 +153,12 @@ export default function TaskList() {
   const pending = tasks.filter((t) => !t.is_completed).length
   const hasActiveFilters = statusFilter !== 'all' || priorityFilter !== 'all' || dateFilter !== 'all'
 
+  const clearAllFilters = () => { setStatusFilter('all'); setPriorityFilter('all'); setDateFilter('all') }
+
+  const statusChipLabel: Record<StatusFilter, string> = { all: '', pending: 'Pendientes', completed: 'Completadas' }
+  const priorityChipLabel: Record<PriorityFilter, string> = { all: '', high: 'Alta', medium: 'Media', low: 'Baja' }
+  const dateChipLabel: Record<DateFilter, string> = { all: '', today: 'Hoy', week: 'Esta semana', overdue: 'Vencidas' }
+
   const byNotebook = (() => {
     const groups = new Map<string, { name: string; tasks: TaskWithContext[] }>()
     const noBook: TaskWithContext[] = []
@@ -174,7 +193,7 @@ export default function TaskList() {
             title="Filtros"
             onClick={() => setShowFilters(!showFilters)}
             className={`p-1.5 rounded-lg transition cursor-pointer ${
-              hasActiveFilters
+              showFilters || hasActiveFilters
                 ? 'bg-accent/15 text-accent'
                 : 'text-muted hover:bg-surface hover:text-foreground'
             }`}
@@ -275,13 +294,35 @@ export default function TaskList() {
             {hasActiveFilters && (
               <button
                 type="button"
-                onClick={() => { setStatusFilter('all'); setPriorityFilter('all'); setDateFilter('all') }}
+                onClick={clearAllFilters}
                 className="text-xs text-muted hover:text-danger transition cursor-pointer self-center ml-auto"
               >
                 Limpiar
               </button>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Active filter chips */}
+      {hasActiveFilters && mainTab === 'mytasks' && (
+        <div className="px-6 py-2 border-b border-border flex items-center gap-2 flex-wrap shrink-0">
+          {statusFilter !== 'all' && (
+            <FilterChip label={statusChipLabel[statusFilter]} onClear={() => setStatusFilter('all')} />
+          )}
+          {priorityFilter !== 'all' && (
+            <FilterChip label={`Prioridad: ${priorityChipLabel[priorityFilter]}`} onClear={() => setPriorityFilter('all')} />
+          )}
+          {dateFilter !== 'all' && (
+            <FilterChip label={dateChipLabel[dateFilter]} onClear={() => setDateFilter('all')} />
+          )}
+          <button
+            type="button"
+            onClick={clearAllFilters}
+            className="text-xs text-muted hover:text-danger transition cursor-pointer ml-1"
+          >
+            Limpiar todo
+          </button>
         </div>
       )}
 
@@ -303,7 +344,7 @@ export default function TaskList() {
               </div>
             </div>
           ) : (
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               {filtered.map((task) => (
                 <TaskItem
                   key={task.id}
@@ -338,7 +379,7 @@ export default function TaskList() {
                     </span>
                     <span className="text-xs text-subtle">({group.tasks.length})</span>
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     {group.tasks.map((task) => (
                       <TaskItem
                         key={task.id}
@@ -362,6 +403,22 @@ export default function TaskList() {
   )
 }
 
+function FilterChip({ label, onClear }: { label: string; onClear: () => void }) {
+  return (
+    <span className="inline-flex items-center gap-1 pl-2.5 pr-1.5 py-1 bg-accent/10 text-accent text-xs rounded-full">
+      {label}
+      <button
+        type="button"
+        onClick={onClear}
+        title="Quitar filtro"
+        className="hover:bg-accent/20 rounded-full p-0.5 cursor-pointer transition"
+      >
+        <X size={11} />
+      </button>
+    </span>
+  )
+}
+
 function TaskItem({
   task,
   onToggle,
@@ -375,25 +432,31 @@ function TaskItem({
 
   return (
     <div
-      className={`group bg-panel border rounded-xl p-3.5 transition ${
-        task.is_completed ? 'border-border opacity-60' : 'border-border hover:border-border'
+      className={`group bg-panel border rounded-xl px-4 py-3 transition hover:border-accent/30 ${
+        task.is_completed ? 'border-border opacity-60' : 'border-border'
       }`}
     >
       <div className="flex items-start gap-3">
-        {/* Checkbox */}
+        {/* Priority dot */}
+        <span
+          title={`Prioridad ${PRIORITY_LABEL[task.priority]}`}
+          className={`mt-2.5 w-2 h-2 rounded-full shrink-0 ${PRIORITY_DOT[task.priority]}`}
+        />
+
+        {/* Checkbox 24px */}
         <button
           type="button"
           title={task.is_completed ? 'Marcar pendiente' : 'Completar'}
           onClick={onToggle}
-          className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition cursor-pointer ${
+          className={`mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-90 ${
             task.is_completed
               ? 'border-accent bg-accent'
               : 'border-border hover:border-accent'
           }`}
         >
           {task.is_completed && (
-            <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
-              <path d="M1 3L3 5L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <svg width="13" height="10" viewBox="0 0 13 10" fill="none">
+              <path d="M1.5 5L4.8 8.3L11.5 1.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           )}
         </button>
@@ -402,25 +465,18 @@ function TaskItem({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span
-              className={`text-sm font-medium ${
+              className={`text-[15px] font-medium leading-snug ${
                 task.is_completed ? 'line-through text-muted' : 'text-foreground'
               }`}
             >
               {task.title}
             </span>
-            {task.is_flagged && <Flag size={12} className="text-orange-400 shrink-0" />}
+            {task.is_flagged && <Flag size={13} className="text-orange-400 fill-orange-400 shrink-0" />}
           </div>
 
-          <div className="flex items-center gap-3 mt-1 flex-wrap">
-            <span className={`text-xs ${PRIORITY_COLOR[task.priority]}`}>
-              ● {PRIORITY_LABEL[task.priority]}
-            </span>
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
             {task.due_date && (
-              <span className={`flex items-center gap-1 text-xs ${
-                isPast(parseISO(task.due_date)) && !isToday(parseISO(task.due_date)) && !task.is_completed
-                  ? 'text-danger'
-                  : 'text-muted'
-              }`}>
+              <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${dueDatePill(task)}`}>
                 <Calendar size={11} />
                 {format(parseISO(task.due_date), 'd MMM', { locale: es })}
               </span>

@@ -1,22 +1,34 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { X, Flag, Calendar, AlignLeft, ChevronDown } from 'lucide-react'
+import { X, Flag, Calendar, AlignLeft, FileText, Search, Check } from 'lucide-react'
 import type { Task } from '@/types'
+import { getAllNotesWithNotebook, type NoteWithNotebook } from '@/lib/supabase/notes'
 
 type Priority = Task['priority']
 
+interface SaveData {
+  title: string
+  description: string
+  due_date: string
+  priority: Priority
+  is_flagged: boolean
+  note_id: string | null
+}
+
 interface Props {
   onClose: () => void
-  onSave: (data: { title: string; description: string; due_date: string; priority: Priority; is_flagged: boolean }) => Promise<void>
+  onSave: (data: SaveData) => Promise<void>
   initialDate?: string
 }
 
-const PRIORITIES: { value: Priority; label: string; color: string }[] = [
-  { value: 'low', label: 'Baja', color: 'text-blue-400' },
-  { value: 'medium', label: 'Media', color: 'text-yellow-400' },
-  { value: 'high', label: 'Alta', color: 'text-red-400' },
+const PRIORITIES: { value: Priority; label: string; dot: string; activeBg: string; activeText: string }[] = [
+  { value: 'low', label: 'Baja', dot: 'bg-blue-400', activeBg: 'bg-blue-500/15 border-blue-500/45', activeText: 'text-blue-400' },
+  { value: 'medium', label: 'Media', dot: 'bg-yellow-400', activeBg: 'bg-yellow-500/15 border-yellow-500/45', activeText: 'text-yellow-500' },
+  { value: 'high', label: 'Alta', dot: 'bg-red-400', activeBg: 'bg-red-500/15 border-red-500/45', activeText: 'text-red-400' },
 ]
+
+const TODAY = new Date().toISOString().split('T')[0]
 
 export default function TaskModal({ onClose, onSave, initialDate }: Props) {
   const [title, setTitle] = useState('')
@@ -24,13 +36,26 @@ export default function TaskModal({ onClose, onSave, initialDate }: Props) {
   const [dueDate, setDueDate] = useState(initialDate ?? '')
   const [priority, setPriority] = useState<Priority>('medium')
   const [isFlagged, setIsFlagged] = useState(false)
+  const [noteId, setNoteId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
-  const [showPriority, setShowPriority] = useState(false)
+
+  const [notes, setNotes] = useState<NoteWithNotebook[]>([])
+  const [showNotePicker, setShowNotePicker] = useState(false)
+  const [noteSearch, setNoteSearch] = useState('')
+
   const titleRef = useRef<HTMLInputElement>(null)
   const backdropRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     titleRef.current?.focus()
+  }, [])
+
+  useEffect(() => {
+    let active = true
+    getAllNotesWithNotebook()
+      .then((data) => { if (active) setNotes(data) })
+      .catch(() => { /* error cargando notas */ })
+    return () => { active = false }
   }, [])
 
   const handleBackdrop = (e: React.MouseEvent) => {
@@ -41,7 +66,14 @@ export default function TaskModal({ onClose, onSave, initialDate }: Props) {
     if (!title.trim()) return
     setSaving(true)
     try {
-      await onSave({ title: title.trim(), description, due_date: dueDate, priority, is_flagged: isFlagged })
+      await onSave({
+        title: title.trim(),
+        description,
+        due_date: dueDate,
+        priority,
+        is_flagged: isFlagged,
+        note_id: noteId,
+      })
       onClose()
     } catch {
       // error silencioso
@@ -50,13 +82,16 @@ export default function TaskModal({ onClose, onSave, initialDate }: Props) {
     }
   }
 
-  const currentPriority = PRIORITIES.find((p) => p.value === priority)!
+  const selectedNote = notes.find((n) => n.id === noteId) ?? null
+  const filteredNotes = noteSearch.trim()
+    ? notes.filter((n) => n.title.toLowerCase().includes(noteSearch.toLowerCase()))
+    : notes
 
   return (
     <div
       ref={backdropRef}
       onClick={handleBackdrop}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
     >
       <div className="w-full max-w-md bg-panel border border-border rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
@@ -73,7 +108,7 @@ export default function TaskModal({ onClose, onSave, initialDate }: Props) {
         </div>
 
         {/* Body */}
-        <div className="p-5 space-y-4">
+        <div className="p-5 space-y-5">
           {/* Title */}
           <input
             ref={titleRef}
@@ -83,81 +118,142 @@ export default function TaskModal({ onClose, onSave, initialDate }: Props) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSave()}
-            className="w-full bg-transparent text-foreground text-base font-medium outline-none placeholder-subtle"
+            className="w-full bg-transparent text-foreground text-lg font-semibold outline-none placeholder-subtle"
             style={{ color: 'var(--color-foreground)' }}
           />
 
           {/* Description */}
-          <div className="flex items-start gap-2.5">
-            <AlignLeft size={15} className="text-muted mt-0.5 shrink-0" />
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-medium text-subtle mb-1.5">
+              <AlignLeft size={13} /> Descripción
+            </label>
             <textarea
-              placeholder="Descripción (opcional)"
+              placeholder="Añade más detalles (opcional)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={2}
-              className="flex-1 bg-transparent text-sm text-foreground outline-none resize-none placeholder-subtle"
+              rows={3}
+              className="w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none resize-none placeholder-subtle focus:border-accent/50 transition"
               style={{ color: 'var(--color-foreground)' }}
             />
           </div>
 
-          <div className="h-px bg-border" />
+          {/* Priority — segmented visual selector */}
+          <div>
+            <label className="block text-xs font-medium text-subtle mb-1.5">Prioridad</label>
+            <div className="grid grid-cols-3 gap-2">
+              {PRIORITIES.map((p) => {
+                const active = priority === p.value
+                return (
+                  <button
+                    key={p.value}
+                    type="button"
+                    onClick={() => setPriority(p.value)}
+                    className={`flex items-center justify-center gap-1.5 py-2 rounded-lg border text-xs font-medium transition cursor-pointer ${
+                      active
+                        ? `${p.activeBg} ${p.activeText}`
+                        : 'bg-surface border-border text-muted hover:text-foreground'
+                    }`}
+                  >
+                    <span className={`w-2 h-2 rounded-full ${p.dot}`} />
+                    {p.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
 
-          {/* Options row */}
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Due date */}
-            <div className="flex items-center gap-1.5 bg-surface rounded-lg px-3 py-1.5">
-              <Calendar size={13} className="text-muted shrink-0" />
+          {/* Due date + Flag */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-medium text-subtle mb-1.5">
+                <Calendar size={13} /> Fecha límite
+              </label>
               <input
                 type="date"
                 value={dueDate}
+                min={TODAY}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="bg-transparent text-xs text-muted outline-none cursor-pointer"
+                className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-xs text-foreground outline-none cursor-pointer focus:border-accent/50 transition"
+                style={{ color: 'var(--color-foreground)' }}
                 title="Fecha límite"
               />
             </div>
-
-            {/* Priority */}
-            <div className="relative">
+            <div>
+              <label className="block text-xs font-medium text-subtle mb-1.5">Importante</label>
               <button
                 type="button"
-                onClick={() => setShowPriority(!showPriority)}
-                className="flex items-center gap-1.5 bg-surface rounded-lg px-3 py-1.5 text-xs cursor-pointer hover:bg-elevated transition"
+                onClick={() => setIsFlagged(!isFlagged)}
+                className={`w-full flex items-center justify-center gap-1.5 py-2 rounded-lg border text-xs font-medium transition cursor-pointer ${
+                  isFlagged
+                    ? 'bg-orange-500/15 border-orange-500/45 text-orange-400'
+                    : 'bg-surface border-border text-muted hover:text-foreground'
+                }`}
               >
-                <span className={currentPriority.color}>●</span>
-                <span className="text-muted">{currentPriority.label}</span>
-                <ChevronDown size={11} className="text-muted" />
+                <Flag size={13} className={isFlagged ? 'fill-orange-400' : ''} />
+                {isFlagged ? 'Marcada' : 'Marcar'}
               </button>
-              {showPriority && (
-                <div className="absolute top-full left-0 mt-1 w-32 bg-panel border border-border rounded-lg shadow-xl z-10 overflow-hidden">
-                  {PRIORITIES.map((p) => (
-                    <button
-                      key={p.value}
-                      type="button"
-                      onClick={() => { setPriority(p.value); setShowPriority(false) }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted hover:bg-surface hover:text-foreground cursor-pointer transition"
-                    >
-                      <span className={p.color}>●</span>
-                      {p.label}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
+          </div>
 
-            {/* Flag */}
+          {/* Link to note */}
+          <div className="relative">
+            <label className="flex items-center gap-1.5 text-xs font-medium text-subtle mb-1.5">
+              <FileText size={13} /> Vincular a una nota
+            </label>
             <button
               type="button"
-              title="Marcar como importante"
-              onClick={() => setIsFlagged(!isFlagged)}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition cursor-pointer ${
-                isFlagged
-                  ? 'bg-orange-500/15 text-orange-400'
-                  : 'bg-surface text-muted hover:bg-elevated'
-              }`}
+              onClick={() => setShowNotePicker(!showNotePicker)}
+              className="w-full flex items-center justify-between gap-2 bg-surface border border-border rounded-lg px-3 py-2 text-xs cursor-pointer hover:border-accent/50 transition"
             >
-              <Flag size={13} />
-              <span>{isFlagged ? 'Marcada' : 'Marcar'}</span>
+              <span className={`truncate ${selectedNote ? 'text-foreground' : 'text-subtle'}`}>
+                {selectedNote ? (selectedNote.title || 'Sin título') : 'Ninguna (opcional)'}
+              </span>
+              {selectedNote && (
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => { e.stopPropagation(); setNoteId(null) }}
+                  className="text-muted hover:text-danger transition shrink-0"
+                  title="Quitar vínculo"
+                >
+                  <X size={13} />
+                </span>
+              )}
             </button>
+
+            {showNotePicker && (
+              <div className="absolute bottom-full left-0 right-0 mb-1 bg-panel border border-border rounded-lg shadow-xl z-20 overflow-hidden">
+                <div className="flex items-center gap-2 px-3 py-2 border-b border-border">
+                  <Search size={13} className="text-muted shrink-0" />
+                  <input
+                    type="text"
+                    autoFocus
+                    placeholder="Buscar nota…"
+                    value={noteSearch}
+                    onChange={(e) => setNoteSearch(e.target.value)}
+                    className="flex-1 bg-transparent text-xs text-foreground outline-none placeholder-subtle"
+                    style={{ color: 'var(--color-foreground)' }}
+                  />
+                </div>
+                <div className="max-h-48 overflow-y-auto">
+                  {filteredNotes.length === 0 ? (
+                    <p className="px-3 py-3 text-xs text-subtle text-center">Sin notas</p>
+                  ) : (
+                    filteredNotes.slice(0, 50).map((n) => (
+                      <button
+                        key={n.id}
+                        type="button"
+                        onClick={() => { setNoteId(n.id); setShowNotePicker(false); setNoteSearch('') }}
+                        className="w-full flex items-center justify-between gap-2 px-3 py-2 text-xs text-muted hover:bg-surface hover:text-foreground cursor-pointer transition text-left"
+                      >
+                        <span className="truncate">{n.title || 'Sin título'}</span>
+                        {n.id === noteId && <Check size={13} className="text-accent shrink-0" />}
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -166,7 +262,7 @@ export default function TaskModal({ onClose, onSave, initialDate }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm text-muted hover:text-foreground transition cursor-pointer"
+            className="px-4 py-2.5 text-sm text-muted hover:text-foreground transition cursor-pointer"
           >
             Cancelar
           </button>
@@ -175,7 +271,7 @@ export default function TaskModal({ onClose, onSave, initialDate }: Props) {
             data-testid="task-submit"
             onClick={handleSave}
             disabled={!title.trim() || saving}
-            className="px-4 py-2 text-sm bg-accent text-white rounded-lg hover:bg-accent-light disabled:opacity-40 transition cursor-pointer font-medium"
+            className="px-6 py-2.5 text-sm bg-accent text-white rounded-lg hover:bg-accent-light disabled:opacity-40 transition cursor-pointer font-semibold shadow-sm shadow-accent/20"
           >
             {saving ? 'Guardando…' : 'Crear tarea'}
           </button>

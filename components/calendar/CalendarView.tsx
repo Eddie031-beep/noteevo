@@ -125,13 +125,14 @@ export default function CalendarView() {
 
   const handleCreate = async (data: {
     title: string; description: string; due_date: string
-    priority: Task['priority']; is_flagged: boolean
+    priority: Task['priority']; is_flagged: boolean; note_id: string | null
   }) => {
     const task = await createTask(data.title, {
       description: data.description || undefined,
       due_date: data.due_date || undefined,
       priority: data.priority,
       is_flagged: data.is_flagged,
+      note_id: data.note_id ?? undefined,
     })
     addTask(task)
   }

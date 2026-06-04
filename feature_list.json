@@ -115,7 +115,7 @@
     "phase": 16,
     "name": "tasks-ui-rediseno",
     "title": "Tasks: rediseño UI + modal mejorado",
-    "status": "pending",
+    "status": "done",
     "description": "Cards rediseñadas: dot color prioridad, pill fecha urgente, checkbox 24px con animación. Panel filtros colapsable (drawer). TaskModal mejorado: selector prioridad visual, date picker con min hoy, selector nota a vincular.",
     "depends_on": []
   },

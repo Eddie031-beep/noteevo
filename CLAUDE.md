@@ -176,7 +176,7 @@ Información de contacto, Lluvia de ideas, Notas de reunión.
 - No hay cambios en DB (las plantillas builtin viven en código)
 
 ### id:42 — Tasks: rediseño UI + modal mejorado
-**Estado: pending**
+**Estado: done ✅**
 Inspirado en Linear/Evernote Tasks:
 - `TaskList.tsx`: rediseño completo de la lista de tareas
   - Cards más compactas con mejor jerarquía visual: título grande, metadata pequeña debajo
