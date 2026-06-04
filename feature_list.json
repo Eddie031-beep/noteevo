@@ -142,8 +142,9 @@
     "phase": 16,
     "name": "spaces-ui-mejoras",
     "title": "Spaces: rediseño UI + mejoras de permisos",
-    "status": "pending",
+    "status": "done",
     "description": "SpacesView: cards más grandes con descripción, contador miembros/libretas, color/banner por space. SpaceDetailView: tabla miembros clara, avatar al invitar. SharedWithMeView: mostrar dueño, nº miembros, fecha de unión.",
+    "notes": "RPC get_spaces_overview() (SECURITY DEFINER): member_count, notebook_count, owner_email, my_joined_at por space accesible. Color determinista por id en lib/utils/space-color.ts (sin migración). Cards con banner de color + icono solapado + conteos. SpaceDetailView: badge de rol propio en header + tabla de miembros con columnas (Miembro/Rol/Unión/Acciones) e iniciales. InviteModal en 2 pasos (buscar→confirmar) con preview de iniciales/email vía nuevo endpoint /api/spaces/lookup-user.",
     "depends_on": []
   },
   {

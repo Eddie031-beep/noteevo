@@ -1,10 +1,12 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Users, Plus, MoreHorizontal, Pencil, Trash2, LogOut, Crown, Shield, Eye, Edit3 } from 'lucide-react'
-import { getMySpaces, deleteSpace, removeMember } from '@/lib/supabase/spaces'
+import { Users, Plus, MoreHorizontal, Pencil, Trash2, LogOut, Crown, Shield, Eye, Edit3, BookOpen } from 'lucide-react'
+import { getMySpaces, deleteSpace, removeMember, getSpacesOverview } from '@/lib/supabase/spaces'
+import type { SpaceOverview } from '@/lib/supabase/spaces'
 import { useSpaceStore } from '@/store/spaceStore'
 import { createClient } from '@/lib/supabase/client'
+import { getSpaceColor, withAlpha } from '@/lib/utils/space-color'
 import CreateSpaceModal from './CreateSpaceModal'
 import SpaceDetailView from './SpaceDetailView'
 import type { Space, SpaceRole } from '@/types'
@@ -19,6 +21,7 @@ const ROLE_LABELS: Record<SpaceRole | 'owner', { label: string; icon: React.Reac
 export default function SpacesView() {
   const { spaces, selectedSpace, isLoading, setSpaces, addSpace, updateSpace, removeSpace, setSelectedSpace, setLoading } = useSpaceStore()
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [overview, setOverview] = useState<Map<string, SpaceOverview>>(new Map())
   const [showCreate, setShowCreate] = useState(false)
   const [editingSpace, setEditingSpace] = useState<Space | null>(null)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
@@ -32,8 +35,9 @@ export default function SpacesView() {
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUserId(user?.id ?? null)
       try {
-        const data = await getMySpaces()
+        const [data, ov] = await Promise.all([getMySpaces(), getSpacesOverview()])
         setSpaces(data)
+        setOverview(ov)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error al cargar spaces')
       } finally {
@@ -152,39 +156,31 @@ export default function SpacesView() {
 
         {/* Spaces grid */}
         {spaces.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" ref={menuRef}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" ref={menuRef}>
             {spaces.map((space) => {
               const roleInfo = ROLE_LABELS[space.user_role ?? 'viewer']
               const isOwner = space.user_role === 'owner'
               const canManage = isOwner || space.user_role === 'admin'
               const menuOpen = openMenuId === space.id
+              const color = getSpaceColor(space.id)
+              const ov = overview.get(space.id)
+              // Total de personas = miembros (space_members) + 1 (dueño, que no
+              // está en space_members).
+              const memberTotal = (ov?.member_count ?? 0) + 1
+              const notebookTotal = ov?.notebook_count ?? 0
 
               return (
                 <div
                   key={space.id}
-                  className="bg-panel border border-border rounded-xl p-4 flex flex-col gap-3 hover:border-accent/30 transition"
+                  className="bg-panel border border-border rounded-xl overflow-hidden flex flex-col hover:border-accent/30 hover:shadow-lg transition"
                 >
-                  {/* Card header: clickable area + 3-dot menu */}
-                  <div className="flex items-start justify-between gap-2">
-                    <button
-                      type="button"
-                      title={`Abrir ${space.name}`}
-                      onClick={() => setSelectedSpace(space)}
-                      className="flex items-center gap-2.5 min-w-0 flex-1 text-left"
-                    >
-                      <div className="w-9 h-9 bg-accent/15 rounded-lg flex items-center justify-center shrink-0">
-                        <Users size={16} className="text-accent" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-medium text-foreground text-sm truncate">{space.name}</p>
-                        {space.description && (
-                          <p className="text-xs text-muted truncate mt-0.5">{space.description}</p>
-                        )}
-                      </div>
-                    </button>
-
-                    {/* 3-dot menu */}
-                    <div className="relative shrink-0">
+                  {/* Banner de color identificador */}
+                  <div
+                    className="h-14 relative"
+                    style={{ background: `linear-gradient(120deg, ${color}, ${withAlpha(color, 0.55)})` }}
+                  >
+                    {/* 3-dot menu sobre el banner */}
+                    <div className="absolute top-2 right-2 z-10">
                       <button
                         type="button"
                         title="Opciones"
@@ -192,13 +188,13 @@ export default function SpacesView() {
                           e.stopPropagation()
                           setOpenMenuId(menuOpen ? null : space.id)
                         }}
-                        className="p-1 text-muted hover:text-foreground transition rounded"
+                        className="p-1 rounded-md bg-black/15 text-white/90 hover:bg-black/30 transition"
                       >
                         <MoreHorizontal size={16} />
                       </button>
 
                       {menuOpen && (
-                        <div className="absolute right-0 top-7 z-20 bg-elevated border border-border rounded-xl shadow-xl min-w-[160px] py-1 overflow-hidden">
+                        <div className="absolute right-0 top-9 z-20 bg-elevated border border-border rounded-xl shadow-xl min-w-[160px] py-1 overflow-hidden">
                           {canManage && (
                             <button
                               type="button"
@@ -235,15 +231,46 @@ export default function SpacesView() {
                         </div>
                       )}
                     </div>
+
+                    {/* Icono solapado */}
+                    <div
+                      className="absolute -bottom-5 left-4 w-11 h-11 rounded-xl border-2 border-panel flex items-center justify-center shadow-sm"
+                      style={{ backgroundColor: color }}
+                    >
+                      <Users size={18} className="text-white" />
+                    </div>
                   </div>
 
-                  {/* Role badge */}
-                  <div>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-accent/10 text-accent text-xs rounded-full border border-accent/20">
-                      {roleInfo.icon}
-                      {roleInfo.label}
-                    </span>
-                  </div>
+                  {/* Cuerpo clickable */}
+                  <button
+                    type="button"
+                    title={`Abrir ${space.name}`}
+                    onClick={() => setSelectedSpace(space)}
+                    className="flex flex-col gap-2 px-4 pt-7 pb-4 text-left flex-1"
+                  >
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-foreground text-[15px] truncate">{space.name}</p>
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-accent/10 text-accent text-[10px] rounded-full border border-accent/20 shrink-0">
+                        {roleInfo.icon}
+                        {roleInfo.label}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted line-clamp-2 min-h-[2rem]">
+                      {space.description || 'Sin descripción'}
+                    </p>
+
+                    {/* Footer: conteos */}
+                    <div className="flex items-center gap-4 pt-1 text-xs text-subtle">
+                      <span className="inline-flex items-center gap-1">
+                        <Users size={13} />
+                        {memberTotal} {memberTotal === 1 ? 'miembro' : 'miembros'}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <BookOpen size={13} />
+                        {notebookTotal} {notebookTotal === 1 ? 'libreta' : 'libretas'}
+                      </span>
+                    </div>
+                  </button>
                 </div>
               )
             })}

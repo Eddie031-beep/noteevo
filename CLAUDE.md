@@ -219,7 +219,18 @@ Evernote muestra los archivos como grid de cards cuando son imágenes, y lista c
 - Días coloreados por urgencia (borde izquierdo + dot + fondo sutil)
 
 ### id:45 — Spaces: rediseño UI + mejoras de permisos
-**Estado: pending**
+**Estado: done ✅**
+- `SpacesView` / `SharedWithMeView`: cards con banner de color identificador
+  (color determinista por `space.id` en `lib/utils/space-color.ts`, sin migración),
+  icono solapado, descripción visible y conteos de miembros + libretas
+- `SharedWithMeView`: muestra dueño (email), nº de miembros y fecha de unión
+- `SpaceDetailView`: badge del rol propio en el header + tabla de miembros con
+  columnas (Miembro / Rol / Unión / Acciones) e iniciales como avatar
+- `InviteModal` en 2 pasos: **buscar** usuario → preview con iniciales/email →
+  **confirmar invitación**. Nuevo endpoint `/api/spaces/lookup-user` (solo
+  owner/admin; evita enumeración de emails)
+- RPC `get_spaces_overview()` (SECURITY DEFINER): `member_count`, `notebook_count`,
+  `owner_email`, `my_joined_at` por space accesible en una sola llamada
 - `SpacesView.tsx`: rediseño de la vista de spaces
   - Cards más grandes con descripción visible, contador de miembros y libretas
   - Banner/color de identificación por space (color aleatorio al crear)
@@ -329,6 +340,9 @@ get_due_date_reminders()
 ```sql
 -- id:40 Tags con conteo
 get_tags_with_count() → tabla: {id, name, note_count, created_at}
+
+-- id:45 Overview de spaces (SECURITY DEFINER)
+get_spaces_overview() → tabla: {space_id, member_count, notebook_count, owner_email, my_joined_at}
 ```
 
 ---
@@ -352,7 +366,8 @@ app/
 │   ├── ai/suggest-tags/route.ts
 │   ├── ai/transform/route.ts
 │   ├── ai/assistant/route.ts      ← Phase 16 (id:47)
-│   └── spaces/invite/route.ts
+│   ├── spaces/invite/route.ts
+│   └── spaces/lookup-user/route.ts ← Phase 16 (id:45)
 ├── globals.css
 └── middleware.ts
 
@@ -421,7 +436,7 @@ lib/
 │   ├── profile.ts
 │   └── stats.ts
 ├── templates/builtin-templates.ts
-└── utils/tiptap.ts, tiptap-to-markdown.ts
+└── utils/tiptap.ts, tiptap-to-markdown.ts, space-color.ts
 
 store/
 ├── notebookStore.ts, noteStore.ts, tagStore.ts
@@ -479,6 +494,8 @@ RESEND_API_KEY=                  # Phase 13
 | Vista tags con conteo de notas (Phase 16) | Utilidad real para gestión de etiquetas |
 | Horas de tarea como reloj literal en timestamptz (Phase 16 id:44) | Round-trip consistente con `slice(0,10)`/`slice(11,16)`; evita desfases de zona horaria. NUNCA usar `toISOString()` al construir start_time/end_time |
 | Rejilla semanal con `HOUR_HEIGHT=48` y línea de hora viva (Phase 16 id:44) | Posicionamiento absoluto de eventos por minutos; línea de "ahora" refrescada cada 60s |
+| Color de space determinista por `id` (Phase 16 id:45) | Evita migración/columna; visualmente equivalente a "color aleatorio al crear" y estable entre sesiones. `lib/utils/space-color.ts` |
+| `/api/spaces/lookup-user` solo owner/admin (Phase 16 id:45) | Preview de usuario antes de invitar sin convertir el endpoint en oráculo de enumeración de emails |
 
 ---
 

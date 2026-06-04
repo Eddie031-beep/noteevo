@@ -178,6 +178,31 @@ export async function getSpaceMembersWithEmail(
   return (data ?? []) as SpaceMemberWithEmail[]
 }
 
+export interface SpaceOverview {
+  space_id: string
+  member_count: number
+  notebook_count: number
+  owner_email: string | null
+  my_joined_at: string | null
+}
+
+/**
+ * Conteos de miembros/libretas + email del dueño + fecha de unión del usuario
+ * actual, para todos los spaces accesibles. Una sola llamada (RPC SECURITY
+ * DEFINER) que alimenta SpacesView y SharedWithMeView.
+ */
+export async function getSpacesOverview(): Promise<Map<string, SpaceOverview>> {
+  const supabase = createClient()
+  const { data, error } = await supabase.rpc('get_spaces_overview')
+  if (error) throw new Error(error.message)
+
+  const map = new Map<string, SpaceOverview>()
+  for (const row of (data ?? []) as SpaceOverview[]) {
+    map.set(row.space_id, row)
+  }
+  return map
+}
+
 export async function getSpaceNotes(spaceId: string): Promise<import('@/types').Note[]> {
   const supabase = createClient()
 

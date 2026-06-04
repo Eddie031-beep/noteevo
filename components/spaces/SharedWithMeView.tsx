@@ -1,11 +1,13 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Share2, Users, LogOut, Eye, Edit3, Shield, Crown, MoreHorizontal } from 'lucide-react'
-import { removeMember } from '@/lib/supabase/spaces'
+import { Share2, Users, LogOut, Eye, Edit3, Shield, Crown, MoreHorizontal, BookOpen, Calendar } from 'lucide-react'
+import { removeMember, getSpacesOverview } from '@/lib/supabase/spaces'
+import type { SpaceOverview } from '@/lib/supabase/spaces'
 import { useSpaceStore } from '@/store/spaceStore'
 import { useUIStore } from '@/store/uiStore'
 import { createClient } from '@/lib/supabase/client'
+import { getSpaceColor, withAlpha } from '@/lib/utils/space-color'
 import SpaceDetailView from './SpaceDetailView'
 import type { Space, SpaceRole } from '@/types'
 
@@ -16,10 +18,15 @@ const ROLE_LABELS: Record<SpaceRole | 'owner', { label: string; icon: React.Reac
   viewer: { label: 'Viewer',  icon: <Eye size={11} /> },
 }
 
+function formatJoinDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
 export default function SharedWithMeView() {
   const { spaces, selectedSpace, removeSpace, addSpace, setSelectedSpace } = useSpaceStore()
   const { setCurrentView } = useUIStore()
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [overview, setOverview] = useState<Map<string, SpaceOverview>>(new Map())
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -31,6 +38,9 @@ export default function SharedWithMeView() {
     supabase.auth.getUser().then(({ data: { user } }) => {
       setCurrentUserId(user?.id ?? null)
     })
+    getSpacesOverview()
+      .then(setOverview)
+      .catch(() => { /* counts opcionales: si fallan, las cards siguen funcionando */ })
   }, [])
 
   useEffect(() => {
@@ -100,35 +110,26 @@ export default function SharedWithMeView() {
 
         {/* Spaces grid */}
         {sharedSpaces.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" ref={menuRef}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" ref={menuRef}>
             {sharedSpaces.map((space) => {
               const roleInfo = ROLE_LABELS[space.user_role ?? 'viewer']
               const menuOpen = openMenuId === space.id
+              const color = getSpaceColor(space.id)
+              const ov = overview.get(space.id)
+              const memberTotal = (ov?.member_count ?? 0) + 1
+              const notebookTotal = ov?.notebook_count ?? 0
 
               return (
                 <div
                   key={space.id}
-                  className="bg-panel border border-border rounded-xl p-4 flex flex-col gap-3 hover:border-accent/30 transition"
+                  className="bg-panel border border-border rounded-xl overflow-hidden flex flex-col hover:border-accent/30 hover:shadow-lg transition"
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <button
-                      type="button"
-                      title={`Abrir ${space.name}`}
-                      onClick={() => handleOpenSpace(space)}
-                      className="flex items-center gap-2.5 min-w-0 flex-1 text-left"
-                    >
-                      <div className="w-9 h-9 bg-accent/15 rounded-lg flex items-center justify-center shrink-0">
-                        <Users size={16} className="text-accent" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-medium text-foreground text-sm truncate">{space.name}</p>
-                        {space.description && (
-                          <p className="text-xs text-muted truncate mt-0.5">{space.description}</p>
-                        )}
-                      </div>
-                    </button>
-
-                    <div className="relative shrink-0">
+                  {/* Banner de color identificador */}
+                  <div
+                    className="h-14 relative"
+                    style={{ background: `linear-gradient(120deg, ${color}, ${withAlpha(color, 0.55)})` }}
+                  >
+                    <div className="absolute top-2 right-2 z-10">
                       <button
                         type="button"
                         title="Opciones"
@@ -136,13 +137,13 @@ export default function SharedWithMeView() {
                           e.stopPropagation()
                           setOpenMenuId(menuOpen ? null : space.id)
                         }}
-                        className="p-1 text-muted hover:text-foreground transition rounded"
+                        className="p-1 rounded-md bg-black/15 text-white/90 hover:bg-black/30 transition"
                       >
                         <MoreHorizontal size={16} />
                       </button>
 
                       {menuOpen && (
-                        <div className="absolute right-0 top-7 z-20 bg-elevated border border-border rounded-xl shadow-xl min-w-[160px] py-1 overflow-hidden">
+                        <div className="absolute right-0 top-9 z-20 bg-elevated border border-border rounded-xl shadow-xl min-w-[160px] py-1 overflow-hidden">
                           <button
                             type="button"
                             onClick={() => handleLeave(space)}
@@ -154,14 +155,60 @@ export default function SharedWithMeView() {
                         </div>
                       )}
                     </div>
+
+                    <div
+                      className="absolute -bottom-5 left-4 w-11 h-11 rounded-xl border-2 border-panel flex items-center justify-center shadow-sm"
+                      style={{ backgroundColor: color }}
+                    >
+                      <Users size={18} className="text-white" />
+                    </div>
                   </div>
 
-                  <div>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-accent/10 text-accent text-xs rounded-full border border-accent/20">
-                      {roleInfo.icon}
-                      {roleInfo.label}
-                    </span>
-                  </div>
+                  {/* Cuerpo clickable */}
+                  <button
+                    type="button"
+                    title={`Abrir ${space.name}`}
+                    onClick={() => handleOpenSpace(space)}
+                    className="flex flex-col gap-2 px-4 pt-7 pb-4 text-left flex-1"
+                  >
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-foreground text-[15px] truncate">{space.name}</p>
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-accent/10 text-accent text-[10px] rounded-full border border-accent/20 shrink-0">
+                        {roleInfo.icon}
+                        {roleInfo.label}
+                      </span>
+                    </div>
+
+                    {space.description && (
+                      <p className="text-xs text-muted line-clamp-2">{space.description}</p>
+                    )}
+
+                    {/* Dueño */}
+                    {ov?.owner_email && (
+                      <p className="text-xs text-muted flex items-center gap-1 truncate">
+                        <Crown size={11} className="text-accent shrink-0" />
+                        <span className="truncate">Dueño: {ov.owner_email}</span>
+                      </p>
+                    )}
+
+                    {/* Footer: conteos + fecha de unión */}
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-1 text-xs text-subtle">
+                      <span className="inline-flex items-center gap-1">
+                        <Users size={13} />
+                        {memberTotal} {memberTotal === 1 ? 'miembro' : 'miembros'}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <BookOpen size={13} />
+                        {notebookTotal} {notebookTotal === 1 ? 'libreta' : 'libretas'}
+                      </span>
+                      {ov?.my_joined_at && (
+                        <span className="inline-flex items-center gap-1">
+                          <Calendar size={13} />
+                          {formatJoinDate(ov.my_joined_at)}
+                        </span>
+                      )}
+                    </div>
+                  </button>
                 </div>
               )
             })}

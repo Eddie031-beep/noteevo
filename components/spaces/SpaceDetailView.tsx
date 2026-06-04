@@ -37,6 +37,20 @@ const ROLE_ICONS: Record<SpaceRole | 'owner', React.ReactNode> = {
   viewer: <Eye size={13} />,
 }
 
+const ROLE_LABEL: Record<SpaceRole | 'owner', string> = {
+  owner: 'Dueño',
+  admin: 'Admin',
+  editor: 'Editor',
+  viewer: 'Viewer',
+}
+
+function memberInitials(email: string): string {
+  const parts = email.split(/[\s@._-]+/).filter(Boolean)
+  if (parts.length === 0) return '?'
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[1][0]).toUpperCase()
+}
+
 function RoleSelector({
   currentRole,
   onChange,
@@ -225,7 +239,18 @@ export default function SpaceDetailView({ space, onBack }: SpaceDetailViewProps)
 
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-semibold text-foreground">{space.name}</h1>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h1 className="text-2xl font-semibold text-foreground">{space.name}</h1>
+                {space.user_role && (
+                  <span
+                    title="Tu rol en este space"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent/10 text-accent text-xs rounded-full border border-accent/20"
+                  >
+                    {ROLE_ICONS[space.user_role]}
+                    {ROLE_LABEL[space.user_role]}
+                  </span>
+                )}
+              </div>
               {space.description && (
                 <p className="text-sm text-muted mt-1">{space.description}</p>
               )}
@@ -364,86 +389,111 @@ export default function SpaceDetailView({ space, onBack }: SpaceDetailViewProps)
 
             {/* Tab: Miembros */}
             {activeTab === 'members' && (
-              <div className="flex flex-col gap-2">
-                {/* Owner row */}
-                <div className="flex items-center justify-between gap-3 p-3.5 bg-panel border border-border rounded-xl">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 bg-accent/15 rounded-full flex items-center justify-center shrink-0">
-                      <Users size={14} className="text-accent" />
-                    </div>
-                    <div className="min-w-0">
+              <div className="flex flex-col gap-3">
+                {canInvite && (
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setShowInvite(true)}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-accent text-white text-sm rounded-lg hover:bg-accent/90 transition"
+                    >
+                      <Users size={14} />
+                      Invitar miembro
+                    </button>
+                  </div>
+                )}
+
+                <div className="border border-border rounded-xl overflow-hidden">
+                  {/* Column headers */}
+                  <div className="hidden sm:flex items-center gap-3 px-4 py-2.5 bg-surface/40 border-b border-border text-[11px] font-medium uppercase tracking-wider text-subtle">
+                    <span className="flex-1 min-w-0">Miembro</span>
+                    <span className="w-32 shrink-0">Rol</span>
+                    <span className="w-28 shrink-0">Unión</span>
+                    <span className="w-8 shrink-0" />
+                  </div>
+
+                  {/* Owner row */}
+                  <div className="flex items-center gap-3 px-4 py-3 border-b border-border last:border-0">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-9 h-9 bg-accent/15 rounded-full flex items-center justify-center shrink-0 text-accent text-xs font-semibold">
+                        <Crown size={15} />
+                      </div>
                       <p className="text-sm font-medium text-foreground truncate">
-                        {isOwner ? 'Tú' : 'Dueño del space'}
+                        {isOwner ? 'Tú (dueño)' : 'Dueño del space'}
                       </p>
                     </div>
+                    <div className="w-32 shrink-0">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent/10 text-accent text-xs rounded-full border border-accent/20">
+                        <Crown size={11} />
+                        Dueño
+                      </span>
+                    </div>
+                    <div className="w-28 shrink-0 text-xs text-subtle">—</div>
+                    <div className="w-8 shrink-0" />
                   </div>
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent/10 text-accent text-xs rounded-full border border-accent/20 shrink-0">
-                    <Crown size={11} />
-                    Dueño
-                  </span>
-                </div>
 
-                {/* Members rows */}
-                {members.length === 0 ? (
-                  <div className="flex flex-col items-center gap-3 py-12 text-center">
-                    <Users size={28} className="text-subtle" />
-                    <p className="text-sm text-muted">Sin miembros invitados aún</p>
-                    {canInvite && (
-                      <button
-                        type="button"
-                        onClick={() => setShowInvite(true)}
-                        className="text-sm text-accent hover:text-accent-light transition"
-                      >
-                        Invitar miembro
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  members.map((member) => {
-                    const isCurrentUser = member.user_id === currentUserId
-                    const canManage = canInvite && !isCurrentUser
-                    return (
-                      <div
-                        key={member.user_id}
-                        className="flex items-center justify-between gap-3 p-3.5 bg-panel border border-border rounded-xl group"
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-8 h-8 bg-surface rounded-full flex items-center justify-center shrink-0 border border-border">
-                            <Users size={14} className="text-muted" />
-                          </div>
-                          <div className="min-w-0">
+                  {/* Member rows */}
+                  {members.length === 0 ? (
+                    <div className="flex flex-col items-center gap-3 py-12 text-center">
+                      <Users size={28} className="text-subtle" />
+                      <p className="text-sm text-muted">Sin miembros invitados aún</p>
+                      {canInvite && (
+                        <button
+                          type="button"
+                          onClick={() => setShowInvite(true)}
+                          className="text-sm text-accent hover:text-accent-light transition"
+                        >
+                          Invitar miembro
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    members.map((member) => {
+                      const isCurrentUser = member.user_id === currentUserId
+                      const canManage = canInvite && !isCurrentUser
+                      return (
+                        <div
+                          key={member.user_id}
+                          className="flex items-center gap-3 px-4 py-3 border-b border-border last:border-0 hover:bg-surface/30 transition group"
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div className="w-9 h-9 bg-surface rounded-full flex items-center justify-center shrink-0 border border-border text-xs font-semibold text-muted">
+                              {memberInitials(member.email)}
+                            </div>
                             <p className="text-sm font-medium text-foreground truncate">
                               {member.email}
                               {isCurrentUser && (
                                 <span className="ml-1.5 text-xs text-muted">(tú)</span>
                               )}
                             </p>
-                            <p className="text-xs text-subtle">
-                              {new Date(member.joined_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
-                            </p>
+                          </div>
+                          <div className="w-32 shrink-0">
+                            <RoleSelector
+                              currentRole={member.role}
+                              onChange={(role) => handleRoleChange(member.user_id, role)}
+                              disabled={!canManage}
+                            />
+                          </div>
+                          <div className="w-28 shrink-0 text-xs text-subtle">
+                            {new Date(member.joined_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          </div>
+                          <div className="w-8 shrink-0 flex justify-end">
+                            {canManage && (
+                              <button
+                                type="button"
+                                title="Expulsar miembro"
+                                onClick={() => handleRemoveMember(member.user_id)}
+                                className="opacity-0 group-hover:opacity-100 p-1.5 text-muted hover:text-danger rounded-lg hover:bg-surface transition cursor-pointer"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <RoleSelector
-                            currentRole={member.role}
-                            onChange={(role) => handleRoleChange(member.user_id, role)}
-                            disabled={!canManage}
-                          />
-                          {canManage && (
-                            <button
-                              type="button"
-                              title="Expulsar miembro"
-                              onClick={() => handleRemoveMember(member.user_id)}
-                              className="opacity-0 group-hover:opacity-100 p-1.5 text-muted hover:text-danger rounded-lg hover:bg-surface transition cursor-pointer"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  })
-                )}
+                      )
+                    })
+                  )}
+                </div>
               </div>
             )}
           </>
