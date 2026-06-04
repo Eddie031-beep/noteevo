@@ -8,7 +8,7 @@ import { ChevronLeft, ChevronRight, Plus, Calendar } from 'lucide-react'
 import {
   format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays,
   startOfMonth, endOfMonth, startOfWeek, endOfWeek,
-  isSameDay, isSameMonth, isToday, parseISO,
+  isSameDay, isSameMonth, isToday,
 } from 'date-fns'
 import { es } from 'date-fns/locale'
 import type { Task } from '@/types'
@@ -363,7 +363,7 @@ function DayView({ current, tasks, onAdd }: {
           <div className="flex flex-col items-center gap-3 mt-20 text-center">
             <Calendar size={32} className="text-subtle" />
             <p className="text-foreground font-medium text-sm">Sin tareas para este día</p>
-            <p className="text-muted text-xs">Haz clic en "Nueva tarea" para añadir una</p>
+            <p className="text-muted text-xs">Haz clic en &quot;Nueva tarea&quot; para añadir una</p>
           </div>
         ) : (
           <div className="space-y-2">
