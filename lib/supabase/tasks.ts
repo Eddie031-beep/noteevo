@@ -44,7 +44,7 @@ export async function getTasksWithNotebook(): Promise<TaskWithContext[]> {
 
 export async function createTask(
   title: string,
-  opts: Partial<Pick<Task, 'description' | 'due_date' | 'priority' | 'note_id' | 'is_flagged'>> = {}
+  opts: Partial<Pick<Task, 'description' | 'due_date' | 'start_time' | 'end_time' | 'priority' | 'note_id' | 'is_flagged'>> = {}
 ): Promise<Task> {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -62,7 +62,7 @@ export async function createTask(
 
 export async function updateTask(
   id: string,
-  updates: Partial<Pick<Task, 'title' | 'description' | 'due_date' | 'priority' | 'is_flagged' | 'reminder_at'>>
+  updates: Partial<Pick<Task, 'title' | 'description' | 'due_date' | 'start_time' | 'end_time' | 'priority' | 'is_flagged' | 'reminder_at'>>
 ): Promise<void> {
   const supabase = createClient()
   const { error } = await supabase.from('tasks').update(updates).eq('id', id)

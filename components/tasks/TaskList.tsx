@@ -9,7 +9,7 @@ import {
 import type { TaskWithContext } from '@/lib/supabase/tasks'
 import TaskModal from './TaskModal'
 import {
-  Plus, Flag, Calendar, CheckSquare, Trash2,
+  Plus, Flag, Calendar, Clock, CheckSquare, Trash2,
   ChevronDown, BookOpen, SlidersHorizontal, X,
 } from 'lucide-react'
 import { format, parseISO, isToday, isPast, isWithinInterval, addDays, startOfDay } from 'date-fns'
@@ -42,6 +42,14 @@ function matchesDateFilter(task: Task, filter: DateFilter): boolean {
   if (filter === 'week') return isWithinInterval(due, { start: today, end: addDays(today, 7) })
   if (filter === 'overdue') return isPast(due) && !isToday(due)
   return true
+}
+
+/** Etiqueta de hora "HH:mm" o "HH:mm – HH:mm" a partir de start/end (literal, sin TZ). */
+function taskTimeLabel(task: Task): string | null {
+  if (!task.start_time) return null
+  const start = task.start_time.slice(11, 16)
+  if (!task.end_time) return start
+  return `${start} – ${task.end_time.slice(11, 16)}`
 }
 
 /** Estilo del pill de fecha según urgencia. */
@@ -101,6 +109,8 @@ export default function TaskList() {
     title: string
     description: string
     due_date: string
+    start_time: string | null
+    end_time: string | null
     priority: Task['priority']
     is_flagged: boolean
     note_id: string | null
@@ -108,6 +118,8 @@ export default function TaskList() {
     const task = await createTask(data.title, {
       description: data.description || undefined,
       due_date: data.due_date || undefined,
+      start_time: data.start_time ?? undefined,
+      end_time: data.end_time ?? undefined,
       priority: data.priority,
       is_flagged: data.is_flagged,
       note_id: data.note_id ?? undefined,
@@ -479,6 +491,12 @@ function TaskItem({
               <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${dueDatePill(task)}`}>
                 <Calendar size={11} />
                 {format(parseISO(task.due_date), 'd MMM', { locale: es })}
+              </span>
+            )}
+            {taskTimeLabel(task) && (
+              <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-surface text-muted">
+                <Clock size={11} />
+                {taskTimeLabel(task)}
               </span>
             )}
             {task.description && (

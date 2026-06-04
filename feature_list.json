@@ -133,8 +133,8 @@
     "phase": 16,
     "name": "calendar-mejoras",
     "title": "Calendar: mejoras visuales y creación de eventos",
-    "status": "pending",
-    "description": "Mejor contraste y jerarquía visual. Celdas mes más altas. Línea hora actual en semana. Mini-popover creación rápida al click. Soporte hora inicio/fin en tareas. Días con tareas coloreados por urgencia.",
+    "status": "done",
+    "description": "Mejor contraste y jerarquía visual. Celdas mes más altas (120px) + fondo sutil por urgencia. Vista semana reescrita como rejilla horaria (24h) con línea de hora actual en vivo y fila 'Todo el día'. Mini-popover de creación rápida al click (con 'Más detalles' al modal completo). Migración DB: columnas start_time/end_time (timestamptz); campo de hora inicio/fin en TaskModal con validación. Días coloreados por urgencia.",
     "depends_on": []
   },
   {

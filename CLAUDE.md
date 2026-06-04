@@ -207,16 +207,16 @@ Evernote muestra los archivos como grid de cards cuando son imágenes, y lista c
 - Previsualización de imagen al hacer click (lightbox simple con `<dialog>`)
 
 ### id:44 — Calendar: mejoras visuales y creación de eventos
-**Estado: pending**
-- Mejorar el diseño general del calendario: cabecera más clara, mejor contraste de días
-- Vista mes: aumentar altura mínima de celdas para que se vean más tareas sin scroll
-- Vista semana: añadir línea de "hora actual" en columnas
-- Creación de eventos mejorada:
-  - Al hacer click en un día/hora, abrir mini-popover de creación rápida (no modal completo)
-  - Modal completo accesible desde el popover para más detalles
-  - Soporte para eventos con hora de inicio/fin (actualmente solo fecha)
-  - Campo `time` en `TaskModal` para tareas con hora específica
-- Colorear días con tareas según urgencia (borde o fondo sutil)
+**Estado: done ✅**
+- Cabecera más clara (botón "Hoy" con borde, switcher con `shadow-sm`); cabeceras de días con `bg-surface/40`
+- Vista mes: celdas más altas (`minHeight: 120`), fondo sutil por urgencia (`URGENCY_CELL_BG`), hasta 3 tareas con prefijo de hora
+- Vista semana: **reescrita como rejilla horaria de 24h** (`HOUR_HEIGHT = 48`):
+  - Gutter de horas + gridlines; columnas por día con eventos posicionados absolutamente por `start_time`/`end_time`
+  - **Línea de "hora actual"** en vivo (refresco cada 60s) que cruza las columnas, con punto rojo en la columna de hoy
+  - Fila "Todo el día" para tareas sin hora; auto-scroll a la mañana / hora actual al montar
+- Creación rápida: `QuickCreatePopover` anclado al click (día en mes / slot horario en semana) con título + Enter; enlace "Más detalles →" abre `TaskModal` precargado con fecha/hora
+- Hora inicio/fin: **migración DB** `tasks.start_time` / `tasks.end_time` (`timestamptz`); `TaskModal` con inputs de hora + validación (fin > inicio, requiere fecha)
+- Días coloreados por urgencia (borde izquierdo + dot + fondo sutil)
 
 ### id:45 — Spaces: rediseño UI + mejoras de permisos
 **Estado: pending**
@@ -283,9 +283,12 @@ notes        (id, user_id, notebook_id, title, content jsonb, is_favorite, is_tr
               search_vector tsvector, created_at, updated_at)
 tags         (id, user_id, name, created_at)
 note_tags    (note_id, tag_id)
-tasks        (id, user_id, note_id, title, description, due_date, reminder_at,
+tasks        (id, user_id, note_id, title, description, due_date,
+              start_time, end_time, reminder_at,
               reminder_7days_sent, reminder_1day_sent,
               priority, is_flagged, is_completed, completed_at, created_at)
+              -- start_time/end_time timestamptz (Phase 16 id:44): hora del evento;
+              -- null = tarea de todo el día. Guardadas como reloj literal (sin TZ).
 attachments  (id, user_id, note_id, file_name, file_type, file_size,
               storage_path, created_at)
 spaces       (id, name, description, owner_id, created_at, updated_at)
@@ -474,6 +477,8 @@ RESEND_API_KEY=                  # Phase 13
 | `noteCardEnter` keyframe en globals.css | Animación de entrada escalonada en NoteList |
 | Editor max-w-3xl centrado (Phase 16) | Breathing room, menos abrumador |
 | Vista tags con conteo de notas (Phase 16) | Utilidad real para gestión de etiquetas |
+| Horas de tarea como reloj literal en timestamptz (Phase 16 id:44) | Round-trip consistente con `slice(0,10)`/`slice(11,16)`; evita desfases de zona horaria. NUNCA usar `toISOString()` al construir start_time/end_time |
+| Rejilla semanal con `HOUR_HEIGHT=48` y línea de hora viva (Phase 16 id:44) | Posicionamiento absoluto de eventos por minutos; línea de "ahora" refrescada cada 60s |
 
 ---
 

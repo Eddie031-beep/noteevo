@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { X, Flag, Calendar, AlignLeft, FileText, Search, Check } from 'lucide-react'
+import { X, Flag, Calendar, AlignLeft, FileText, Search, Check, Clock } from 'lucide-react'
 import type { Task } from '@/types'
 import { getAllNotesWithNotebook, type NoteWithNotebook } from '@/lib/supabase/notes'
 
@@ -11,6 +11,8 @@ interface SaveData {
   title: string
   description: string
   due_date: string
+  start_time: string | null
+  end_time: string | null
   priority: Priority
   is_flagged: boolean
   note_id: string | null
@@ -20,6 +22,8 @@ interface Props {
   onClose: () => void
   onSave: (data: SaveData) => Promise<void>
   initialDate?: string
+  initialStartTime?: string
+  initialEndTime?: string
 }
 
 const PRIORITIES: { value: Priority; label: string; dot: string; activeBg: string; activeText: string }[] = [
@@ -30,10 +34,14 @@ const PRIORITIES: { value: Priority; label: string; dot: string; activeBg: strin
 
 const TODAY = new Date().toISOString().split('T')[0]
 
-export default function TaskModal({ onClose, onSave, initialDate }: Props) {
+export default function TaskModal({
+  onClose, onSave, initialDate, initialStartTime, initialEndTime,
+}: Props) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [dueDate, setDueDate] = useState(initialDate ?? '')
+  const [startTime, setStartTime] = useState(initialStartTime ?? '')
+  const [endTime, setEndTime] = useState(initialEndTime ?? '')
   const [priority, setPriority] = useState<Priority>('medium')
   const [isFlagged, setIsFlagged] = useState(false)
   const [noteId, setNoteId] = useState<string | null>(null)
@@ -62,14 +70,25 @@ export default function TaskModal({ onClose, onSave, initialDate }: Props) {
     if (e.target === backdropRef.current) onClose()
   }
 
+  // Una hora solo es válida si hay fecha asociada.
+  const timeNeedsDate = (!!startTime || !!endTime) && !dueDate
+  const timeRangeInvalid = !!startTime && !!endTime && endTime <= startTime
+  const canSave = !!title.trim() && !saving && !timeNeedsDate && !timeRangeInvalid
+
   const handleSave = async () => {
-    if (!title.trim()) return
+    if (!canSave) return
     setSaving(true)
     try {
+      // Strings ISO literales (sin conversión de zona horaria): el reloj que
+      // el usuario escribe se guarda tal cual en la columna timestamptz.
+      const startIso = dueDate && startTime ? `${dueDate}T${startTime}:00` : null
+      const endIso = dueDate && endTime ? `${dueDate}T${endTime}:00` : null
       await onSave({
         title: title.trim(),
         description,
         due_date: dueDate,
+        start_time: startIso,
+        end_time: endIso,
         priority,
         is_flagged: isFlagged,
         note_id: noteId,
@@ -195,6 +214,39 @@ export default function TaskModal({ onClose, onSave, initialDate }: Props) {
             </div>
           </div>
 
+          {/* Hora inicio / fin (opcional) */}
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-medium text-subtle mb-1.5">
+              <Clock size={13} /> Hora <span className="text-subtle/70">(opcional)</span>
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                aria-label="Hora de inicio"
+                title="Hora de inicio"
+                className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-xs text-foreground outline-none cursor-pointer focus:border-accent/50 transition"
+                style={{ color: 'var(--color-foreground)' }}
+              />
+              <input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                aria-label="Hora de fin"
+                title="Hora de fin"
+                className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-xs text-foreground outline-none cursor-pointer focus:border-accent/50 transition"
+                style={{ color: 'var(--color-foreground)' }}
+              />
+            </div>
+            {timeNeedsDate && (
+              <p className="text-xs text-yellow-500 mt-1.5">Elige una fecha límite para asignar una hora</p>
+            )}
+            {timeRangeInvalid && (
+              <p className="text-xs text-danger mt-1.5">La hora de fin debe ser posterior a la de inicio</p>
+            )}
+          </div>
+
           {/* Link to note */}
           <div className="relative">
             <label className="flex items-center gap-1.5 text-xs font-medium text-subtle mb-1.5">
@@ -270,7 +322,7 @@ export default function TaskModal({ onClose, onSave, initialDate }: Props) {
             type="button"
             data-testid="task-submit"
             onClick={handleSave}
-            disabled={!title.trim() || saving}
+            disabled={!canSave}
             className="px-6 py-2.5 text-sm bg-accent text-white rounded-lg hover:bg-accent-light disabled:opacity-40 transition cursor-pointer font-semibold shadow-sm shadow-accent/20"
           >
             {saving ? 'Guardando…' : 'Crear tarea'}

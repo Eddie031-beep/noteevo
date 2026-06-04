@@ -46,6 +46,8 @@ export interface Task {
   title: string
   description: string | null
   due_date: string | null
+  start_time: string | null
+  end_time: string | null
   reminder_at: string | null
   priority: 'low' | 'medium' | 'high'
   is_flagged: boolean
