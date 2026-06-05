@@ -125,189 +125,94 @@ build verde. Cualquier trabajo nuevo se registra como Phase 16+ en `feature_list
 
 ---
 
-## Phase 16 — Mejoras UI/UX + Features pendientes (PENDIENTES)
+## Phase 16 — Mejoras UI/UX + Features (COMPLETA ✅ — 9/9)
 
-Las siguientes mejoras y features nuevas están planificadas. Se implementan en orden,
-una por una, siempre con build verde antes de marcar done.
+> **TODAS las features de Phase 16 (id:40–48) están implementadas, con build verde
+> y mergeadas en `RepoEddie`.** No hay trabajo pendiente en esta fase. Las descripciones
+> abajo documentan lo que YA se construyó (estado final), no un backlog.
+> El registro canónico de estado es `feature_list.json` (todas en `"status": "done"`).
 
-### id:40 — Tags: vista y gestión completa
-**Estado: done ✅ (commit b2ff6a0)**
-La vista de etiquetas actual solo muestra un listado plano de chips. Necesita:
-- Vista `/dashboard` con `currentView === 'tags-view'` rediseñada: grid de tarjetas por etiqueta
-  mostrando nombre + conteo de notas asociadas + fecha de creación
-- Click en una etiqueta → filtra y muestra las notas que la tienen (similar a NoteList)
-- Renombrar etiqueta inline (doble click o botón de edición)
-- Eliminar etiqueta con confirmación (también elimina las relaciones `note_tags`)
-- Búsqueda/filtro de etiquetas en la vista
-- `lib/supabase/tags.ts`: añadir `renameTag(id, newName)`, `deleteTagWithRelations(id)`, `getTagsWithCount()`
-- RPC `get_tags_with_count()` en Supabase que retorna `{id, name, note_count, created_at}`
+| id | Feature | Estado |
+|---|---|---|
+| 40 | Tags: vista y gestión completa | ✅ done |
+| 41 | Templates: galería completa estilo Notion | ✅ done |
+| 42 | Tasks: rediseño UI + modal mejorado | ✅ done |
+| 43 | Files: rediseño UI al estilo Evernote | ✅ done |
+| 44 | Calendar: mejoras visuales y creación de eventos | ✅ done |
+| 45 | Spaces: rediseño UI + mejoras de permisos | ✅ done |
+| 46 | NoteEditor: rediseño layout y breathing room | ✅ done |
+| 47 | IA en Sidebar: panel lateral de IA | ✅ done |
+| 48 | Compartir nota: modo edición colaborativa | ✅ done |
 
-### id:41 — Templates: galería completa estilo Notion
-**Estado: done ✅**
-Rediseño total de la galería de plantillas inspirado en Notion/Evernote. El objetivo es que
-las plantillas se sientan como un producto propio con valor real, no solo un selector básico.
+### id:40 — Tags: vista y gestión completa ✅ done (commit b2ff6a0)
+Vista `tags-view` rediseñada: grid de tarjetas por etiqueta con nombre + conteo de notas +
+fecha. Click en etiqueta filtra sus notas; renombrar inline; eliminar con confirmación
+(borra relaciones `note_tags`); buscador. RPC `get_tags_with_count()`. `lib/supabase/tags.ts`
+con `renameTag()`, `deleteTagWithRelations()`, `getTagsWithCount()`, `getNotesByTag()`.
 
-**16 plantillas builtin nuevas** distribuidas en 9 categorías:
-`personal`, `trabajo`, `reuniones`, `diario`, `educacion`, `viaje`, `finanzas`, `salud`, `proyecto`
+### id:41 — Templates: galería completa estilo Notion ✅ done
+Galería rediseñada (layout 3 paneles: buscador+filtros / grid con thumbnail real TipTap
+read-only `scale(0.35)` / panel de detalle). 12 plantillas builtin en 9 categorías
+(`personal`, `trabajo`, `reuniones`, `diario`, `educacion`, `viaje`, `finanzas`, `salud`,
+`proyecto`). Badges Oficial/Mía, borde acento en activa. Detalle con preview read-only +
+`NotebookPicker` (recuerda última via `localStorage`) + "Usar esta plantilla"
+(crea nota con el content JSON tal cual). `TemplateSelector.tsx` con flujo 2 pasos.
+Reutiliza `sharedEditorExtensions` (Callout/Toggle/TOC) en preview.
 
-Plantillas: Agenda semanal, Plan de proyecto, Asignación escolar, Programación 101,
-Notas de clase, Ecuaciones clave (Matemáticas), Lista de compras, Diario diario,
-Lista de lectura, Plan de viaje, Gestión de proyectos, CRM/Clientes, Nota de candidato,
-Información de contacto, Lluvia de ideas, Notas de reunión.
+### id:42 — Tasks: rediseño UI + modal mejorado ✅ done
+`TaskList`: cards compactas con dot de color por prioridad, pill de fecha coloreado
+(rojo vencida / amarillo próxima / gris futura), flag naranja, checkbox 24px con animación.
+Panel de filtros como drawer colapsable + chips activos. `TaskModal`: selector de prioridad
+visual, date picker con `min` hoy, descripción visible, selector de nota a vincular.
 
-**Galería (`TemplatesView.tsx`) — rediseño completo:**
-- Grid 3 col desktop / 2 tablet / 1 móvil
-- Cards con **thumbnail real** del contenido: editor TipTap read-only escalado a `scale(0.45)`,
-  `pointer-events-none`, `overflow-hidden` dentro del card
-- Badge "Oficial NoteEvo" en builtin / "Mía" en personales
-- Fila "Destacadas" al tope (4 plantillas)
-- Filtros por categoría (pills) + buscador por nombre
+### id:43 — Files: rediseño UI al estilo Evernote ✅ done (commit d98feee)
+Vista grid (cards cuadradas con thumbnail) + lista, toggle en header. Filtros por tipo
+(Imágenes/PDFs/Audio/Video/Otros) con conteo. Orden por Fecha/Nombre/Tamaño. Lightbox con
+`<dialog>` nativo. Drag & drop sobre `FilesView` con modal selector de nota destino.
+Breadcrumb "nota origen" clickeable (`getNoteById` → navega al editor).
 
-**Flujo de importar — modal de detalle:**
-1. Click en card → modal a pantalla completa
-2. Preview grande (TipTap read-only con **todas** las extensiones incluyendo Callout/Toggle/TOC)
-3. Selector de libreta destino (recuerda última via `localStorage`)
-4. "Usar esta plantilla" → crea nota → redirige al editor con nota abierta
+### id:44 — Calendar: mejoras visuales y creación de eventos ✅ done
+Mejor contraste/jerarquía. Vista mes con celdas más altas (`minHeight: 120`) + fondo sutil
+por urgencia (`URGENCY_CELL_BG`), hasta 3 tareas con prefijo de hora. Vista semana reescrita
+como rejilla horaria 24h (`HOUR_HEIGHT = 48`) con eventos absolutos por `start_time`/`end_time`,
+**línea de "hora actual"** en vivo (refresco 60s) y fila "Todo el día". `QuickCreatePopover`
+anclado al click ("Más detalles →" abre `TaskModal`). Migración DB: `tasks.start_time` /
+`tasks.end_time` (`timestamptz`); inputs de hora en `TaskModal` con validación (fin > inicio).
+Días coloreados por urgencia.
 
-**Archivos a crear/modificar:**
-- `lib/templates/builtin-templates.ts` — añadir 16 plantillas nuevas con contenido TipTap JSON rico
-- `components/templates/TemplatesView.tsx` — rediseño completo
-- `components/templates/TemplateSelector.tsx` — actualizar con nuevo flujo de preview
-- No hay cambios en DB (las plantillas builtin viven en código)
+### id:45 — Spaces: rediseño UI + mejoras de permisos ✅ done
+`SpacesView` / `SharedWithMeView`: cards con banner de color determinista por `space.id`
+(`lib/utils/space-color.ts`, sin migración), icono solapado, descripción y conteos de
+miembros + libretas. `SharedWithMeView` muestra dueño (email), nº de miembros y fecha de
+unión. `SpaceDetailView`: badge del rol propio + tabla de miembros (Miembro/Rol/Unión/Acciones)
+con iniciales. `InviteModal` en 2 pasos (buscar → confirmar) vía endpoint
+`/api/spaces/lookup-user` (solo owner/admin; evita enumeración de emails). RPC
+`get_spaces_overview()` (SECURITY DEFINER): `member_count`, `notebook_count`, `owner_email`,
+`my_joined_at` en una sola llamada.
 
-### id:42 — Tasks: rediseño UI + modal mejorado
-**Estado: done ✅**
-Inspirado en Linear/Evernote Tasks:
-- `TaskList.tsx`: rediseño completo de la lista de tareas
-  - Cards más compactas con mejor jerarquía visual: título grande, metadata pequeña debajo
-  - Prioridad como dot de color a la izquierda (no texto)
-  - Fecha de vencimiento con pill coloreado (rojo si vencida, amarillo si próxima, gris si futura)
-  - Flag como icono naranja solo cuando está activo
-  - Checkbox más grande y visible (24px), animación al completar
-- Panel de filtros colapsable (actualmente siempre visible y ocupa espacio):
-  - Convertir en un drawer/panel que se abre con el botón de filtros
-  - Chips activos mostrados debajo del header cuando hay filtros aplicados
-- `TaskModal.tsx`: mejorar el modal de creación/edición:
-  - Selector de prioridad visual con colores (no solo texto)
-  - Date picker nativo mejorado con `min` relativo a hoy
-  - Campo de descripción más visible
-  - Opción de vincular la tarea a una nota existente (selector de nota)
-  - Botón "Guardar" más prominente
+### id:46 — NoteEditor: rediseño layout y breathing room ✅ done
+Cuerpo envuelto en `max-w-3xl mx-auto` centrado (`max-w-2xl` en focus mode, con transición
+de ancho); `py-12`; `px-6 sm:px-10`. Título `text-4xl font-bold leading-tight`; separador
+`border-b border-border/60` bajo título+tags. Dividers de toolbar más visibles (`h-5`, `mx-1`).
+Focus mode: toolbar `absolute` oculta, se revela on hover de la franja superior
+(`group/tb` + `opacity`/`translate`). Móvil: `flex-nowrap overflow-x-auto`, `sm:flex-wrap`.
 
-### id:43 — Files: rediseño UI al estilo Evernote
-**Estado: done ✅ (commit d98feee)**
-Evernote muestra los archivos como grid de cards cuando son imágenes, y lista cuando son docs.
-- Vista grid para imágenes: cards cuadradas con thumbnail grande (200×200), nombre debajo
-- Vista lista para docs: fila compacta con icono tipado, nombre, tamaño, nota origen, fecha
-- Toggle vista grid/lista en el header
-- Drag & drop para subir archivos directamente en `FilesView` (actualmente solo desde la nota)
-- Breadcrumb "nota origen" clickeable que navega a la nota
-- Filtro por tipo: Imágenes / PDFs / Audio / Video / Otros
-- Ordenar por: Nombre / Fecha / Tamaño
-- Previsualización de imagen al hacer click (lightbox simple con `<dialog>`)
+### id:47 — IA en Sidebar: panel lateral de IA ✅ done
+View `'ai-assistant'` en `uiStore` + entrada "Asistente IA" (Sparkles) en `Sidebar` tras
+Calendario; render full-width en `dashboard/page.tsx`. `components/ai/AiAssistantView.tsx`:
+chat general con streaming (`ReadableStream`), selector de contexto
+(Sin nota / Nota activa / Todas mis notas), acciones rápidas e historial en memoria.
+Contexto "Todas mis notas": carga perezosa de `getAllNotesWithNotebook` + `extractTextPreview`.
+`app/api/ai/assistant/route.ts`: rate limit 20/día con `action='ai_assistant'` en `ai_usage`.
 
-### id:44 — Calendar: mejoras visuales y creación de eventos
-**Estado: done ✅**
-- Cabecera más clara (botón "Hoy" con borde, switcher con `shadow-sm`); cabeceras de días con `bg-surface/40`
-- Vista mes: celdas más altas (`minHeight: 120`), fondo sutil por urgencia (`URGENCY_CELL_BG`), hasta 3 tareas con prefijo de hora
-- Vista semana: **reescrita como rejilla horaria de 24h** (`HOUR_HEIGHT = 48`):
-  - Gutter de horas + gridlines; columnas por día con eventos posicionados absolutamente por `start_time`/`end_time`
-  - **Línea de "hora actual"** en vivo (refresco cada 60s) que cruza las columnas, con punto rojo en la columna de hoy
-  - Fila "Todo el día" para tareas sin hora; auto-scroll a la mañana / hora actual al montar
-- Creación rápida: `QuickCreatePopover` anclado al click (día en mes / slot horario en semana) con título + Enter; enlace "Más detalles →" abre `TaskModal` precargado con fecha/hora
-- Hora inicio/fin: **migración DB** `tasks.start_time` / `tasks.end_time` (`timestamptz`); `TaskModal` con inputs de hora + validación (fin > inicio, requiere fecha)
-- Días coloreados por urgencia (borde izquierdo + dot + fondo sutil)
-
-### id:45 — Spaces: rediseño UI + mejoras de permisos
-**Estado: done ✅**
-- `SpacesView` / `SharedWithMeView`: cards con banner de color identificador
-  (color determinista por `space.id` en `lib/utils/space-color.ts`, sin migración),
-  icono solapado, descripción visible y conteos de miembros + libretas
-- `SharedWithMeView`: muestra dueño (email), nº de miembros y fecha de unión
-- `SpaceDetailView`: badge del rol propio en el header + tabla de miembros con
-  columnas (Miembro / Rol / Unión / Acciones) e iniciales como avatar
-- `InviteModal` en 2 pasos: **buscar** usuario → preview con iniciales/email →
-  **confirmar invitación**. Nuevo endpoint `/api/spaces/lookup-user` (solo
-  owner/admin; evita enumeración de emails)
-- RPC `get_spaces_overview()` (SECURITY DEFINER): `member_count`, `notebook_count`,
-  `owner_email`, `my_joined_at` por space accesible en una sola llamada
-- `SpacesView.tsx`: rediseño de la vista de spaces
-  - Cards más grandes con descripción visible, contador de miembros y libretas
-  - Banner/color de identificación por space (color aleatorio al crear)
-- `SpaceDetailView.tsx`: mejoras en la gestión de miembros
-  - Al invitar, mostrar avatar/iniciales del usuario encontrado antes de confirmar
-  - Tabla de miembros más clara: columnas Nombre/Email, Rol, Fecha de unión, Acciones
-  - Indicador visual del rol propio en el header del space
-- `SharedWithMeView.tsx`: mejorar las cards
-  - Mostrar quién es el dueño del space (nombre/email)
-  - Mostrar cuántos miembros tiene el space
-  - Fecha de cuando el usuario se unió
-
-### id:46 — NoteEditor: rediseño layout y breathing room
-**Estado: done ✅**
-- Cuerpo de escritura envuelto en `max-w-3xl mx-auto` centrado (`max-w-2xl` en
-  focus mode, con transición de ancho); `py-12`; `px-6 sm:px-10`
-- Título `text-4xl font-bold leading-tight`; separador `border-b border-border/60`
-  entre el bloque título+tags y el cuerpo del editor
-- Dividers de toolbar más visibles (`h-5`, `mx-1`)
-- Focus mode: toolbar `absolute` oculta por defecto, se revela al pasar el cursor
-  por la franja superior (`group/tb` + `opacity`/`translate`)
-- Móvil: toolbar `flex-nowrap overflow-x-auto`, `sm:flex-wrap`
-El editor actual ocupa todo el ancho y se siente abrumador. Cambios:
-- Ancho máximo del área de escritura: `max-w-3xl` centrado (actualmente `px-10` full width)
-- Padding vertical aumentado: `py-12` en vez de `py-8`
-- Título de la nota más grande: `text-4xl` con `font-bold` y más espacio inferior
-- Separador visual sutil entre título/tags y el cuerpo del editor
-- Toolbar del editor: separar en grupos visuales más claros con divisores más visibles
-- Modo "distraction-free": cuando `isFocusMode`, reducir aún más el ancho (`max-w-2xl`)
-  y ocultar completamente la toolbar (solo mostrar con hover en la parte superior)
-- En móvil: toolbar scrollable horizontalmente
-
-### id:47 — IA en Sidebar: panel lateral de IA
-**Estado: done ✅**
-- View `'ai-assistant'` en `uiStore` + entrada "Asistente IA" (Sparkles) en
-  `Sidebar` tras Calendario; render full-width en `dashboard/page.tsx`
-- `components/ai/AiAssistantView.tsx`: chat general con streaming (`ReadableStream`),
-  selector de contexto (Sin nota / Nota activa / Todas mis notas), acciones
-  rápidas e historial en memoria (se borra al recargar)
-- Contexto "Todas mis notas": carga perezosa de `getAllNotesWithNotebook` +
-  `extractTextPreview` (resumen de títulos + preview)
-- `app/api/ai/assistant/route.ts`: rate limit 20/día con `action='ai_assistant'`
-  en `ai_usage` (sin CHECK constraint), prompt de sistema con/sin contexto
-Añadir una sección de IA accesible desde el sidebar izquierdo (no solo desde el editor):
-- Nueva opción en el sidebar: "Asistente IA" con icono Sparkles
-- `currentView === 'ai-assistant'` en `uiStore`
-- Componente `components/ai/AiAssistantView.tsx`:
-  - Chat general (no anclado a una nota específica) con Groq streaming
-  - Selector de contexto: "Sin nota" / "Nota activa" / "Todas mis notas (resumen)"
-  - Historial de la sesión (en memoria, se pierde al recargar)
-  - Acciones rápidas: "Resumir mis notas de hoy", "¿Qué tengo pendiente?", "Sugerir tareas"
-  - Rate limit: 20 mensajes/día (reutilizar tabla `ai_usage` con acción `'ai_assistant'`)
-- Route Handler: `app/api/ai/assistant/route.ts` (streaming, Groq)
-- Añadir entrada en `Sidebar.tsx` (siempre visible, no `disabled`)
-
-### id:48 — Compartir nota: opción "Cualquiera con el link puede editar"
-**Estado: done ✅**
-- `access_level` ahora `'none' | 'view' | 'edit'` (columna text, sin CHECK constraint)
-- `ShareControls`: opción "Anyone with the link can edit" habilitada; al activar
-  desde cero crea el link (`view`) y lo promociona a `edit`
-- `NoteViewer` → renombrado a **`NotePublicEditor`** (props `editable` + `slug`);
-  cuando `editable`, TipTap editable con autosave debounce 1500ms e indicador
-  Guardando / Guardado / Error. `initializedRef` evita autosave en el `setContent`
-  inicial
-- Endpoint público `app/api/shared/update/route.ts` → `updateSharedNoteContent`
-  (cliente admin/service role) que valida `is_active` + `access_level='edit'` +
-  no expirado + cota de tamaño 500KB antes de escribir `notes.content`
-Actualmente solo existe "view" (solo lectura). Añadir modo edición colaborativa:
-- Nueva columna en `shared_notes`: `access_level text default 'none'` → ya existe con valores `'none' | 'view'`, añadir `'edit'`
-- `ShareControls.tsx`: habilitar la opción "Anyone with the link can edit" (actualmente disabled)
-- Página `/n/[slug]`: si `access_level === 'edit'`, renderizar TipTap en modo editable
-  - Guardar cambios en la nota original via `updateNote` (con service role para bypasear RLS)
-  - Debounce de 1500ms para no saturar escrituras
-  - Indicador visual "Guardado" / "Guardando..." en la página pública
-- `lib/supabase/shared-notes-server.ts`: función `updateSharedNoteContent(slug, content)`
-- Consideración de seguridad: solo permitir edición si `is_active = true` y `expires_at` no vencido
-- `NoteViewer.tsx` → renombrar a `NotePublicEditor.tsx` y añadir prop `editable: boolean`
+### id:48 — Compartir nota: modo edición colaborativa ✅ done
+`access_level` ahora `'none' | 'view' | 'edit'` (text, sin CHECK constraint). `ShareControls`
+habilita "Anyone with the link can edit" (al activar desde cero crea link `view` y lo
+promociona a `edit`). `NoteViewer` → renombrado a **`NotePublicEditor`** (props `editable`
++ `slug`); cuando `editable`, TipTap editable con autosave debounce 1500ms e indicador
+Guardando/Guardado/Error (`initializedRef` evita autosave en el `setContent` inicial).
+Endpoint público `app/api/shared/update/route.ts` → `updateSharedNoteContent` (service role)
+que valida `is_active` + `access_level='edit'` + no expirado + cota 500KB antes de escribir.
 
 ---
 
