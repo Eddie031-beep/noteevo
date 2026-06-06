@@ -2,9 +2,10 @@
 
 import { useEffect } from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import { Plus, Star } from 'lucide-react'
+import { Plus, Star, PanelLeftClose } from 'lucide-react'
 import { useNoteStore } from '@/store/noteStore'
 import { useNotebookStore } from '@/store/notebookStore'
+import { useUIStore } from '@/store/uiStore'
 import { extractTextPreview } from '@/lib/utils/tiptap'
 import type { Note } from '@/types'
 
@@ -93,6 +94,7 @@ function NoteCard({ note, isSelected, onSelect, index }: NoteCardProps) {
 export default function NoteList() {
   const { notes, selectedNote, setSelectedNote, createNote, fetchNotes } = useNoteStore()
   const { selectedNotebook } = useNotebookStore()
+  const { setNoteListCollapsed } = useUIStore()
 
   useEffect(() => {
     if (selectedNotebook?.id) {
@@ -113,17 +115,27 @@ export default function NoteList() {
           </p>
         </div>
 
-        {selectedNotebook && (
+        <div className="flex items-center gap-0.5 shrink-0">
+          {selectedNotebook && (
+            <button
+              type="button"
+              title="Nueva nota"
+              data-testid="new-note-btn"
+              onClick={() => createNote(selectedNotebook.id)}
+              className="p-1.5 rounded-lg hover:bg-surface text-muted hover:text-foreground transition-all duration-150 active:scale-90 cursor-pointer"
+            >
+              <Plus size={14} />
+            </button>
+          )}
           <button
             type="button"
-            title="Nueva nota"
-            data-testid="new-note-btn"
-            onClick={() => createNote(selectedNotebook.id)}
-            className="p-1.5 rounded-lg hover:bg-surface text-muted hover:text-foreground transition-all duration-150 active:scale-90 shrink-0 cursor-pointer"
+            title="Ocultar panel"
+            onClick={() => setNoteListCollapsed(true)}
+            className="p-1.5 rounded-lg hover:bg-surface text-muted hover:text-foreground transition-all duration-150 active:scale-90 cursor-pointer"
           >
-            <Plus size={14} />
+            <PanelLeftClose size={14} />
           </button>
-        )}
+        </div>
       </div>
 
       {/* List */}

@@ -7,7 +7,7 @@ import { useNoteStore } from '@/store/noteStore'
 import { createNote } from '@/lib/supabase/notes'
 
 export function useKeyboardShortcuts() {
-  const { setCurrentView, setCheatsheetOpen, setFocusMode, isFocusMode } = useUIStore()
+  const { setCurrentView, setCheatsheetOpen, setFocusMode, isFocusMode, toggleSidebarCollapsed } = useUIStore()
   const { selectedNotebook } = useNotebookStore()
   const { addNote, setSelectedNote } = useNoteStore()
 
@@ -73,6 +73,13 @@ export function useKeyboardShortcuts() {
         return
       }
 
+      // Ctrl+\ — colapsar/expandir sidebar
+      if ((e.ctrlKey || e.metaKey) && e.key === '\\') {
+        e.preventDefault()
+        toggleSidebarCollapsed()
+        return
+      }
+
       // ? — cheatsheet
       if (e.key === '?' && !isEditable) {
         e.preventDefault()
@@ -83,5 +90,5 @@ export function useKeyboardShortcuts() {
 
     window.addEventListener('keydown', handler, true)
     return () => window.removeEventListener('keydown', handler, true)
-  }, [selectedNotebook, setCurrentView, setCheatsheetOpen, setFocusMode, isFocusMode, addNote, setSelectedNote])
+  }, [selectedNotebook, setCurrentView, setCheatsheetOpen, setFocusMode, isFocusMode, addNote, setSelectedNote, toggleSidebarCollapsed])
 }

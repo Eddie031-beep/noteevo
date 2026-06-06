@@ -18,6 +18,7 @@ import {
   List, ListOrdered, CheckSquare,
   Code, FileCode,
   Superscript as SuperscriptIcon, Subscript as SubscriptIcon, Eraser,
+  PanelLeftOpen, PanelLeftClose,
 } from 'lucide-react'
 import TagInput from './TagInput'
 import AttachmentPanel from './AttachmentPanel'
@@ -70,7 +71,7 @@ export default function NoteEditor() {
   const { selectedNote, updateNote: updateNoteStore } = useNoteStore()
   const { notebooks } = useNotebookStore()
   const { spaces } = useSpaceStore()
-  const { isFocusMode } = useUIStore()
+  const { isFocusMode, currentView, isNoteListCollapsed, setNoteListCollapsed } = useUIStore()
   const titleRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const syncedNoteIdRef = useRef<string | null>(null)
@@ -246,6 +247,22 @@ export default function NoteEditor() {
                 : ''
             }`}
           >
+
+          {/* Toggle panel de notas */}
+          {!isFocusMode && (currentView === 'notebooks' || currentView === 'notebooks-view' || currentView === 'all-notes' || currentView === 'favorites' || currentView === 'trash' || currentView === 'search') && (
+            <>
+              <ToolbarButton
+                title={isNoteListCollapsed ? 'Mostrar panel de notas' : 'Ocultar panel de notas'}
+                onClick={() => setNoteListCollapsed(!isNoteListCollapsed)}
+              >
+                {isNoteListCollapsed
+                  ? <PanelLeftOpen size={14} />
+                  : <PanelLeftClose size={14} />
+                }
+              </ToolbarButton>
+              <Divider />
+            </>
+          )}
 
           {/* Formato básico */}
           <ToolbarButton title="Negrita" onClick={() => editor?.chain().focus().toggleBold().run()} active={editor?.isActive('bold')}>

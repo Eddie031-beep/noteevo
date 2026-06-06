@@ -202,3 +202,59 @@
 - RLS que no funciona → verificar con usuario real en Supabase Studio
 - Edge Function que falla → revisar logs en Supabase Dashboard > Edge Functions
 - Migración SQL necesaria → documentar el SQL exacto en el checkpoint antes de aplicar
+
+---
+
+## Guías de implementación — Phase 16 Sidebar (ids 49–54)
+
+#### id:49 — Sidebar workspace header
+- Leer `profileStore.useProfileStore()` para obtener `profile.display_name` y `profile.avatar_url`
+- Fallback de iniciales: `display_name?.slice(0,2).toUpperCase()` o primeras 2 letras del email
+- El dropdown usa estado local `isProfileMenuOpen` + click-outside con `useEffect`
+- Estructura sugerida para el header:
+  ```tsx
+  <div className="flex items-center gap-3 px-3 py-3 border-b border-border">
+    <Avatar size={32} url={profile?.avatar_url} initials={initials} />
+    <span className="text-sm font-medium truncate flex-1">{profile?.display_name ?? 'NoteEvo'}</span>
+    <button onClick={() => setIsProfileMenuOpen(v => !v)}><ChevronDown size={14} /></button>
+  </div>
+  ```
+
+#### id:50 — Sidebar separadores
+- Envolver grupos de NavItems en un componente `<SidebarGroup label="Principal">` o simplemente
+  con un `<div className="mb-1">` + separador `<hr className="border-border/30 my-1" />`
+- El label de sección es opcional y puede ser muy pequeño (text-[10px] text-muted uppercase tracking-wider)
+
+#### id:51 — Full-row click zones
+- Cada NavItem debe ser un `<button>` o `<div>` con `w-full` y `className` que incluya
+  `rounded-lg px-3 py-2 flex items-center gap-3 hover:bg-secondary transition-colors`
+- NO usar padding solo en el ícono o texto — el área completa debe ser clickeable
+- El item activo: `bg-secondary border-l-2 border-accent` o similar al borde accent ya usado en NoteList
+
+#### id:52 — Sección "Más"
+- Usar `useState` + `useEffect` para leer `localStorage('noteevo-sidebar-more-open')`
+- Animación: `style={{ maxHeight: isMoreOpen ? '200px' : '0', overflow: 'hidden', transition: 'max-height 0.2s ease' }}`
+- NO usar `display: none` — provoca salto sin animación
+
+#### id:53 — Sidebar colapsado
+- En `uiStore.ts`, añadir junto a `isFocusMode`:
+  ```ts
+  isSidebarCollapsed: false,
+  toggleSidebarCollapsed: () => set(s => ({ isSidebarCollapsed: !s.isSidebarCollapsed })),
+  ```
+- En `layout.tsx`: el contenedor principal cambia de `ml-60` a `ml-12` cuando está colapsado
+  (usar clase dinámica o CSS transition en el mismo elemento)
+- Tooltip en modo colapsado: atributo `title` nativo es suficiente, o `<span className="sr-only">`
+  + tooltip custom si se quiere más control visual
+- Shortcut `Ctrl+\`: añadir en `useKeyboardShortcuts.ts` con `{ key: '\\', ctrl: true }`
+
+#### id:54 — Notebooks expandibles
+- NO crear una nueva vista — el acordeón vive dentro del `Sidebar.tsx`
+- Al hacer click en una libreta del acordeón:
+  ```ts
+  setSelectedNotebook(notebook)
+  setCurrentView('notebooks')
+  ```
+- Conteo de notas: puede calcularse del store `noteStore.notes.filter(n => n.notebook_id === nb.id && !n.is_trashed).length`
+  (sin llamada extra a DB si las notas ya están cargadas)
+- Si las notas no están cargadas aún, mostrar el conteo como `—` y no hacer fetch extra

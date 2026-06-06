@@ -430,6 +430,28 @@ RESEND_API_KEY=                  # Phase 13
 | Color de space determinista por `id` (Phase 16 id:45) | Evita migración/columna; visualmente equivalente a "color aleatorio al crear" y estable entre sesiones. `lib/utils/space-color.ts` |
 | `/api/spaces/lookup-user` solo owner/admin (Phase 16 id:45) | Preview de usuario antes de invitar sin convertir el endpoint en oráculo de enumeración de emails |
 | Edición pública colaborativa con service role (Phase 16 id:48) | `/api/shared/update` no requiere auth; `updateSharedNoteContent` valida is_active + access_level='edit' + no expirado + cota 500KB antes de escribir. NoteViewer→NotePublicEditor con prop `editable`; autosave debounce 1500ms |
+| Sidebar width colapsado: 48px (Phase 16 ids 49–54) | Mínimo para mostrar íconos 20px con padding 14px a cada lado |
+| Sidebar width expandido: ~240px (Phase 16 ids 49–54) | Consistente con Notion (224px) y Evernote; cabe display_name sin truncar en mayoría de casos |
+| `isSidebarCollapsed` en uiStore (Phase 16 id:53) | Estado global necesario para que el layout del dashboard ajuste el margen del área de contenido |
+| localStorage para estados del sidebar (Phase 16 ids 52–54) | Persisten entre sesiones sin roundtrip a DB; son preferencias de UI, no datos de usuario |
+| Notebooks expandibles sin fetch extra (Phase 16 id:54) | Usar notas ya en noteStore para calcular conteo; evita N+1 queries al renderizar el sidebar |
+| Tooltip nativo `title` en sidebar colapsado (Phase 16 id:53) | Suficiente para desktop; evita dependencia de librería de tooltips |
+| Sin `overflow: hidden` en sidebar groups (Phase 16 ids 52–54) | Necesario para que el acordeón de "Más" y el de notebooks aniden dropdowns correctamente |
+
+---
+
+## Arquitectura de carpetas — adiciones Phase 16 Sidebar (ids 49–54)
+
+```
+store/
+└── uiStore.ts   ← añadir isSidebarCollapsed + toggleSidebarCollapsed
+
+components/sidebar/
+└── Sidebar.tsx  ← workspace header, grupos, full-row items, "Más", notebooks acordeón
+
+app/(dashboard)/
+└── layout.tsx   ← ajuste de margen/grid cuando sidebar está colapsado
+```
 
 ---
 

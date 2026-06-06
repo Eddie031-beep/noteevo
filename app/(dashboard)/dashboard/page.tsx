@@ -202,7 +202,7 @@ function AllNotesView() {
 }
 
 export default function DashboardPage() {
-  const { currentView, isFocusMode } = useUIStore()
+  const { currentView, isFocusMode, isNoteListCollapsed } = useUIStore()
 
   const showHome = currentView === 'home'
   const showAllNotes = currentView === 'all-notes'
@@ -228,11 +228,21 @@ export default function DashboardPage() {
       {!isFocusMode && (
         <>
           {showHome && <HomePanel />}
-          {showAllNotes && <AllNotesView />}
-          {showNoteList && <NoteList />}
-          {showFavorites && <FavoriteNotes />}
-          {showTrash && <TrashNotes />}
-          {showSearch && <SearchResults />}
+
+          {/* Paneles de lista de notas — colapsables con animación */}
+          {(showAllNotes || showNoteList || showFavorites || showTrash || showSearch) && (
+            <div
+              className="shrink-0 overflow-hidden transition-all duration-300 ease-in-out"
+              style={{ width: isNoteListCollapsed ? 0 : 288 }}
+            >
+              {showAllNotes && <AllNotesView />}
+              {showNoteList && <NoteList />}
+              {showFavorites && <FavoriteNotes />}
+              {showTrash && <TrashNotes />}
+              {showSearch && <SearchResults />}
+            </div>
+          )}
+
           {showAdvancedSearch && <AdvancedSearchPanel />}
           {showTags && <TagsView />}
           {showTasks && <TaskList />}

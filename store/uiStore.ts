@@ -14,6 +14,11 @@ interface UIStore {
   setSearchQuery: (query: string) => void
   isFocusMode: boolean
   setFocusMode: (v: boolean) => void
+  isNoteListCollapsed: boolean
+  setNoteListCollapsed: (v: boolean) => void
+  isSidebarCollapsed: boolean
+  setSidebarCollapsed: (v: boolean) => void
+  toggleSidebarCollapsed: () => void
   isCheatsheetOpen: boolean
   setCheatsheetOpen: (v: boolean) => void
   theme: Theme
@@ -27,6 +32,11 @@ export const useUIStore = create<UIStore>((set) => ({
   setSearchQuery: (query) => set({ searchQuery: query }),
   isFocusMode: false,
   setFocusMode: (v) => set({ isFocusMode: v }),
+  isNoteListCollapsed: false,
+  setNoteListCollapsed: (v) => set({ isNoteListCollapsed: v }),
+  isSidebarCollapsed: false,
+  setSidebarCollapsed: (v) => set({ isSidebarCollapsed: v }),
+  toggleSidebarCollapsed: () => set((s) => ({ isSidebarCollapsed: !s.isSidebarCollapsed })),
   isCheatsheetOpen: false,
   setCheatsheetOpen: (v) => set({ isCheatsheetOpen: v }),
   theme: 'dark',

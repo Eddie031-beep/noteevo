@@ -149,3 +149,50 @@ Todas las features id:1–39 están done. No re-verificar.
 - [ ] `lib/supabase/shared-notes-server.ts`: añadir `updateSharedNoteContent()`
 - [ ] Renombrar `NoteViewer.tsx` → `NotePublicEditor.tsx` con prop `editable: boolean`
 - [ ] Solo permitir edición si `is_active = true` y `expires_at` no vencido
+
+### Sidebar: workspace header + avatar (id:49)
+- [ ] Avatar visible en el tope del sidebar: foto si existe `avatar_url`, sino iniciales del `display_name`
+- [ ] Nombre del workspace/usuario visible junto al avatar
+- [ ] Dropdown funcional: opciones "Configuración" y "Cerrar sesión"
+- [ ] `signOut()` de Supabase redirige a `/login`
+- [ ] Sin errores TypeScript en `Sidebar.tsx`
+
+### Sidebar: separadores + grupos (id:50)
+- [ ] 3 secciones claramente diferenciadas: Principal / Organización / Herramientas
+- [ ] Separador 0.5px visible entre secciones (no entre items individuales)
+- [ ] Gap de ~6px entre cada grupo de sección
+- [ ] Ningún item cambia de vista destino (solo agrupación visual)
+- [ ] Build verde
+
+### Sidebar: full-row click zones (id:51)
+- [ ] Zona de click de cada NavItem ocupa el 100% del ancho disponible
+- [ ] Highlight de hover con `border-radius: 8px` (rounded-lg en Tailwind)
+- [ ] Padding uniforme: 8px vertical, 12px horizontal en todos los items
+- [ ] Ningún item con `disabled` que tenga vista implementada
+- [ ] Item "Asistente IA" activo (no disabled) si id:47 está done, o marcado pending claramente
+- [ ] Build verde
+
+### Sidebar: sección 'Más' colapsable (id:52)
+- [ ] Items secundarios (Archivos, Plantillas, Configuración) dentro del grupo "Más"
+- [ ] Botón "Más" con chevron que rota al expandir/colapsar
+- [ ] Estado inicial correcto al cargar (lee localStorage)
+- [ ] Animación de apertura/cierre suave (transition-all + max-height)
+- [ ] Build verde
+
+### Sidebar: modo colapsado solo íconos (id:53)
+- [ ] `isSidebarCollapsed` en `uiStore.ts` con getter y setter
+- [ ] Ancho colapsado: ~48px; ancho expandido: ~240px
+- [ ] Transición CSS suave entre ambos estados (transition-all duration-200)
+- [ ] Tooltips visibles en modo colapsado al hacer hover
+- [ ] Layout del dashboard ajusta el espacio del editor al colapsar/expandir
+- [ ] `Ctrl+\` toggle funciona (registrado en `useKeyboardShortcuts.ts`)
+- [ ] Estado persiste en `localStorage('noteevo-sidebar-collapsed')`
+- [ ] Build verde
+
+### Sidebar: notebooks expandibles inline (id:54)
+- [ ] Click en "Libretas" expande acordeón inline con lista de notebooks
+- [ ] Cada fila: ícono + nombre truncado + conteo de notas
+- [ ] Click en una libreta → filtra notas de esa libreta y cambia vista
+- [ ] Si hay más de 7 libretas: muestra "Ver todas →" al final
+- [ ] Estado expandido persiste en localStorage
+- [ ] Build verde

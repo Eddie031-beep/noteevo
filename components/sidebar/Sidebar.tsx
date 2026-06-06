@@ -183,12 +183,12 @@ export default function Sidebar() {
     renameNotebook,
     setSelectedNotebook, selectedNotebook,
   } = useNotebookStore()
-  const { currentView, setCurrentView, searchQuery, setSearchQuery, theme, setTheme } = useUIStore()
+  const { currentView, setCurrentView, searchQuery, setSearchQuery, theme, setTheme, isSidebarCollapsed: collapsed, setSidebarCollapsed: setCollapsed } = useUIStore()
   const { setTags } = useTagStore()
   const { spaces, setSpaces, selectedSpace, setSelectedSpace, removeSpace } = useSpaceStore()
   const { profile, setProfile } = useProfileStore()
 
-  const [collapsed, setCollapsed] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(true)
   const [newName, setNewName] = useState('')
   const [creating, setCreating] = useState(false)
   const [showInput, setShowInput] = useState(false)
@@ -290,6 +290,22 @@ export default function Sidebar() {
       })
       .catch(() => {})
   }, [setProfile, setTheme])
+
+  // Hidratar preferencias de sidebar desde localStorage (solo cliente)
+  useEffect(() => {
+    const saved = localStorage.getItem('noteevo-sidebar-collapsed')
+    if (saved !== null) setCollapsed(saved === 'true')
+    const savedMore = localStorage.getItem('noteevo-sidebar-more-open')
+    if (savedMore !== null) setMoreOpen(savedMore === 'true')
+  }, [setCollapsed])
+
+  useEffect(() => {
+    localStorage.setItem('noteevo-sidebar-collapsed', String(collapsed))
+  }, [collapsed])
+
+  useEffect(() => {
+    localStorage.setItem('noteevo-sidebar-more-open', String(moreOpen))
+  }, [moreOpen])
 
   const handleCreate = async () => {
     if (!newName.trim()) return
@@ -580,13 +596,6 @@ export default function Sidebar() {
           collapsed={collapsed}
         />
         <NavItem
-          icon={<LayoutTemplate size={18} />}
-          label="Plantillas"
-          active={currentView === 'templates'}
-          onClick={() => handleNav('templates')}
-          collapsed={collapsed}
-        />
-        <NavItem
           icon={<Trash2 size={18} />}
           label="Papelera"
           active={currentView === 'trash'}
@@ -605,14 +614,6 @@ export default function Sidebar() {
           badge={pendingCount}
         />
 
-        {/* Próximamente */}
-        <NavItem
-          icon={<Paperclip size={18} />}
-          label="Archivos"
-          active={currentView === 'files'}
-          onClick={() => handleNav('files')}
-          collapsed={collapsed}
-        />
         <NavItem
           icon={<Calendar size={18} />}
           label="Calendario"
@@ -692,14 +693,64 @@ export default function Sidebar() {
           onClick={() => handleNav('shared')}
           collapsed={collapsed}
         />
-        <NavItem
-          icon={<Sparkles size={18} />}
-          label="IA"
-          active={false}
-          onClick={() => {}}
-          collapsed={collapsed}
-          disabled
-        />
+        <Separator />
+
+        {/* Sección "Más" colapsable (id:52) */}
+        {!collapsed ? (
+          <div>
+            <button
+              type="button"
+              onClick={() => setMoreOpen(!moreOpen)}
+              className="w-full flex items-center gap-1 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted hover:text-foreground transition cursor-pointer"
+            >
+              {moreOpen ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+              Más
+            </button>
+            <div
+              className="space-y-0.5"
+              style={{ maxHeight: moreOpen ? 200 : 0, overflow: 'hidden', transition: 'max-height 0.2s ease' }}
+            >
+              <NavItem
+                icon={<Paperclip size={18} />}
+                label="Archivos"
+                active={currentView === 'files'}
+                onClick={() => handleNav('files')}
+                collapsed={collapsed}
+              />
+              <NavItem
+                icon={<LayoutTemplate size={18} />}
+                label="Plantillas"
+                active={currentView === 'templates'}
+                onClick={() => handleNav('templates')}
+                collapsed={collapsed}
+              />
+              <NavItem
+                icon={<Settings size={18} />}
+                label="Configuración"
+                active={pathname === '/dashboard/settings'}
+                onClick={() => router.push('/dashboard/settings')}
+                collapsed={collapsed}
+              />
+            </div>
+          </div>
+        ) : (
+          <>
+            <NavItem
+              icon={<Paperclip size={18} />}
+              label="Archivos"
+              active={currentView === 'files'}
+              onClick={() => handleNav('files')}
+              collapsed={collapsed}
+            />
+            <NavItem
+              icon={<LayoutTemplate size={18} />}
+              label="Plantillas"
+              active={currentView === 'templates'}
+              onClick={() => handleNav('templates')}
+              collapsed={collapsed}
+            />
+          </>
+        )}
       </nav>
 
       {/* ── Bottom actions ── */}
