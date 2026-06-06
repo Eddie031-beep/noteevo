@@ -258,3 +258,184 @@
 - Conteo de notas: puede calcularse del store `noteStore.notes.filter(n => n.notebook_id === nb.id && !n.is_trashed).length`
   (sin llamada extra a DB si las notas ya están cargadas)
 - Si las notas no están cargadas aún, mostrar el conteo como `—` y no hacer fetch extra
+
+---
+
+### Phase 17 — Features de producto
+
+#### id:55 — Emoji por nota
+- Migración antes de implementar: `ALTER TABLE notes ADD COLUMN emoji text;`
+- Picker: array de ~40 emojis frecuentes en grid 8x5 + campo de búsqueda nativa
+- Clic en zona encima del título (área vacía, 48px de alto) → abre picker, no clic en el título mismo
+- Al seleccionar emoji: `UPDATE notes SET emoji = $1 WHERE id = $2 AND user_id = auth.uid()`
+- En NoteList: renderizar `<span>{note.emoji}</span>` antes del título; si null, icono `<FileText size={16}/>`
+- En noteStore: actualizar optimistamente antes del await
+
+#### id:56 — Contador de palabras
+- Calcular en el callback `onUpdate: ({ editor }) => { ... }` de useEditor
+- `const text = editor.getText(); const words = text.trim() ? text.trim().split(/\s+/).length : 0`
+- Tiempo: `const mins = Math.max(1, Math.ceil(words / 238))`
+- Mostrar solo cuando `words > 0`; ocultar con `words === 0`
+- Ubicación: `<div className="flex items-center gap-4 text-xs text-muted">` en la barra inferior del editor, junto al indicador "Guardado / Guardando..."
+
+#### id:57 — Notas ancladas
+- Migración: `ALTER TABLE notes ADD COLUMN is_pinned boolean default false;`
+- En `lib/supabase/notes.ts`: `togglePin(noteId: string, value: boolean)` → UPDATE + retorno del note actualizado
+- En noteStore: `updateNote` local optimista (ya existe el patrón)
+- En NoteList: `const pinned = notes.filter(n => n.is_pinned); const rest = notes.filter(n => !n.is_pinned)`
+- Sección "Ancladas" solo renderiza si `pinned.length > 0`; separador sutil entre secciones
+
+#### id:58 — Tooltips en toolbar
+- ToolbarTooltip.tsx: `'use client'`, `position: absolute; z-index: 50; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%)`
+- El contenedor padre del botón necesita `position: relative` y `group` class
+- Uso: `<ToolbarTooltip label="Negrita" shortcut="Ctrl+B"><button>...</button></ToolbarTooltip>`
+- Delay 400ms con useRef para el setTimeout, limpiar en cleanup
+- NO usar Radix Tooltip — demasiado pesado para este uso
+
+#### id:59 — Cover image
+- Migraciones: `ALTER TABLE notes ADD COLUMN cover_url text; ALTER TABLE notes ADD COLUMN cover_gradient text;`
+- Storage path: `covers/${userId}/${noteId}` en el bucket existente (mismo que imágenes de notas)
+- Zona de cover: div de 180px de alto encima del título. Visible siempre en modo edición.
+  Si no hay cover: fondo neutro con botón "Añadir portada" centrado.
+- Gradientes predefinidos: array de strings CSS `['linear-gradient(135deg, #667eea 0%, #764ba2 100%)', ...]`
+- En NoteList card: `<div style={{backgroundImage: `url(${note.cover_url})` || note.cover_gradient}} className="h-10 rounded-t-md bg-cover bg-center" />`
+- `updateCover(noteId, {cover_url?: string, cover_gradient?: string})` → UPDATE solo las columnas que cambien
+
+#### id:60 — Gallery view
+- State local en NoteList: `const [view, setView] = useState<'list'|'grid'>(() => localStorage.getItem('noteevo-notes-view') as 'list'|'grid' ?? 'list')`
+- Grid CSS: `grid-template-columns: repeat(2, 1fr); gap: 12px`
+- Preview de texto desde JSON TipTap: función `extractText(content: JSONContent): string` — recorrer recursivamente buscando nodos `text`, unir con espacios, truncar a 120 chars
+- Si `extractText` ya existe en `lib/utils/tiptap.ts`, reutilizarlo
+
+#### id:61 — Opciones tipográficas
+- Migración: `ALTER TABLE user_profiles ADD COLUMN editor_prefs jsonb default '{}'::jsonb;`
+- Interface `EditorPrefs { lineHeight: '1.4'|'1.7'|'2.0'; paragraphSpacing: 'compact'|'normal'|'relaxed'; lineWidth: 'narrow'|'normal'|'wide'; fontSize: '14'|'16'|'18' }`
+- CSS variables en globals.css: `.editor-content { --editor-line-height: 1.7; --editor-font-size: 16px; }`
+  `.editor-content p { line-height: var(--editor-line-height); font-size: var(--editor-font-size); }`
+- Aplicar variables inline en el contenedor del editor según los prefs del usuario
+- Guardar en profileStore con debounce 1000ms → `updateEditorPrefs(prefs)` en profile.ts
+- Panel: drawer/popover pequeño con 4 secciones de radio buttons, NO un modal grande
+
+#### id:62 — Empty states
+- EmptyState.tsx interface: `{ icon: ReactNode; title: string; description: string; action?: { label: string; onClick: () => void } }`
+- SVGs inline simples: `<svg viewBox="0 0 64 64" className="w-16 h-16 text-muted">` con formas básicas
+- Contenedor: `<div className="flex flex-col items-center justify-center py-20 gap-4 text-center">`
+- Textos por vista:
+  - NoteList vacío: "Sin notas aquí" / "Crea tu primera nota" / botón "Nueva nota"
+  - Favoritos vacío: "Sin notas favoritas" / "Marca notas con ★ para acceder rápido"
+  - Papelera vacía: "Papelera vacía" / "Las notas eliminadas aparecerán aquí"
+  - Tasks vacío: "Sin tareas" / "Organiza lo que tienes pendiente" / botón "Nueva tarea"
+  - Files vacío: "Sin archivos" / "Adjunta archivos a tus notas para verlos aquí"
+  - Templates vacío: solo aplica si no hay personales (las builtin siempre existen)
+
+#### id:63 — Ordenar notas
+- Dropdown con `<select>` nativo o custom. Opciones: `updated_at_desc`(default), `created_at_desc`, `title_asc`, `size_desc`
+- Función de ordenación client-side (NO tocar las queries de Supabase):
+  ```ts
+  const sorted = [...notes].sort((a, b) => {
+    if (sort === 'title_asc') return a.title.localeCompare(b.title)
+    if (sort === 'size_desc') return JSON.stringify(b.content).length - JSON.stringify(a.content).length
+    if (sort === 'created_at_desc') return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+  })
+  ```
+- localStorage key: `noteevo-sort-${selectedNotebook?.id ?? 'all'}`
+
+#### id:64 — Color por nota
+- Migración: `ALTER TABLE notes ADD COLUMN color text;`
+- Paleta: `['red','orange','yellow','green','teal','blue','purple','pink']` → mapear a clases Tailwind
+- En NoteList card: `border-l-[3px] border-l-{color}-400` (reemplaza el borde accent actual)
+  Si `note.color` es null: mantener el borde accent verde del hover actual
+- Picker en menú contextual: 8 círculos de color + X para "sin color"; CSS puro, sin librerías
+- Filtro en header: pills de colores horizontales, `null` = "Todos"
+- `updateNoteColor(noteId, color: string | null)` en notes.ts
+
+#### id:65 — Typewriter mode
+- `uiStore.ts`: añadir `isTypewriterMode: false, toggleTypewriterMode: () => set(s => ({isTypewriterMode: !s.isTypewriterMode}))`
+- En NoteEditor: listener `editor.on('selectionUpdate', handleTypewriter)` solo si `isTypewriterMode`
+- handleTypewriter: `const { from } = editor.state.selection; const domNode = editor.view.domAtPos(from).node; domNode?.parentElement?.scrollIntoView({block:'center',behavior:'smooth'})`
+- CSS en globals.css: `.typewriter-mode .ProseMirror > * { opacity: 0.35; transition: opacity 0.15s; } .typewriter-mode .ProseMirror > *.is-active { opacity: 1; }`
+- Añadir/remover clase `is-active` via `editor.view.dispatch` con decoración de TipTap en `onSelectionUpdate`
+- Toggle en barra inferior: icono `AlignCenter` de Lucide
+
+#### id:66 — Comando rápido mejorado
+- Detectar si el input empieza con `>` para modo comando vs. búsqueda normal
+- Comandos definidos como array de objetos `{ id, icon, label, shortcut?, action: () => void }`
+- Filtrar por el texto después del `>`: `commands.filter(c => c.label.toLowerCase().includes(query.toLowerCase()))`
+- Acciones de comandos: usar `useNotebookStore`, `useUiStore`, `useTaskStore` para disparar acciones
+- Navegación: `useState<number>(selectedIndex)` + keydown handlers en el input
+- Preservar la búsqueda de notas existente cuando el input NO empieza con `>`
+
+#### id:67 — Importar archivos
+- Instalar `marked` (npm install marked --save) para parsing de Markdown
+- Route Handler: `POST /api/import` con `multipart/form-data`, campo `file` + `notebookId`
+- Para .md: `const html = marked(text); const json = htmlToTiptap(html)` — implementar `htmlToTiptap` en `lib/utils/tiptap.ts`
+- Para .enex: parsear XML con `new DOMParser().parseFromString(enex, 'text/xml')` → extraer `<title>` y `<content>` → `<content>` contiene ENML (HTML-like) → parsear como HTML → convertir a TipTap JSON
+- Crear nota tras importar: `createNote(notebookId)` + `updateNote(id, {title, content})`
+- Modal: drag & drop nativo (sin librería), aceptar `.md,.enex`, barra de progreso con estado local
+
+#### id:68 — Backlinks
+- SQL completo antes de implementar (ver campo `sql` en feature_list.json)
+- Extensión TipTap `NoteLink`: `addInputRules` con `textblockTypeInputRule` o `inputRuleMatcherHandler` para `[[` → dropdown de notas
+- Nodo custom `noteLink`: `attrs: { noteId: string, title: string }`, renderiza como `<a>` con estilo especial
+- Sincronización en autosave (el debounce de 1500ms ya existe en NoteEditor):
+  ```ts
+  const links = findNoteLinks(editor.getJSON()) // recorrer JSON buscando nodos noteLink
+  await syncNoteLinks(noteId, links.map(l => l.attrs.noteId))
+  ```
+  `syncNoteLinks`: DELETE FROM note_links WHERE source_note_id = $1 + INSERT de los nuevos (upsert)
+- BacklinksPanel: mismo patrón que VersionHistoryPanel — panel colapsable en el sidebar derecho del editor
+
+#### id:69 — IA inline
+- InputRule TipTap: detecta `/ai ` al inicio de un párrafo (`^\/ai\s`) → reemplaza el nodo por nodo especial `aiPrompt`
+- Nodo `aiPrompt`: no editable directamente, muestra placeholder decorativo, captura Enter para ejecutar
+- Al ejecutar: `fetch('/api/ai/inline', {method:'POST', body: JSON.stringify({prompt: text, context: noteContent})})` → streaming igual que chat/route.ts
+- Respuesta se inserta como nodos párrafo/heading/etc según el JSON que devuelva el modelo (pedir respuesta en formato TipTap JSON o texto plano y parsearlo)
+- Si el usuario presiona Escape: eliminar el nodo `aiPrompt` y restaurar párrafo vacío
+- Rate limit: acción `'ai_inline'` en ai_usage, límite 20/día
+
+---
+
+## Migraciones SQL agrupadas — Phase 17
+
+Ejecutar en Supabase SQL Editor antes de implementar las features que las necesiten:
+
+```sql
+-- id:55 — emoji por nota
+ALTER TABLE notes ADD COLUMN IF NOT EXISTS emoji text;
+
+-- id:57 — notas ancladas
+ALTER TABLE notes ADD COLUMN IF NOT EXISTS is_pinned boolean default false;
+
+-- id:59 — cover image
+ALTER TABLE notes ADD COLUMN IF NOT EXISTS cover_url text;
+ALTER TABLE notes ADD COLUMN IF NOT EXISTS cover_gradient text;
+
+-- id:61 — opciones tipográficas
+ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS editor_prefs jsonb default '{}'::jsonb;
+
+-- id:64 — color por nota
+ALTER TABLE notes ADD COLUMN IF NOT EXISTS color text;
+
+-- id:68 — backlinks (ejecutar completo)
+CREATE TABLE IF NOT EXISTS note_links (
+  source_note_id uuid references notes(id) ON DELETE CASCADE,
+  target_note_id uuid references notes(id) ON DELETE CASCADE,
+  created_at timestamptz default now(),
+  PRIMARY KEY (source_note_id, target_note_id)
+);
+ALTER TABLE note_links ENABLE ROW LEVEL SECURITY;
+CREATE POLICY IF NOT EXISTS note_links_select ON note_links
+  FOR SELECT USING (
+    EXISTS (SELECT 1 FROM notes WHERE id = source_note_id AND user_id = auth.uid())
+  );
+CREATE POLICY IF NOT EXISTS note_links_insert ON note_links
+  FOR INSERT WITH CHECK (
+    EXISTS (SELECT 1 FROM notes WHERE id = source_note_id AND user_id = auth.uid())
+  );
+CREATE POLICY IF NOT EXISTS note_links_delete ON note_links
+  FOR DELETE USING (
+    EXISTS (SELECT 1 FROM notes WHERE id = source_note_id AND user_id = auth.uid())
+  );
+GRANT SELECT, INSERT, DELETE ON note_links TO authenticated;
+```

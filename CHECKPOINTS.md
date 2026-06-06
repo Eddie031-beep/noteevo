@@ -196,3 +196,126 @@ Todas las features id:1–39 están done. No re-verificar.
 - [ ] Si hay más de 7 libretas: muestra "Ver todas →" al final
 - [ ] Estado expandido persiste en localStorage
 - [ ] Build verde
+
+---
+
+## Phase 17 — Features de producto (ids 55–69)
+
+### Emoji por nota (id:55)
+- [ ] Columna `emoji text` en tabla `notes` creada
+- [ ] Picker inline funcional en NoteEditor (sobre el título)
+- [ ] Emoji visible en NoteList junto al título
+- [ ] Fallback a icono FileText cuando no hay emoji
+- [ ] `updateNoteEmoji(noteId, emoji)` en `lib/supabase/notes.ts`
+- [ ] Build verde
+
+### Contador de palabras + tiempo de lectura (id:56)
+- [ ] Contador visible en barra inferior del editor
+- [ ] Actualiza en tiempo real al escribir (`onUpdate`)
+- [ ] Formato correcto: "680 palabras · 3 min lectura"
+- [ ] No visible cuando la nota está vacía
+- [ ] Build verde
+
+### Notas ancladas (id:57)
+- [ ] Columna `is_pinned boolean default false` en tabla `notes` creada
+- [ ] Sección "Ancladas" visible encima del resto en NoteList cuando hay notas ancladas
+- [ ] Botón pin/unpin en menú contextual de la card
+- [ ] `togglePin(noteId, value)` en `lib/supabase/notes.ts`
+- [ ] Build verde
+
+### Tooltips con shortcut en toolbar (id:58)
+- [ ] Componente `ToolbarTooltip.tsx` creado (sin dependencias externas)
+- [ ] Delay de 400ms antes de mostrar
+- [ ] Shortcut visible en formato `kbd` dentro del tooltip
+- [ ] Aplicado en todos los botones de NoteEditor y FormatDropdowns
+- [ ] Build verde
+
+### Cover image por nota (id:59)
+- [ ] Columnas `cover_url text` y `cover_gradient text` en tabla `notes` creadas
+- [ ] Zona de cover visible en NoteEditor encima del título
+- [ ] Upload a Supabase Storage funcional (ruta `covers/{user_id}/{note_id}`)
+- [ ] Al menos 8 gradientes predefinidos como alternativa
+- [ ] Thumbnail en NoteList cards (40px de alto) cuando existe cover
+- [ ] `updateCover(noteId, data)` en `lib/supabase/notes.ts`
+- [ ] Build verde
+
+### Gallery view (id:60)
+- [ ] Toggle lista/grid en header de NoteList (iconos correctos)
+- [ ] Preferencia persiste en `localStorage('noteevo-notes-view')`
+- [ ] Vista grid en 2 columnas
+- [ ] Cards muestran: cover/gradiente, emoji, título, fecha relativa, preview de texto
+- [ ] Sin llamadas extra a DB
+- [ ] Build verde
+
+### Opciones tipográficas (id:61)
+- [ ] Columna `editor_prefs jsonb` en tabla `user_profiles` creada
+- [ ] Panel de opciones accesible desde barra inferior del editor
+- [ ] 4 opciones: line height, paragraph spacing, line width, font size
+- [ ] Cambios aplican en tiempo real al contenedor del editor
+- [ ] Guardado con debounce en user_profiles
+- [ ] Build verde
+
+### Empty states (id:62)
+- [ ] Componente `EmptyState.tsx` creado con props: icon, title, description, action?
+- [ ] Aplicado en: NoteList, TaskList, FilesView, CalendarView, TemplatesView, TrashNotes
+- [ ] Cada instancia tiene texto y CTA específico en español
+- [ ] SVG de ilustración visible (no solo texto)
+- [ ] Build verde
+
+### Ordenar notas (id:63)
+- [ ] Dropdown de ordenación en header de NoteList (4 opciones)
+- [ ] Preferencia guardada por notebook en localStorage
+- [ ] Ordenación client-side (sin fetch extra)
+- [ ] Opción activa visualmente marcada
+- [ ] Build verde
+
+### Color por nota (id:64)
+- [ ] Columna `color text` en tabla `notes` creada
+- [ ] Picker de 8 colores + "sin color" en menú contextual de la card
+- [ ] Borde izquierdo de color visible en NoteList
+- [ ] Filtro de color en header de NoteList
+- [ ] `updateNoteColor(noteId, color|null)` en `lib/supabase/notes.ts`
+- [ ] Build verde
+
+### Typewriter mode (id:65)
+- [ ] `isTypewriterMode: boolean` en `uiStore.ts`
+- [ ] Toggle accesible desde barra inferior del editor
+- [ ] Párrafos inactivos con opacidad reducida (0.35)
+- [ ] Párrafo activo con opacidad 1.0
+- [ ] Scroll que mantiene el cursor centrado verticalmente
+- [ ] CSS aplicado solo cuando `isTypewriterMode = true`
+- [ ] Build verde
+
+### Comando rápido mejorado (id:66)
+- [ ] Input unificado: '>' para comandos, texto libre para búsqueda
+- [ ] Mínimo 6 comandos funcionales con íconos
+- [ ] Navegación con teclado (↑↓ + Enter)
+- [ ] Shortcut visible en cada opción
+- [ ] Ctrl+K abre el panel (comportamiento existente preservado)
+- [ ] Build verde
+
+### Importar Markdown / .enex (id:67)
+- [ ] Modal de importación con drag & drop
+- [ ] Importar .md funcional: resultado es nota con contenido TipTap correcto
+- [ ] Importar .enex funcional: título y contenido extraídos correctamente
+- [ ] Selector de libreta destino en el modal
+- [ ] Mensajes de error en español si el archivo es inválido
+- [ ] Build verde
+
+### Backlinks entre notas (id:68)
+- [ ] Tabla `note_links` creada con RLS activado
+- [ ] Extensión TipTap: `[[` trigger abre autocomplete de notas
+- [ ] Nodo `noteLink` insertado correctamente con noteId y title
+- [ ] Sincronización de `note_links` en cada autosave
+- [ ] Panel de backlinks visible en NoteEditor (puede estar colapsado por defecto)
+- [ ] RPC `get_backlinks(p_note_id)` retorna notas correctamente
+- [ ] Build verde
+
+### IA inline en editor (id:69)
+- [ ] `/ai ` al inicio de párrafo vacío activa el modo inline
+- [ ] Placeholder visual "Escribe un prompt..." visible
+- [ ] Streaming de respuesta inserta texto en el documento
+- [ ] Route Handler `app/api/ai/inline/route.ts` funcional
+- [ ] Rate limit con acción `'ai_inline'` en `ai_usage`
+- [ ] Errores muestran mensaje en español en el editor
+- [ ] Build verde

@@ -610,5 +610,255 @@
       "store/notebookStore.ts"
     ],
     "notes": "Usar notebookStore.notebooks (ya existe). Mostrar máximo 7 libretas; si hay más, mostrar 'Ver todas →'. Cada fila: ícono BookOpen + nombre truncado + conteo de notas en badge gris. Estado isNotebooksExpanded local + localStorage('noteevo-sidebar-notebooks-open')."
+  },
+  {
+    "id": 55,
+    "phase": 17,
+    "title": "Emoji / icono por nota",
+    "status": "pending",
+    "depends_on": [],
+    "effort": "medium",
+    "impact": "high",
+    "needs_db": true,
+    "sql": "ALTER TABLE notes ADD COLUMN emoji text;",
+    "files": [
+      "lib/supabase/notes.ts",
+      "components/editor/NoteEditor.tsx",
+      "components/notes/NoteList.tsx",
+      "types/index.ts"
+    ],
+    "notes": "Picker inline en NoteEditor al clic en zona del título (encima del input). Fallback: icono FileText de Lucide. Mostrar en NoteList junto al título. Función addEmoji(noteId, emoji) en notes.ts. Opcional: acción 'suggest_emoji' via Groq (mismo patrón que suggest-tags)."
+  },
+  {
+    "id": 56,
+    "phase": 17,
+    "title": "Contador de palabras + tiempo de lectura",
+    "status": "pending",
+    "depends_on": [],
+    "effort": "easy",
+    "impact": "medium",
+    "needs_db": false,
+    "files": [
+      "components/editor/NoteEditor.tsx"
+    ],
+    "notes": "Solo NoteEditor.tsx. Calcular desde editor.getText().trim().split(/\\s+/).filter(Boolean).length. Tiempo = Math.ceil(words / 238). Mostrar en barra inferior del editor junto al estado de guardado (Guardado / Guardando...). Formato: '680 palabras · 3 min lectura'. Actualizar en onUpdate del editor."
+  },
+  {
+    "id": 57,
+    "phase": 17,
+    "title": "Notas ancladas (pinned)",
+    "status": "pending",
+    "depends_on": [],
+    "effort": "easy",
+    "impact": "medium",
+    "needs_db": true,
+    "sql": "ALTER TABLE notes ADD COLUMN is_pinned boolean default false;",
+    "files": [
+      "lib/supabase/notes.ts",
+      "components/notes/NoteList.tsx",
+      "types/index.ts"
+    ],
+    "notes": "Función togglePin(noteId, value) en notes.ts. En NoteList: sección 'Ancladas' encima del resto cuando hay notas con is_pinned=true. Botón pin en menú contextual de cada card (icono Pin de Lucide). Query: ORDER BY is_pinned DESC, updated_at DESC. Sin cambios en noteStore si las notas ya se recargan al hacer toggle."
+  },
+  {
+    "id": 58,
+    "phase": 17,
+    "title": "Tooltips con shortcut en toolbar",
+    "status": "pending",
+    "depends_on": [],
+    "effort": "easy",
+    "impact": "low",
+    "needs_db": false,
+    "files": [
+      "components/editor/NoteEditor.tsx",
+      "components/editor/FormatDropdowns.tsx",
+      "components/editor/ToolbarTooltip.tsx"
+    ],
+    "notes": "Crear ToolbarTooltip.tsx: wrapper CSS puro (no Radix), posición absolute, delay 400ms con setTimeout. Props: label string, shortcut? string. Formato en tooltip: 'Negrita' + elemento kbd con 'Ctrl+B'. Aplicar en todos los botones de NoteEditor.tsx y FormatDropdowns.tsx."
+  },
+  {
+    "id": 59,
+    "phase": 17,
+    "title": "Cover image por nota",
+    "status": "pending",
+    "depends_on": [
+      55
+    ],
+    "effort": "medium",
+    "impact": "high",
+    "needs_db": true,
+    "sql": "ALTER TABLE notes ADD COLUMN cover_url text; ALTER TABLE notes ADD COLUMN cover_gradient text;",
+    "files": [
+      "lib/supabase/notes.ts",
+      "components/editor/NoteEditor.tsx",
+      "components/notes/NoteList.tsx",
+      "types/index.ts"
+    ],
+    "notes": "Zona de cover encima del título en NoteEditor (visible solo si hay cover o si el usuario hace hover en esa área). Upload via Supabase Storage: mismo bucket que imágenes de notas, ruta covers/{user_id}/{note_id}. Gradientes alternativos: array de 8 opciones predefinidas como strings CSS. En NoteList card: franja de 40px de alto con la imagen/gradiente cuando existe. Función updateCover(noteId, {cover_url?, cover_gradient?}) en notes.ts."
+  },
+  {
+    "id": 60,
+    "phase": 17,
+    "title": "Gallery view en lista de notas",
+    "status": "pending",
+    "depends_on": [],
+    "effort": "medium",
+    "impact": "high",
+    "needs_db": false,
+    "files": [
+      "components/notes/NoteList.tsx"
+    ],
+    "notes": "Solo NoteList.tsx. Toggle lista/grid en header (iconos LayoutList / LayoutGrid de Lucide). Preferencia en localStorage('noteevo-notes-view'). Vista grid: 2 columnas, cards con cover_url o cover_gradient si existe (id:59), emoji (id:55), título, fecha relativa, preview de 2 líneas del contenido (extraer texto plano del JSON TipTap). Sin llamadas extra a DB: usar notas ya en noteStore."
+  },
+  {
+    "id": 61,
+    "phase": 17,
+    "title": "Opciones tipográficas del editor",
+    "status": "pending",
+    "depends_on": [],
+    "effort": "medium",
+    "impact": "medium",
+    "needs_db": true,
+    "sql": "ALTER TABLE user_profiles ADD COLUMN editor_prefs jsonb default '{}'::jsonb;",
+    "files": [
+      "lib/supabase/profile.ts",
+      "components/editor/NoteEditor.tsx",
+      "store/profileStore.ts",
+      "app/globals.css"
+    ],
+    "notes": "Valores en editor_prefs: lineHeight (1.4|1.7|2.0), paragraphSpacing (compact|normal|relaxed), lineWidth (narrow=max-w-2xl|normal=max-w-3xl|wide=max-w-4xl), fontSize (14|16|18). Panel de opciones accesible desde botón en barra inferior del editor (icono SlidersHorizontal). CSS variables en globals.css aplicadas al contenedor .editor-content. Guardar con debounce 1000ms en user_profiles."
+  },
+  {
+    "id": 62,
+    "phase": 17,
+    "title": "Empty states con ilustración",
+    "status": "pending",
+    "depends_on": [],
+    "effort": "easy",
+    "impact": "medium",
+    "needs_db": false,
+    "files": [
+      "components/ui/EmptyState.tsx",
+      "components/notes/NoteList.tsx",
+      "components/tasks/TaskList.tsx",
+      "components/files/FilesView.tsx",
+      "components/calendar/CalendarView.tsx",
+      "components/templates/TemplatesView.tsx",
+      "components/notes/TrashNotes.tsx"
+    ],
+    "notes": "Crear EmptyState.tsx: props icon (SVG inline simple, no librería), title, description, action? {label, onClick}. SVGs: formas geométricas simples que sugieran el concepto (ej. para notas: rectángulos apilados; para tareas: checkboxes). Cada uso tiene título y CTA específico en español. Ej notas vacías: 'Sin notas aquí' + 'Crear primera nota'."
+  },
+  {
+    "id": 63,
+    "phase": 17,
+    "title": "Ordenar notas por más criterios",
+    "status": "pending",
+    "depends_on": [],
+    "effort": "easy",
+    "impact": "low",
+    "needs_db": false,
+    "files": [
+      "components/notes/NoteList.tsx"
+    ],
+    "notes": "Solo NoteList.tsx. Dropdown con 4 opciones: 'Última edición' (updated_at DESC, default actual), 'Fecha creación' (created_at DESC), 'Título A-Z' (title ASC), 'Más largas' (JSON.stringify(content).length DESC). Guardar preferencia en localStorage con clave por notebook: noteevo-sort-{notebookId}. Ordenación client-side sobre noteStore.notes (sin fetch extra). Icono ArrowUpDown de Lucide en el header."
+  },
+  {
+    "id": 64,
+    "phase": 17,
+    "title": "Color por nota",
+    "status": "pending",
+    "depends_on": [],
+    "effort": "medium",
+    "impact": "medium",
+    "needs_db": true,
+    "sql": "ALTER TABLE notes ADD COLUMN color text;",
+    "files": [
+      "lib/supabase/notes.ts",
+      "components/notes/NoteList.tsx",
+      "types/index.ts"
+    ],
+    "notes": "8 colores predefinidos + null (sin color). Paleta: red, orange, yellow, green, teal, blue, purple, pink. En NoteList card: borde izquierdo de 3px con el color elegido (reemplaza el borde accent verde del hover). Picker en menú contextual de la card. Filtro de color en header de NoteList (pills de colores). Función updateNoteColor(noteId, color|null) en notes.ts."
+  },
+  {
+    "id": 65,
+    "phase": 17,
+    "title": "Typewriter mode + párrafo activo destacado",
+    "status": "pending",
+    "depends_on": [],
+    "effort": "medium",
+    "impact": "medium",
+    "needs_db": false,
+    "files": [
+      "components/editor/NoteEditor.tsx",
+      "store/uiStore.ts",
+      "app/globals.css"
+    ],
+    "notes": "Toggle isTypewriterMode en uiStore.ts. Typewriter: en onSelectionUpdate del editor, llamar editor.view.dom.querySelector('.ProseMirror-focused')?.scrollIntoView({block:'center',behavior:'smooth'}). Párrafo activo: CSS en globals.css — .typewriter-mode .ProseMirror p { opacity: 0.35; transition: opacity 0.2s } + .typewriter-mode .ProseMirror .is-active-paragraph { opacity: 1 }. Añadir clase is-active-paragraph al nodo activo via plugin TipTap o en onSelectionUpdate. Botón en barra inferior del editor."
+  },
+  {
+    "id": 66,
+    "phase": 17,
+    "title": "Comando rápido mejorado (Ctrl+K)",
+    "status": "pending",
+    "depends_on": [],
+    "effort": "medium",
+    "impact": "medium",
+    "needs_db": false,
+    "files": [
+      "components/search/CommandPalette.tsx",
+      "store/uiStore.ts",
+      "hooks/useKeyboardShortcuts.ts"
+    ],
+    "notes": "Rediseñar el modal de Ctrl+K existente. Input unificado: si el valor empieza con '>' es comando, sino es búsqueda (mantener búsqueda actual). Comandos: >nueva nota, >nueva tarea, >ir tareas, >ir calendario, >ir archivos, >cambiar tema, >configuración. Cada comando tiene ícono Lucide + shortcut visible. Navegación con teclado (↑↓ + Enter). Si ya existe el componente de búsqueda, extenderlo; si no, crear CommandPalette.tsx nuevo."
+  },
+  {
+    "id": 67,
+    "phase": 17,
+    "title": "Importar desde Markdown / .enex",
+    "status": "pending",
+    "depends_on": [],
+    "effort": "medium",
+    "impact": "medium",
+    "needs_db": false,
+    "files": [
+      "app/api/import/route.ts",
+      "components/notes/ImportModal.tsx",
+      "lib/utils/tiptap.ts"
+    ],
+    "notes": "Route Handler server-side para manejar archivos grandes. Para .md: usar marked (npm install marked) para parsear → convertir HTML a TipTap JSON (invertir lógica de lib/utils/tiptap.ts). Para .enex: XML con estructura <en-export><note><title>...<content>ENML... Parsear con DOMParser en server. ENML es HTML-like: convertir tags EN a equivalentes HTML → a TipTap JSON. Modal con drag&drop de archivos, selector de libreta destino, barra de progreso. Crear nota(s) via createNote + updateNote existentes."
+  },
+  {
+    "id": 68,
+    "phase": 17,
+    "title": "Backlinks entre notas",
+    "status": "pending",
+    "depends_on": [],
+    "effort": "hard",
+    "impact": "high",
+    "needs_db": true,
+    "sql": "CREATE TABLE note_links (source_note_id uuid references notes(id) ON DELETE CASCADE, target_note_id uuid references notes(id) ON DELETE CASCADE, created_at timestamptz default now(), PRIMARY KEY (source_note_id, target_note_id)); ALTER TABLE note_links ENABLE ROW LEVEL SECURITY; CREATE POLICY note_links_policy ON note_links USING (EXISTS (SELECT 1 FROM notes WHERE id = source_note_id AND user_id = auth.uid()));",
+    "files": [
+      "lib/editor/notelink-extension.ts",
+      "lib/supabase/notes.ts",
+      "components/editor/NoteEditor.tsx",
+      "types/index.ts"
+    ],
+    "notes": "Extensión TipTap: detectar patrón [[texto en input → InputRule → abrir dropdown de notas filtradas por título → al seleccionar, insertar nodo custom 'noteLink' con atributos {noteId, title}. Al guardar nota (autosave): escanear JSON buscando nodos tipo 'noteLink', sincronizar tabla note_links (DELETE donde source=noteId, INSERT los encontrados). Panel BacklinksPanel en NoteEditor (igual que VersionHistoryPanel): lista de notas que tienen source_note_id apuntando a la nota actual. RPC get_backlinks(p_note_id) → retorna notas con JOIN. Solo implementar si ids 55-65 están completos."
+  },
+  {
+    "id": 69,
+    "phase": 17,
+    "title": "IA inline en editor (/ai)",
+    "status": "pending",
+    "depends_on": [],
+    "effort": "hard",
+    "impact": "high",
+    "needs_db": false,
+    "files": [
+      "lib/editor/ai-inline-extension.ts",
+      "app/api/ai/inline/route.ts",
+      "components/editor/NoteEditor.tsx"
+    ],
+    "notes": "Extensión TipTap: InputRule que detecta '/ai ' al inicio de un párrafo vacío → reemplaza el nodo por un placeholder decorativo 'Escribe un prompt...' → al presionar Enter toma el texto del párrafo como prompt → llama app/api/ai/inline/route.ts con {prompt, context: nota actual} → streaming → inserta la respuesta en el documento reemplazando el nodo de prompt. Route Handler: mismo patrón que chat/route.ts pero sin historial. Rate limit: acción 'ai_inline' en ai_usage. Solo implementar después de todos los demás."
   }
 ]
