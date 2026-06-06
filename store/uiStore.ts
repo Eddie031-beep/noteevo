@@ -14,6 +14,8 @@ interface UIStore {
   setSearchQuery: (query: string) => void
   isFocusMode: boolean
   setFocusMode: (v: boolean) => void
+  isTypewriterMode: boolean
+  toggleTypewriterMode: () => void
   isNoteListCollapsed: boolean
   setNoteListCollapsed: (v: boolean) => void
   isSidebarCollapsed: boolean
@@ -32,6 +34,8 @@ export const useUIStore = create<UIStore>((set) => ({
   setSearchQuery: (query) => set({ searchQuery: query }),
   isFocusMode: false,
   setFocusMode: (v) => set({ isFocusMode: v }),
+  isTypewriterMode: false,
+  toggleTypewriterMode: () => set((s) => ({ isTypewriterMode: !s.isTypewriterMode })),
   isNoteListCollapsed: false,
   setNoteListCollapsed: (v) => set({ isNoteListCollapsed: v }),
   isSidebarCollapsed: false,

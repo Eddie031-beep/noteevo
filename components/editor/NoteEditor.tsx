@@ -18,9 +18,10 @@ import {
   List, ListOrdered, CheckSquare,
   Code, FileCode,
   Superscript as SuperscriptIcon, Subscript as SubscriptIcon, Eraser,
-  PanelLeftOpen, PanelLeftClose,
+  PanelLeftOpen, PanelLeftClose, Pilcrow,
 } from 'lucide-react'
 import TagInput from './TagInput'
+import ToolbarTooltip from './ToolbarTooltip'
 import AttachmentPanel from './AttachmentPanel'
 import AiSummaryPanel from './AiSummaryPanel'
 import AiChatPanel from './AiChatPanel'
@@ -40,26 +41,29 @@ import { saveVersion, getVersionCount } from '@/lib/supabase/versions'
 import type { NoteVersion } from '@/types'
 
 function ToolbarButton({
-  onClick, active, title, children,
+  onClick, active, title, shortcut, children,
 }: {
   onClick: () => void
   active?: boolean
   title: string
+  shortcut?: string
   children: React.ReactNode
 }) {
   return (
-    <button
-      type="button"
-      title={title}
-      onClick={onClick}
-      className={`p-1.5 rounded transition cursor-pointer ${
-        active
-          ? 'bg-elevated text-foreground'
-          : 'text-muted hover:bg-surface hover:text-foreground'
-      }`}
-    >
-      {children}
-    </button>
+    <ToolbarTooltip label={title} shortcut={shortcut}>
+      <button
+        type="button"
+        aria-label={title}
+        onClick={onClick}
+        className={`p-1.5 rounded transition cursor-pointer ${
+          active
+            ? 'bg-elevated text-foreground'
+            : 'text-muted hover:bg-surface hover:text-foreground'
+        }`}
+      >
+        {children}
+      </button>
+    </ToolbarTooltip>
   )
 }
 
@@ -67,11 +71,16 @@ function Divider() {
   return <div className="w-px h-5 bg-border mx-1 shrink-0" />
 }
 
+function countWords(text: string): number {
+  const trimmed = text.trim()
+  return trimmed ? trimmed.split(/\s+/).length : 0
+}
+
 export default function NoteEditor() {
   const { selectedNote, updateNote: updateNoteStore } = useNoteStore()
   const { notebooks } = useNotebookStore()
   const { spaces } = useSpaceStore()
-  const { isFocusMode, currentView, isNoteListCollapsed, setNoteListCollapsed } = useUIStore()
+  const { isFocusMode, currentView, isNoteListCollapsed, setNoteListCollapsed, isTypewriterMode, toggleTypewriterMode } = useUIStore()
   const titleRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const syncedNoteIdRef = useRef<string | null>(null)
@@ -88,10 +97,13 @@ export default function NoteEditor() {
   const [showSaveTemplate, setShowSaveTemplate] = useState(false)
   const [showMove, setShowMove] = useState(false)
   const [tagInputKey, setTagInputKey] = useState(0)
+  const [wordCount, setWordCount] = useState(0)
   const [improveToolbar, setImproveToolbar] = useState<{
     position: { top: number; left: number }
     selectedText: string
   } | null>(null)
+
+  const readingMinutes = Math.max(1, Math.ceil(wordCount / 238))
 
   const isReadOnly = useMemo(() => {
     if (!selectedNote?.notebook_id) return false
@@ -113,6 +125,7 @@ export default function NoteEditor() {
       if (editor.state.selection.empty) setImproveToolbar(null)
     },
     onUpdate: ({ editor }) => {
+      setWordCount(countWords(editor.getText()))
       if (!syncedNoteIdRef.current) return
       const noteId = syncedNoteIdRef.current
       const content = editor.getJSON()
@@ -137,12 +150,48 @@ export default function NoteEditor() {
       editor.commands.setContent(
         Object.keys(selectedNote.content).length > 0 ? selectedNote.content : ''
       )
+      setWordCount(countWords(editor.getText()))
     }, 0)
   }, [selectedNote, editor])
 
   useEffect(() => {
     editor?.setEditable(!isReadOnly)
   }, [editor, isReadOnly])
+
+  // Typewriter mode: resalta el párrafo activo y mantiene el cursor centrado.
+  useEffect(() => {
+    if (!editor) return
+    const pm = editor.view.dom as HTMLElement
+    const clearActive = () =>
+      pm.querySelectorAll('.is-active').forEach((el) => el.classList.remove('is-active'))
+
+    if (!isTypewriterMode) {
+      clearActive()
+      return
+    }
+
+    const highlight = () => {
+      clearActive()
+      const { from } = editor.state.selection
+      const domNode = editor.view.domAtPos(from).node
+      let el: HTMLElement | null =
+        domNode.nodeType === Node.TEXT_NODE ? domNode.parentElement : (domNode as HTMLElement)
+      while (el && el.parentElement !== pm) el = el.parentElement
+      if (el) {
+        el.classList.add('is-active')
+        el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      }
+    }
+
+    highlight()
+    editor.on('selectionUpdate', highlight)
+    editor.on('update', highlight)
+    return () => {
+      editor.off('selectionUpdate', highlight)
+      editor.off('update', highlight)
+      clearActive()
+    }
+  }, [editor, isTypewriterMode])
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!selectedNote) return
@@ -265,16 +314,16 @@ export default function NoteEditor() {
           )}
 
           {/* Formato básico */}
-          <ToolbarButton title="Negrita" onClick={() => editor?.chain().focus().toggleBold().run()} active={editor?.isActive('bold')}>
+          <ToolbarButton title="Negrita" shortcut="Ctrl+B" onClick={() => editor?.chain().focus().toggleBold().run()} active={editor?.isActive('bold')}>
             <Bold size={14} />
           </ToolbarButton>
-          <ToolbarButton title="Cursiva" onClick={() => editor?.chain().focus().toggleItalic().run()} active={editor?.isActive('italic')}>
+          <ToolbarButton title="Cursiva" shortcut="Ctrl+I" onClick={() => editor?.chain().focus().toggleItalic().run()} active={editor?.isActive('italic')}>
             <Italic size={14} />
           </ToolbarButton>
-          <ToolbarButton title="Subrayado" onClick={() => editor?.chain().focus().toggleUnderline().run()} active={editor?.isActive('underline')}>
+          <ToolbarButton title="Subrayado" shortcut="Ctrl+U" onClick={() => editor?.chain().focus().toggleUnderline().run()} active={editor?.isActive('underline')}>
             <UnderlineIcon size={14} />
           </ToolbarButton>
-          <ToolbarButton title="Tachado" onClick={() => editor?.chain().focus().toggleStrike().run()} active={editor?.isActive('strike')}>
+          <ToolbarButton title="Tachado" shortcut="Ctrl+Shift+S" onClick={() => editor?.chain().focus().toggleStrike().run()} active={editor?.isActive('strike')}>
             <Strikethrough size={14} />
           </ToolbarButton>
           <ToolbarButton title="Superíndice" onClick={() => editor?.chain().focus().toggleSuperscript().run()} active={editor?.isActive('superscript')}>
@@ -283,7 +332,7 @@ export default function NoteEditor() {
           <ToolbarButton title="Subíndice" onClick={() => editor?.chain().focus().toggleSubscript().run()} active={editor?.isActive('subscript')}>
             <SubscriptIcon size={14} />
           </ToolbarButton>
-          <ToolbarButton title="Resaltar" onClick={() => editor?.chain().focus().toggleHighlight().run()} active={editor?.isActive('highlight')}>
+          <ToolbarButton title="Resaltar" shortcut="Ctrl+Shift+H" onClick={() => editor?.chain().focus().toggleHighlight().run()} active={editor?.isActive('highlight')}>
             <Highlighter size={14} />
           </ToolbarButton>
 
@@ -297,49 +346,49 @@ export default function NoteEditor() {
           <Divider />
 
           {/* Alineación */}
-          <ToolbarButton title="Izquierda" onClick={() => editor?.chain().focus().setTextAlign('left').run()} active={editor?.isActive({ textAlign: 'left' })}>
+          <ToolbarButton title="Izquierda" shortcut="Ctrl+Shift+L" onClick={() => editor?.chain().focus().setTextAlign('left').run()} active={editor?.isActive({ textAlign: 'left' })}>
             <AlignLeft size={14} />
           </ToolbarButton>
-          <ToolbarButton title="Centro" onClick={() => editor?.chain().focus().setTextAlign('center').run()} active={editor?.isActive({ textAlign: 'center' })}>
+          <ToolbarButton title="Centro" shortcut="Ctrl+Shift+E" onClick={() => editor?.chain().focus().setTextAlign('center').run()} active={editor?.isActive({ textAlign: 'center' })}>
             <AlignCenter size={14} />
           </ToolbarButton>
-          <ToolbarButton title="Derecha" onClick={() => editor?.chain().focus().setTextAlign('right').run()} active={editor?.isActive({ textAlign: 'right' })}>
+          <ToolbarButton title="Derecha" shortcut="Ctrl+Shift+R" onClick={() => editor?.chain().focus().setTextAlign('right').run()} active={editor?.isActive({ textAlign: 'right' })}>
             <AlignRight size={14} />
           </ToolbarButton>
 
           <Divider />
 
           {/* Headings */}
-          <ToolbarButton title="H1" onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()} active={editor?.isActive('heading', { level: 1 })}>
+          <ToolbarButton title="Título 1" shortcut="Ctrl+Alt+1" onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()} active={editor?.isActive('heading', { level: 1 })}>
             <Heading1 size={14} />
           </ToolbarButton>
-          <ToolbarButton title="H2" onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} active={editor?.isActive('heading', { level: 2 })}>
+          <ToolbarButton title="Título 2" shortcut="Ctrl+Alt+2" onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} active={editor?.isActive('heading', { level: 2 })}>
             <Heading2 size={14} />
           </ToolbarButton>
-          <ToolbarButton title="H3" onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()} active={editor?.isActive('heading', { level: 3 })}>
+          <ToolbarButton title="Título 3" shortcut="Ctrl+Alt+3" onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()} active={editor?.isActive('heading', { level: 3 })}>
             <Heading3 size={14} />
           </ToolbarButton>
 
           <Divider />
 
           {/* Listas */}
-          <ToolbarButton title="Lista" onClick={() => editor?.chain().focus().toggleBulletList().run()} active={editor?.isActive('bulletList')}>
+          <ToolbarButton title="Lista" shortcut="Ctrl+Shift+8" onClick={() => editor?.chain().focus().toggleBulletList().run()} active={editor?.isActive('bulletList')}>
             <List size={14} />
           </ToolbarButton>
-          <ToolbarButton title="Lista numerada" onClick={() => editor?.chain().focus().toggleOrderedList().run()} active={editor?.isActive('orderedList')}>
+          <ToolbarButton title="Lista numerada" shortcut="Ctrl+Shift+7" onClick={() => editor?.chain().focus().toggleOrderedList().run()} active={editor?.isActive('orderedList')}>
             <ListOrdered size={14} />
           </ToolbarButton>
-          <ToolbarButton title="Checklist" onClick={() => editor?.chain().focus().toggleTaskList().run()} active={editor?.isActive('taskList')}>
+          <ToolbarButton title="Checklist" shortcut="Ctrl+Shift+9" onClick={() => editor?.chain().focus().toggleTaskList().run()} active={editor?.isActive('taskList')}>
             <CheckSquare size={14} />
           </ToolbarButton>
 
           <Divider />
 
           {/* Código */}
-          <ToolbarButton title="Código inline" onClick={() => editor?.chain().focus().toggleCode().run()} active={editor?.isActive('code')}>
+          <ToolbarButton title="Código inline" shortcut="Ctrl+E" onClick={() => editor?.chain().focus().toggleCode().run()} active={editor?.isActive('code')}>
             <Code size={14} />
           </ToolbarButton>
-          <ToolbarButton title="Bloque de código" onClick={() => editor?.chain().focus().toggleCodeBlock().run()} active={editor?.isActive('codeBlock')}>
+          <ToolbarButton title="Bloque de código" shortcut="Ctrl+Alt+C" onClick={() => editor?.chain().focus().toggleCodeBlock().run()} active={editor?.isActive('codeBlock')}>
             <FileCode size={14} />
           </ToolbarButton>
 
@@ -410,7 +459,7 @@ export default function NoteEditor() {
           className="flex-1 overflow-y-auto px-6 sm:px-10 py-12 bg-background"
           onMouseUp={handleEditorMouseUp}
         >
-          <div className={`mx-auto w-full transition-[max-width] duration-300 ${isFocusMode ? 'max-w-2xl' : 'max-w-3xl'}`}>
+          <div className={`mx-auto w-full transition-[max-width] duration-300 ${isFocusMode ? 'max-w-2xl' : 'max-w-3xl'}${isTypewriterMode ? ' typewriter-mode' : ''}`}>
             <input
               ref={titleRef}
               type="text"
@@ -478,6 +527,33 @@ export default function NoteEditor() {
               onClose={() => setShowSmartTags(false)}
             />
           </div>
+        )}
+      </div>
+
+      {/* ── Barra inferior (estado del editor) ── */}
+      <div className="shrink-0 flex items-center justify-between gap-4 px-4 py-1.5 border-t border-border bg-panel text-xs text-muted">
+        <div className="flex items-center gap-4">
+          {wordCount > 0 && (
+            <span>
+              {wordCount} {wordCount === 1 ? 'palabra' : 'palabras'} · {readingMinutes} min lectura
+            </span>
+          )}
+        </div>
+        {!isReadOnly && (
+          <button
+            type="button"
+            onClick={toggleTypewriterMode}
+            aria-pressed={isTypewriterMode}
+            title="Modo máquina de escribir"
+            className={`flex items-center gap-1.5 rounded px-2 py-1 transition cursor-pointer ${
+              isTypewriterMode
+                ? 'bg-elevated text-accent'
+                : 'text-muted hover:bg-surface hover:text-foreground'
+            }`}
+          >
+            <Pilcrow size={13} />
+            <span>Máquina de escribir</span>
+          </button>
         )}
       </div>
 

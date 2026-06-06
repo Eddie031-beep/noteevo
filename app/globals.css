@@ -298,3 +298,12 @@ ul[data-type="taskList"] li > div {
 .toast-enter {
   animation: toastEnter 0.18s ease-out forwards;
 }
+
+/* ── Typewriter mode (id:65) ── */
+.typewriter-mode .ProseMirror > * {
+  opacity: 0.35;
+  transition: opacity 0.2s ease;
+}
+.typewriter-mode .ProseMirror > *.is-active {
+  opacity: 1;
+}

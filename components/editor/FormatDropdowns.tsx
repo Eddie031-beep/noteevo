@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronDown, Check } from 'lucide-react'
 import type { Editor } from '@tiptap/react'
+import ToolbarTooltip from './ToolbarTooltip'
 
 // ── Font Family ────────────────────────────────────────────────────────────
 const FONTS = [
@@ -41,17 +42,20 @@ export function FontFamilySelector({ editor }: { editor: Editor }) {
 
   return (
     <div className="relative" ref={ref}>
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 px-2 py-1.5 rounded text-xs text-muted hover:bg-surface hover:text-foreground transition cursor-pointer"
-        style={{ minWidth: 88 }}
-      >
-        <span className="truncate" style={current.value ? { fontFamily: current.value } : {}}>
-          {current.label}
-        </span>
-        <ChevronDown size={10} className="shrink-0" />
-      </button>
+      <ToolbarTooltip label="Fuente">
+        <button
+          type="button"
+          aria-label="Fuente"
+          onClick={() => setOpen(!open)}
+          className="flex items-center gap-1 px-2 py-1.5 rounded text-xs text-muted hover:bg-surface hover:text-foreground transition cursor-pointer"
+          style={{ minWidth: 88 }}
+        >
+          <span className="truncate" style={current.value ? { fontFamily: current.value } : {}}>
+            {current.label}
+          </span>
+          <ChevronDown size={10} className="shrink-0" />
+        </button>
+      </ToolbarTooltip>
 
       {open && (
         <div className="absolute left-0 top-9 z-40 bg-panel border border-border rounded-xl shadow-2xl w-44 py-1">
@@ -102,14 +106,17 @@ export function FontSizeSelector({ editor }: { editor: Editor }) {
 
   return (
     <div className="relative" ref={ref}>
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-0.5 px-1.5 py-1.5 rounded text-xs text-muted hover:bg-surface hover:text-foreground transition cursor-pointer"
-      >
-        <span>16</span>
-        <ChevronDown size={10} className="shrink-0" />
-      </button>
+      <ToolbarTooltip label="Tamaño de texto">
+        <button
+          type="button"
+          aria-label="Tamaño de texto"
+          onClick={() => setOpen(!open)}
+          className="flex items-center gap-0.5 px-1.5 py-1.5 rounded text-xs text-muted hover:bg-surface hover:text-foreground transition cursor-pointer"
+        >
+          <span>16</span>
+          <ChevronDown size={10} className="shrink-0" />
+        </button>
+      </ToolbarTooltip>
 
       {open && (
         <div className="absolute left-0 top-9 z-40 bg-panel border border-border rounded-xl shadow-2xl w-20 py-1">
@@ -164,21 +171,23 @@ export function TextColorPicker({ editor }: { editor: Editor }) {
 
   return (
     <div className="relative" ref={ref}>
-      <button
-        type="button"
-        title="Color de texto"
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-0.5 p-1.5 rounded hover:bg-surface transition cursor-pointer"
-      >
-        <span className="text-xs font-bold text-foreground leading-none relative">
-          A
-          <span
-            className="absolute bottom-0 left-0 right-0 h-0.5 rounded"
-            style={{ backgroundColor: currentColor ?? 'var(--color-foreground)' }}
-          />
-        </span>
-        <ChevronDown size={10} className="text-muted" />
-      </button>
+      <ToolbarTooltip label="Color de texto">
+        <button
+          type="button"
+          aria-label="Color de texto"
+          onClick={() => setOpen(!open)}
+          className="flex items-center gap-0.5 p-1.5 rounded hover:bg-surface transition cursor-pointer"
+        >
+          <span className="text-xs font-bold text-foreground leading-none relative">
+            A
+            <span
+              className="absolute bottom-0 left-0 right-0 h-0.5 rounded"
+              style={{ backgroundColor: currentColor ?? 'var(--color-foreground)' }}
+            />
+          </span>
+          <ChevronDown size={10} className="text-muted" />
+        </button>
+      </ToolbarTooltip>
 
       {open && (
         <div className="absolute left-0 top-9 z-40 bg-panel border border-border rounded-xl shadow-2xl p-3 w-44">
