@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import Placeholder from '@tiptap/extension-placeholder'
 import { sharedEditorExtensions } from '@/lib/editor/extensions'
+import { ActiveNodeHighlight } from '@/lib/editor/active-node-extension'
 import { useNoteStore } from '@/store/noteStore'
 import { useNotebookStore } from '@/store/notebookStore'
 import { useSpaceStore } from '@/store/spaceStore'
@@ -118,6 +119,7 @@ export default function NoteEditor() {
     editable: !isReadOnly,
     extensions: [
       ...sharedEditorExtensions,
+      ActiveNodeHighlight,
       Placeholder.configure({ placeholder: 'Escribe algo...' }),
     ],
     content: '',
@@ -158,43 +160,20 @@ export default function NoteEditor() {
     editor?.setEditable(!isReadOnly)
   }, [editor, isReadOnly])
 
-  // Typewriter mode: resalta el párrafo activo y mantiene el cursor centrado.
+  // Typewriter mode: el resaltado del párrafo activo lo aplica la extensión
+  // ActiveNodeHighlight (Decoration de ProseMirror, sobrevive a los redibujados).
+  // Este efecto solo mantiene el cursor centrado mientras el modo está activo.
   useEffect(() => {
-    if (!editor) return
+    if (!editor || !isTypewriterMode) return
     const pm = editor.view.dom as HTMLElement
-    const clearActive = () =>
-      pm.querySelectorAll('.is-active-node').forEach((el) => el.classList.remove('is-active-node'))
-
-    if (!isTypewriterMode) {
-      clearActive()
-      return
+    const centerActive = () => {
+      const el = pm.querySelector('.is-active-node')
+      el?.scrollIntoView({ block: 'center', behavior: 'smooth' })
     }
-
-    const highlight = () => {
-      const { from } = editor.state.selection
-      // Quitar la clase de TODOS los nodos antes de marcar el activo
-      pm.querySelectorAll('.is-active-node').forEach((el) =>
-        el.classList.remove('is-active-node')
-      )
-      // Encontrar el nodo DOM en la posición actual y subir al hijo directo del ProseMirror
-      const domAtPos = editor.view.domAtPos(from)
-      let node = domAtPos.node as HTMLElement
-      while (node && node.parentElement !== pm) {
-        node = node.parentElement as HTMLElement
-      }
-      if (node && node !== pm) {
-        node.classList.add('is-active-node')
-        node.scrollIntoView({ block: 'center', behavior: 'smooth' })
-      }
-    }
-
-    highlight()
-    editor.on('selectionUpdate', highlight)
-    editor.on('update', highlight)
+    centerActive()
+    editor.on('selectionUpdate', centerActive)
     return () => {
-      editor.off('selectionUpdate', highlight)
-      editor.off('update', highlight)
-      clearActive()
+      editor.off('selectionUpdate', centerActive)
     }
   }, [editor, isTypewriterMode])
 
@@ -461,10 +440,10 @@ export default function NoteEditor() {
       {/* ── Content ── */}
       <div className="flex-1 flex overflow-hidden relative">
         <div
-          className="flex-1 overflow-y-auto px-6 sm:px-10 py-12 bg-background"
+          className={`flex-1 overflow-y-auto px-6 sm:px-10 py-12 bg-background${isTypewriterMode ? ' typewriter-mode' : ''}`}
           onMouseUp={handleEditorMouseUp}
         >
-          <div className={`mx-auto w-full transition-[max-width] duration-300 ${isFocusMode ? 'max-w-2xl' : 'max-w-3xl'}${isTypewriterMode ? ' typewriter-mode' : ''}`}>
+          <div className={`mx-auto w-full transition-[max-width] duration-300 ${isFocusMode ? 'max-w-2xl' : 'max-w-3xl'}`}>
             <input
               ref={titleRef}
               type="text"
