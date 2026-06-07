@@ -4,15 +4,16 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import {
   Plus, Star, PanelLeftClose, Pin,
-  ArrowUpDown, LayoutList, LayoutGrid, Check,
+  ArrowUpDown, LayoutList, LayoutGrid, Check, MoreHorizontal,
 } from 'lucide-react'
 import { useNoteStore } from '@/store/noteStore'
 import { useNotebookStore } from '@/store/notebookStore'
 import { useUIStore } from '@/store/uiStore'
 import { extractTextPreview } from '@/lib/utils/tiptap'
-import { togglePin } from '@/lib/supabase/notes'
+import { togglePin, updateNoteColor, trashNote } from '@/lib/supabase/notes'
 import { NOTE_COLORS, isNoteColor, type NoteColor } from '@/lib/constants/colors'
-import NoteColorMenu from './NoteColorMenu'
+import NotePopoverMenu from './NotePopoverMenu'
+import MoveNoteModal from './MoveNoteModal'
 import type { Note } from '@/types'
 
 type SortOption = 'updated_at_desc' | 'created_at_desc' | 'title_asc' | 'size_desc'
@@ -121,11 +122,12 @@ interface NoteCardProps {
   isSelected: boolean
   onSelect: () => void
   onTogglePin: () => void
+  onMenuClick: (e: React.MouseEvent) => void
   index: number
   view: ViewMode
 }
 
-function NoteCard({ note, isSelected, onSelect, onTogglePin, index, view }: NoteCardProps) {
+function NoteCard({ note, isSelected, onSelect, onTogglePin, onMenuClick, index, view }: NoteCardProps) {
   const preview = extractTextPreview(note.content, view === 'grid' ? 140 : 80)
   const { setNodeRef, listeners, attributes, isDragging } = useDraggable({
     id: note.id,
@@ -150,6 +152,17 @@ function NoteCard({ note, isSelected, onSelect, onTogglePin, index, view }: Note
       ].join(' ')}
     >
       <Pin size={12} className={note.is_pinned ? 'fill-accent' : ''} />
+    </button>
+  )
+
+  const menuButton = (
+    <button
+      type="button"
+      title="Más opciones"
+      onClick={onMenuClick}
+      className="absolute top-2 right-9 z-10 p-1 rounded-md text-muted opacity-0 group-hover:opacity-100 hover:text-foreground hover:bg-surface transition-all duration-150 cursor-pointer"
+    >
+      <MoreHorizontal size={14} />
     </button>
   )
 
@@ -214,7 +227,7 @@ function NoteCard({ note, isSelected, onSelect, onTogglePin, index, view }: Note
           </div>
         </button>
         {pinButton}
-        <NoteColorMenu noteId={note.id} color={note.color} />
+        {menuButton}
       </div>
     )
   }
@@ -283,7 +296,7 @@ function NoteCard({ note, isSelected, onSelect, onTogglePin, index, view }: Note
         </div>
       </button>
       {pinButton}
-      <NoteColorMenu noteId={note.id} color={note.color} />
+      {menuButton}
     </div>
   )
 }
@@ -297,7 +310,8 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 }
 
 export default function NoteList() {
-  const { notes, selectedNote, setSelectedNote, createNote, fetchNotes, updateNote } = useNoteStore()
+  const { notes, selectedNote, setSelectedNote, createNote, fetchNotes, updateNote, deleteNote } =
+    useNoteStore()
   const { selectedNotebook } = useNotebookStore()
   const { setNoteListCollapsed } = useUIStore()
 
@@ -305,6 +319,10 @@ export default function NoteList() {
   const [view, setView] = useState<ViewMode>('list')
   const [sort, setSort] = useState<SortOption>('updated_at_desc')
   const [colorFilter, setColorFilter] = useState<NoteColor | null>(null)
+  const [popoverState, setPopoverState] = useState<{ noteId: string; anchorRect: DOMRect } | null>(
+    null
+  )
+  const [moveNote, setMoveNote] = useState<Note | null>(null)
 
   useEffect(() => {
     if (selectedNotebook?.id) {
@@ -345,6 +363,36 @@ export default function NoteList() {
     }
   }
 
+  const handleMenuClick = (e: React.MouseEvent, note: Note) => {
+    e.stopPropagation()
+    const rect = e.currentTarget.getBoundingClientRect()
+    setPopoverState({ noteId: note.id, anchorRect: rect })
+  }
+
+  const handleColorChange = async (note: Note, color: NoteColor | null) => {
+    const prev = note.color ?? null
+    updateNote(note.id, { color }) // optimista
+    try {
+      await updateNoteColor(note.id, color)
+    } catch {
+      updateNote(note.id, { color: prev }) // rollback
+    }
+  }
+
+  const handleDelete = async (note: Note) => {
+    deleteNote(note.id) // optimista: lo quita de la lista
+    try {
+      await trashNote(note.id)
+    } catch {
+      // rollback: recargar la libreta para restaurar el estado real
+      if (selectedNotebook?.id) fetchNotes(selectedNotebook.id)
+    }
+  }
+
+  const popoverNote = popoverState
+    ? notes.find((n) => n.id === popoverState.noteId) ?? null
+    : null
+
   const sorted = useMemo(() => sortNotes(notes, sort), [notes, sort])
   const visible = useMemo(
     () => (colorFilter ? sorted.filter((n) => n.color === colorFilter) : sorted),
@@ -368,6 +416,7 @@ export default function NoteList() {
         isSelected={selectedNote?.id === note.id}
         onSelect={() => setSelectedNote(note)}
         onTogglePin={() => handleTogglePin(note)}
+        onMenuClick={(e) => handleMenuClick(e, note)}
         index={startIndex + i}
       />
     ))
@@ -530,6 +579,40 @@ export default function NoteList() {
           </>
         )}
       </div>
+
+      {popoverState && popoverNote && (
+        <NotePopoverMenu
+          note={popoverNote}
+          anchorRect={popoverState.anchorRect}
+          onClose={() => setPopoverState(null)}
+          onColorChange={(color) => {
+            handleColorChange(popoverNote, color)
+            setPopoverState(null)
+          }}
+          onPinToggle={() => {
+            handleTogglePin(popoverNote)
+            setPopoverState(null)
+          }}
+          onMove={() => {
+            setMoveNote(popoverNote)
+            setPopoverState(null)
+          }}
+          onDelete={() => {
+            handleDelete(popoverNote)
+            setPopoverState(null)
+          }}
+        />
+      )}
+
+      {moveNote && (
+        <MoveNoteModal
+          note={moveNote}
+          onMoved={() => {
+            if (selectedNotebook?.id) fetchNotes(selectedNotebook.id)
+          }}
+          onClose={() => setMoveNote(null)}
+        />
+      )}
     </div>
   )
 }

@@ -1,12 +1,12 @@
 export const NOTE_COLORS = {
-  red: '#ef4444',
-  orange: '#f97316',
-  yellow: '#eab308',
-  green: '#22c55e',
-  teal: '#14b8a6',
-  blue: '#3b82f6',
-  purple: '#a855f7',
-  pink: '#ec4899',
+  red: '#fca5a5',
+  orange: '#fdba74',
+  yellow: '#fde047',
+  green: '#86efac',
+  teal: '#5eead4',
+  blue: '#93c5fd',
+  purple: '#d8b4fe',
+  pink: '#f9a8d4',
 } as const
 
 export type NoteColor = keyof typeof NOTE_COLORS
