@@ -18,7 +18,7 @@ import {
   List, ListOrdered, CheckSquare,
   Code, FileCode,
   Superscript as SuperscriptIcon, Subscript as SubscriptIcon, Eraser,
-  PanelLeftOpen, PanelLeftClose, Pilcrow,
+  PanelLeftOpen, PanelLeftClose,
 } from 'lucide-react'
 import TagInput from './TagInput'
 import ToolbarTooltip from './ToolbarTooltip'
@@ -163,7 +163,7 @@ export default function NoteEditor() {
     if (!editor) return
     const pm = editor.view.dom as HTMLElement
     const clearActive = () =>
-      pm.querySelectorAll('.is-active').forEach((el) => el.classList.remove('is-active'))
+      pm.querySelectorAll('.is-active-node').forEach((el) => el.classList.remove('is-active-node'))
 
     if (!isTypewriterMode) {
       clearActive()
@@ -178,7 +178,7 @@ export default function NoteEditor() {
         domNode.nodeType === Node.TEXT_NODE ? domNode.parentElement : (domNode as HTMLElement)
       while (el && el.parentElement !== pm) el = el.parentElement
       if (el) {
-        el.classList.add('is-active')
+        el.classList.add('is-active-node')
         el.scrollIntoView({ block: 'center', behavior: 'smooth' })
       }
     }
@@ -551,7 +551,7 @@ export default function NoteEditor() {
                 : 'text-muted hover:bg-surface hover:text-foreground'
             }`}
           >
-            <Pilcrow size={13} />
+            <AlignCenter size={13} />
             <span>Máquina de escribir</span>
           </button>
         )}

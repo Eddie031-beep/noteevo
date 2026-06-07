@@ -304,6 +304,6 @@ ul[data-type="taskList"] li > div {
   opacity: 0.35;
   transition: opacity 0.2s ease;
 }
-.typewriter-mode .ProseMirror > *.is-active {
+.typewriter-mode .ProseMirror > *.is-active-node {
   opacity: 1;
 }
