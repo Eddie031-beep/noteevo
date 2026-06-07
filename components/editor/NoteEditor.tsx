@@ -171,15 +171,20 @@ export default function NoteEditor() {
     }
 
     const highlight = () => {
-      clearActive()
       const { from } = editor.state.selection
-      const domNode = editor.view.domAtPos(from).node
-      let el: HTMLElement | null =
-        domNode.nodeType === Node.TEXT_NODE ? domNode.parentElement : (domNode as HTMLElement)
-      while (el && el.parentElement !== pm) el = el.parentElement
-      if (el) {
-        el.classList.add('is-active-node')
-        el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      // Quitar la clase de TODOS los nodos antes de marcar el activo
+      pm.querySelectorAll('.is-active-node').forEach((el) =>
+        el.classList.remove('is-active-node')
+      )
+      // Encontrar el nodo DOM en la posición actual y subir al hijo directo del ProseMirror
+      const domAtPos = editor.view.domAtPos(from)
+      let node = domAtPos.node as HTMLElement
+      while (node && node.parentElement !== pm) {
+        node = node.parentElement as HTMLElement
+      }
+      if (node && node !== pm) {
+        node.classList.add('is-active-node')
+        node.scrollIntoView({ block: 'center', behavior: 'smooth' })
       }
     }
 
