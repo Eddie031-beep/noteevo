@@ -11,6 +11,8 @@ import { useNotebookStore } from '@/store/notebookStore'
 import { useUIStore } from '@/store/uiStore'
 import { extractTextPreview } from '@/lib/utils/tiptap'
 import { togglePin } from '@/lib/supabase/notes'
+import { NOTE_COLORS, isNoteColor, type NoteColor } from '@/lib/constants/colors'
+import NoteColorMenu from './NoteColorMenu'
 import type { Note } from '@/types'
 
 type SortOption = 'updated_at_desc' | 'created_at_desc' | 'title_asc' | 'size_desc'
@@ -130,6 +132,8 @@ function NoteCard({ note, isSelected, onSelect, onTogglePin, index, view }: Note
     data: { type: 'note', noteId: note.id, currentNotebookId: note.notebook_id },
   })
 
+  const colorHex = isNoteColor(note.color) ? NOTE_COLORS[note.color] : null
+
   const pinButton = (
     <button
       type="button"
@@ -174,9 +178,22 @@ function NoteCard({ note, isSelected, onSelect, onTogglePin, index, view }: Note
               : 'border-border/40 hover:bg-foreground/[0.03] hover:border-accent/30',
           ].join(' ')}
         >
+          {(note.cover_url || note.cover_gradient) && (
+            <div
+              className="-mx-3 -mt-3 mb-1 h-[60px] rounded-t-lg bg-cover bg-center"
+              style={
+                note.cover_url
+                  ? { backgroundImage: `url(${note.cover_url})` }
+                  : { background: note.cover_gradient ?? undefined }
+              }
+            />
+          )}
+          {note.emoji && (
+            <span className="block text-2xl leading-none mb-0.5">{note.emoji}</span>
+          )}
           <p
             className={[
-              'text-sm font-medium leading-snug truncate pr-5 transition-colors duration-150',
+              'text-sm font-medium leading-snug truncate pr-14 transition-colors duration-150',
               isSelected ? 'text-foreground' : 'text-foreground/85 group-hover:text-foreground',
             ].join(' ')}
           >
@@ -197,6 +214,7 @@ function NoteCard({ note, isSelected, onSelect, onTogglePin, index, view }: Note
           </div>
         </button>
         {pinButton}
+        <NoteColorMenu noteId={note.id} color={note.color} />
       </div>
     )
   }
@@ -217,23 +235,33 @@ function NoteCard({ note, isSelected, onSelect, onTogglePin, index, view }: Note
         type="button"
         data-testid="note-card"
         onClick={onSelect}
+        style={
+          colorHex
+            ? { borderLeftColor: colorHex, borderLeftWidth: '3px', borderLeftStyle: 'solid' }
+            : undefined
+        }
         className={[
           'w-full text-left px-4 py-3 relative',
           'border-b border-border/30',
           'transition-all duration-200 ease-out cursor-pointer',
           'border-l-2',
-          isSelected
-            ? 'bg-foreground/5 border-l-accent'
-            : 'border-l-transparent hover:bg-foreground/[0.03] hover:border-l-accent/30',
+          colorHex
+            ? isSelected
+              ? 'bg-foreground/5'
+              : 'hover:bg-foreground/[0.03]'
+            : isSelected
+              ? 'bg-foreground/5 border-l-accent'
+              : 'border-l-transparent hover:bg-foreground/[0.03] hover:border-l-accent/30',
         ].join(' ')}
       >
         {/* Title */}
         <p
           className={[
-            'text-sm font-medium leading-snug truncate pr-5 transition-colors duration-150',
+            'text-sm font-medium leading-snug truncate pr-14 transition-colors duration-150',
             isSelected ? 'text-foreground' : 'text-foreground/85 group-hover:text-foreground',
           ].join(' ')}
         >
+          {note.emoji && <span className="text-base mr-1.5 align-middle">{note.emoji}</span>}
           {note.title || 'Sin título'}
         </p>
 
@@ -255,6 +283,7 @@ function NoteCard({ note, isSelected, onSelect, onTogglePin, index, view }: Note
         </div>
       </button>
       {pinButton}
+      <NoteColorMenu noteId={note.id} color={note.color} />
     </div>
   )
 }
@@ -275,6 +304,7 @@ export default function NoteList() {
   const notebookKey = selectedNotebook?.id ?? 'all'
   const [view, setView] = useState<ViewMode>('list')
   const [sort, setSort] = useState<SortOption>('updated_at_desc')
+  const [colorFilter, setColorFilter] = useState<NoteColor | null>(null)
 
   useEffect(() => {
     if (selectedNotebook?.id) {
@@ -292,6 +322,7 @@ export default function NoteList() {
   useEffect(() => {
     const stored = localStorage.getItem(`noteevo-sort-${notebookKey}`)
     setSort(isSortOption(stored) ? stored : 'updated_at_desc')
+    setColorFilter(null) // limpiar filtro de color al cambiar de libreta
   }, [notebookKey])
 
   const changeView = (next: ViewMode) => {
@@ -315,8 +346,18 @@ export default function NoteList() {
   }
 
   const sorted = useMemo(() => sortNotes(notes, sort), [notes, sort])
-  const pinned = useMemo(() => sorted.filter((n) => n.is_pinned), [sorted])
-  const rest = useMemo(() => sorted.filter((n) => !n.is_pinned), [sorted])
+  const visible = useMemo(
+    () => (colorFilter ? sorted.filter((n) => n.color === colorFilter) : sorted),
+    [sorted, colorFilter]
+  )
+  const pinned = useMemo(() => visible.filter((n) => n.is_pinned), [visible])
+  const rest = useMemo(() => visible.filter((n) => !n.is_pinned), [visible])
+
+  // Colores realmente en uso entre las notas actuales (para el filtro del header)
+  const usedColors = useMemo(() => {
+    const present = new Set(notes.map((n) => n.color).filter(isNoteColor))
+    return (Object.keys(NOTE_COLORS) as NoteColor[]).filter((c) => present.has(c))
+  }, [notes])
 
   const renderCards = (arr: Note[], startIndex: number) =>
     arr.map((note, i) => (
@@ -407,6 +448,47 @@ export default function NoteList() {
         </div>
       )}
 
+      {/* Filtro por color */}
+      {usedColors.length > 0 && (
+        <div className="flex items-center gap-1.5 px-2.5 py-1.5 border-b border-border/60 shrink-0 overflow-x-auto scrollbar-thin">
+          <button
+            type="button"
+            onClick={() => setColorFilter(null)}
+            className={[
+              'text-[11px] px-2 py-0.5 rounded-md transition cursor-pointer whitespace-nowrap shrink-0',
+              colorFilter === null
+                ? 'bg-surface text-foreground'
+                : 'text-muted hover:text-foreground',
+            ].join(' ')}
+          >
+            Todos
+          </button>
+          {usedColors.map((c) => (
+            <button
+              key={c}
+              type="button"
+              title={c}
+              onClick={() => setColorFilter(c)}
+              className={[
+                'shrink-0 w-6 h-6 rounded-md flex items-center justify-center transition cursor-pointer',
+                colorFilter === c ? 'bg-surface ring-1 ring-border' : 'hover:bg-surface',
+              ].join(' ')}
+            >
+              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: NOTE_COLORS[c] }} />
+            </button>
+          ))}
+          {colorFilter && (
+            <button
+              type="button"
+              onClick={() => setColorFilter(null)}
+              className="text-[11px] text-muted hover:text-foreground ml-auto whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              Limpiar filtro
+            </button>
+          )}
+        </div>
+      )}
+
       {/* List */}
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         {notes.length === 0 ? (
@@ -421,6 +503,17 @@ export default function NoteList() {
                 Crear nota
               </button>
             )}
+          </div>
+        ) : visible.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full gap-2 px-6 text-center">
+            <p className="text-sm text-subtle">Sin notas de este color</p>
+            <button
+              type="button"
+              onClick={() => setColorFilter(null)}
+              className="text-xs text-accent hover:text-accent/80 transition cursor-pointer"
+            >
+              Limpiar filtro
+            </button>
           </div>
         ) : (
           <>

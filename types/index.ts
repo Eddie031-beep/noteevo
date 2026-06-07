@@ -17,6 +17,10 @@ export interface Note {
   is_favorite: boolean
   is_trashed: boolean
   is_pinned?: boolean
+  emoji?: string | null
+  cover_url?: string | null
+  cover_gradient?: string | null
+  color?: string | null
   created_at: string
   updated_at: string
 }

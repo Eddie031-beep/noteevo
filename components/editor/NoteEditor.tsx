@@ -22,6 +22,8 @@ import {
   PanelLeftOpen, PanelLeftClose,
 } from 'lucide-react'
 import TagInput from './TagInput'
+import NoteEmojiButton from './NoteEmojiButton'
+import NoteCover from './NoteCover'
 import ToolbarTooltip from './ToolbarTooltip'
 import AttachmentPanel from './AttachmentPanel'
 import AiSummaryPanel from './AiSummaryPanel'
@@ -460,7 +462,18 @@ export default function NoteEditor() {
           className={`flex-1 overflow-y-auto px-6 sm:px-10 py-12 bg-background${isTypewriterMode ? ' typewriter-mode' : ''}`}
           onMouseUp={handleEditorMouseUp}
         >
-          <div className={`mx-auto w-full transition-[max-width] duration-300 ${isFocusMode ? 'max-w-2xl' : 'max-w-3xl'}`}>
+          <div className={`group/head mx-auto w-full transition-[max-width] duration-300 ${isFocusMode ? 'max-w-2xl' : 'max-w-3xl'}`}>
+            <NoteCover
+              noteId={selectedNote.id}
+              coverUrl={selectedNote.cover_url}
+              coverGradient={selectedNote.cover_gradient}
+              editable={!isReadOnly}
+            />
+            <NoteEmojiButton
+              noteId={selectedNote.id}
+              emoji={selectedNote.emoji}
+              editable={!isReadOnly}
+            />
             <input
               ref={titleRef}
               type="text"

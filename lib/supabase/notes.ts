@@ -75,6 +75,39 @@ export async function togglePin(id: string, value: boolean): Promise<void> {
   if (error) throw new Error(error.message)
 }
 
+export async function updateNoteEmoji(noteId: string, emoji: string | null): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('notes')
+    .update({ emoji })
+    .eq('id', noteId)
+
+  if (error) throw new Error(error.message)
+}
+
+export async function updateCover(
+  noteId: string,
+  data: { cover_url?: string | null; cover_gradient?: string | null }
+): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('notes')
+    .update(data)
+    .eq('id', noteId)
+
+  if (error) throw new Error(error.message)
+}
+
+export async function updateNoteColor(noteId: string, color: string | null): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('notes')
+    .update({ color })
+    .eq('id', noteId)
+
+  if (error) throw new Error(error.message)
+}
+
 export async function getFavoriteNotes(): Promise<Note[]> {
   const supabase = createClient()
   const { data, error } = await supabase
