@@ -647,7 +647,7 @@
     "id": 57,
     "phase": 17,
     "title": "Notas ancladas (pinned)",
-    "status": "pending",
+    "status": "done",
     "depends_on": [],
     "effort": "easy",
     "impact": "medium",
@@ -658,7 +658,7 @@
       "components/notes/NoteList.tsx",
       "types/index.ts"
     ],
-    "notes": "Función togglePin(noteId, value) en notes.ts. En NoteList: sección 'Ancladas' encima del resto cuando hay notas con is_pinned=true. Botón pin en menú contextual de cada card (icono Pin de Lucide). Query: ORDER BY is_pinned DESC, updated_at DESC. Sin cambios en noteStore si las notas ya se recargan al hacer toggle."
+    "notes": "Migración aplicada vía MCP (ADD COLUMN IF NOT EXISTS is_pinned boolean default false). is_pinned?: boolean en tipo Note. togglePin(id, value) en notes.ts (molde de toggleFavorite). NoteList: separa notes en pinned/rest tras ordenar; sección 'Ancladas' (con label) encima de 'Otras'. Botón Pin (icono Pin Lucide) absoluto top-right de cada card, visible on hover o siempre si anclada; fill-accent cuando activo. Toggle optimista con updateNote del store + rollback si falla. Build verde."
   },
   {
     "id": 58,
@@ -700,7 +700,7 @@
     "id": 60,
     "phase": 17,
     "title": "Gallery view en lista de notas",
-    "status": "pending",
+    "status": "done",
     "depends_on": [],
     "effort": "medium",
     "impact": "high",
@@ -708,7 +708,7 @@
     "files": [
       "components/notes/NoteList.tsx"
     ],
-    "notes": "Solo NoteList.tsx. Toggle lista/grid en header (iconos LayoutList / LayoutGrid de Lucide). Preferencia en localStorage('noteevo-notes-view'). Vista grid: 2 columnas, cards con cover_url o cover_gradient si existe (id:59), emoji (id:55), título, fecha relativa, preview de 2 líneas del contenido (extraer texto plano del JSON TipTap). Sin llamadas extra a DB: usar notas ya en noteStore."
+    "notes": "Solo NoteList.tsx. Toggle lista/galería en barra de controles (iconos LayoutList/LayoutGrid de Lucide), activo resaltado. Preferencia en localStorage('noteevo-notes-view'), cargada en useEffect tras montar (evita mismatch de hidratación). Vista grid: grid-cols-2 gap-2, cards con borde redondeado, título, preview 3 líneas (extractTextPreview a 140 chars) y footer fecha+favorito. Reusa extractTextPreview existente; sin llamadas extra a DB (usa noteStore.notes). Botón pin también disponible en cards de galería."
   },
   {
     "id": 61,
@@ -752,7 +752,7 @@
     "id": 63,
     "phase": 17,
     "title": "Ordenar notas por más criterios",
-    "status": "pending",
+    "status": "done",
     "depends_on": [],
     "effort": "easy",
     "impact": "low",
@@ -760,7 +760,7 @@
     "files": [
       "components/notes/NoteList.tsx"
     ],
-    "notes": "Solo NoteList.tsx. Dropdown con 4 opciones: 'Última edición' (updated_at DESC, default actual), 'Fecha creación' (created_at DESC), 'Título A-Z' (title ASC), 'Más largas' (JSON.stringify(content).length DESC). Guardar preferencia en localStorage con clave por notebook: noteevo-sort-{notebookId}. Ordenación client-side sobre noteStore.notes (sin fetch extra). Icono ArrowUpDown de Lucide en el header."
+    "notes": "Solo NoteList.tsx. SortDropdown custom (icono ArrowUpDown + label, click-outside, check en activa) con 4 opciones: 'Última edición' (updated_at DESC, default), 'Fecha de creación' (created_at DESC), 'Título A-Z' (localeCompare es), 'Más largas' (JSON.stringify(content).length DESC). Preferencia en localStorage por libreta: noteevo-sort-{notebookId|'all'}, recargada al cambiar de libreta. Ordenación client-side en useMemo sobre noteStore.notes (sin fetch extra); se aplica antes de separar pinned/rest."
   },
   {
     "id": 64,

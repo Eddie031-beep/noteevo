@@ -65,6 +65,16 @@ export async function toggleFavorite(id: string, value: boolean): Promise<void> 
   if (error) throw new Error(error.message)
 }
 
+export async function togglePin(id: string, value: boolean): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('notes')
+    .update({ is_pinned: value })
+    .eq('id', id)
+
+  if (error) throw new Error(error.message)
+}
+
 export async function getFavoriteNotes(): Promise<Note[]> {
   const supabase = createClient()
   const { data, error } = await supabase

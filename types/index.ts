@@ -16,6 +16,7 @@ export interface Note {
   content: Record<string, unknown>
   is_favorite: boolean
   is_trashed: boolean
+  is_pinned?: boolean
   created_at: string
   updated_at: string
 }

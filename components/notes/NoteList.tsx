@@ -1,13 +1,46 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import { Plus, Star, PanelLeftClose } from 'lucide-react'
+import {
+  Plus, Star, PanelLeftClose, Pin,
+  ArrowUpDown, LayoutList, LayoutGrid, Check,
+} from 'lucide-react'
 import { useNoteStore } from '@/store/noteStore'
 import { useNotebookStore } from '@/store/notebookStore'
 import { useUIStore } from '@/store/uiStore'
 import { extractTextPreview } from '@/lib/utils/tiptap'
+import { togglePin } from '@/lib/supabase/notes'
 import type { Note } from '@/types'
+
+type SortOption = 'updated_at_desc' | 'created_at_desc' | 'title_asc' | 'size_desc'
+type ViewMode = 'list' | 'grid'
+
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: 'updated_at_desc', label: 'Última edición' },
+  { value: 'created_at_desc', label: 'Fecha de creación' },
+  { value: 'title_asc', label: 'Título A-Z' },
+  { value: 'size_desc', label: 'Más largas' },
+]
+
+function isSortOption(value: string | null): value is SortOption {
+  return SORT_OPTIONS.some((o) => o.value === value)
+}
+
+function sortNotes(notes: Note[], sort: SortOption): Note[] {
+  const arr = [...notes]
+  arr.sort((a, b) => {
+    if (sort === 'title_asc') return (a.title || '').localeCompare(b.title || '', 'es')
+    if (sort === 'size_desc') {
+      return JSON.stringify(b.content).length - JSON.stringify(a.content).length
+    }
+    if (sort === 'created_at_desc') {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    }
+    return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+  })
+  return arr
+}
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr)
@@ -23,84 +56,284 @@ function formatDate(dateStr: string): string {
   return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+interface SortDropdownProps {
+  sort: SortOption
+  onChange: (sort: SortOption) => void
+}
+
+function SortDropdown({ sort, onChange }: SortDropdownProps) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    if (open) document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        title="Ordenar notas"
+        onClick={() => setOpen((v) => !v)}
+        className={[
+          'flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] transition-all duration-150 cursor-pointer',
+          open
+            ? 'bg-surface text-foreground'
+            : 'text-muted hover:bg-surface hover:text-foreground',
+        ].join(' ')}
+      >
+        <ArrowUpDown size={12} />
+        <span className="truncate max-w-[110px]">
+          {SORT_OPTIONS.find((o) => o.value === sort)?.label}
+        </span>
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-8 z-50 bg-panel border border-border rounded-xl shadow-2xl w-48 py-1">
+          {SORT_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => {
+                onChange(opt.value)
+                setOpen(false)
+              }}
+              className="w-full flex items-center justify-between gap-2 px-3 py-2 text-xs text-muted hover:bg-surface hover:text-foreground transition cursor-pointer"
+            >
+              {opt.label}
+              {sort === opt.value && <Check size={13} className="text-accent shrink-0" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 interface NoteCardProps {
   note: Note
   isSelected: boolean
   onSelect: () => void
+  onTogglePin: () => void
   index: number
+  view: ViewMode
 }
 
-function NoteCard({ note, isSelected, onSelect, index }: NoteCardProps) {
-  const preview = extractTextPreview(note.content, 80)
+function NoteCard({ note, isSelected, onSelect, onTogglePin, index, view }: NoteCardProps) {
+  const preview = extractTextPreview(note.content, view === 'grid' ? 140 : 80)
   const { setNodeRef, listeners, attributes, isDragging } = useDraggable({
     id: note.id,
     data: { type: 'note', noteId: note.id, currentNotebookId: note.notebook_id },
   })
 
-  return (
+  const pinButton = (
     <button
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
       type="button"
-      data-testid="note-card"
-      onClick={onSelect}
+      title={note.is_pinned ? 'Desanclar nota' : 'Anclar nota'}
+      onClick={(e) => {
+        e.stopPropagation()
+        onTogglePin()
+      }}
+      className={[
+        'absolute top-2 right-2 z-10 p-1 rounded-md transition-all duration-150 cursor-pointer',
+        note.is_pinned
+          ? 'text-accent opacity-100'
+          : 'text-muted opacity-0 group-hover:opacity-100 hover:text-foreground hover:bg-surface',
+      ].join(' ')}
+    >
+      <Pin size={12} className={note.is_pinned ? 'fill-accent' : ''} />
+    </button>
+  )
+
+  if (view === 'grid') {
+    return (
+      <div
+        className="note-card-enter relative group"
+        style={{
+          animationDelay: `${index * 35}ms`,
+          animationFillMode: 'both',
+          opacity: isDragging ? 0.4 : 1,
+        }}
+      >
+        <button
+          ref={setNodeRef}
+          {...listeners}
+          {...attributes}
+          type="button"
+          data-testid="note-card"
+          onClick={onSelect}
+          className={[
+            'w-full h-full text-left p-3 rounded-lg flex flex-col gap-1.5 cursor-pointer',
+            'border transition-all duration-200 ease-out',
+            isSelected
+              ? 'bg-foreground/5 border-accent/60'
+              : 'border-border/40 hover:bg-foreground/[0.03] hover:border-accent/30',
+          ].join(' ')}
+        >
+          <p
+            className={[
+              'text-sm font-medium leading-snug truncate pr-5 transition-colors duration-150',
+              isSelected ? 'text-foreground' : 'text-foreground/85 group-hover:text-foreground',
+            ].join(' ')}
+          >
+            {note.title || 'Sin título'}
+          </p>
+          {preview && (
+            <p className="text-xs text-muted line-clamp-3 leading-relaxed flex-1">
+              {preview}
+            </p>
+          )}
+          <div className="flex items-center justify-between mt-auto pt-1">
+            <span className="text-[10px] text-subtle tabular-nums">
+              {formatDate(note.updated_at)}
+            </span>
+            {note.is_favorite && (
+              <Star size={10} className="text-amber-400 fill-amber-400 shrink-0" />
+            )}
+          </div>
+        </button>
+        {pinButton}
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className="note-card-enter relative group"
       style={{
         animationDelay: `${index * 35}ms`,
         animationFillMode: 'both',
         opacity: isDragging ? 0.4 : 1,
       }}
-      className={[
-        'note-card-enter',
-        'w-full text-left px-4 py-3 relative',
-        'border-b border-border/30',
-        'transition-all duration-200 ease-out cursor-pointer group',
-        'border-l-2',
-        isSelected
-          ? 'bg-foreground/5 border-l-accent'
-          : 'border-l-transparent hover:bg-foreground/[0.03] hover:border-l-accent/30',
-      ].join(' ')}
     >
-      {/* Title */}
-      <p
+      <button
+        ref={setNodeRef}
+        {...listeners}
+        {...attributes}
+        type="button"
+        data-testid="note-card"
+        onClick={onSelect}
         className={[
-          'text-sm font-medium leading-snug truncate transition-colors duration-150',
-          isSelected ? 'text-foreground' : 'text-foreground/85 group-hover:text-foreground',
+          'w-full text-left px-4 py-3 relative',
+          'border-b border-border/30',
+          'transition-all duration-200 ease-out cursor-pointer',
+          'border-l-2',
+          isSelected
+            ? 'bg-foreground/5 border-l-accent'
+            : 'border-l-transparent hover:bg-foreground/[0.03] hover:border-l-accent/30',
         ].join(' ')}
       >
-        {note.title || 'Sin título'}
-      </p>
-
-      {/* Preview */}
-      {preview && (
-        <p className="text-xs text-muted mt-0.5 line-clamp-2 leading-relaxed">
-          {preview}
+        {/* Title */}
+        <p
+          className={[
+            'text-sm font-medium leading-snug truncate pr-5 transition-colors duration-150',
+            isSelected ? 'text-foreground' : 'text-foreground/85 group-hover:text-foreground',
+          ].join(' ')}
+        >
+          {note.title || 'Sin título'}
         </p>
-      )}
 
-      {/* Footer */}
-      <div className="flex items-center justify-between mt-1.5">
-        <span className="text-[10px] text-subtle tabular-nums">
-          {formatDate(note.updated_at)}
-        </span>
-        {note.is_favorite && (
-          <Star size={10} className="text-amber-400 fill-amber-400 shrink-0" />
+        {/* Preview */}
+        {preview && (
+          <p className="text-xs text-muted mt-0.5 line-clamp-2 leading-relaxed">
+            {preview}
+          </p>
         )}
-      </div>
-    </button>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between mt-1.5">
+          <span className="text-[10px] text-subtle tabular-nums">
+            {formatDate(note.updated_at)}
+          </span>
+          {note.is_favorite && (
+            <Star size={10} className="text-amber-400 fill-amber-400 shrink-0" />
+          )}
+        </div>
+      </button>
+      {pinButton}
+    </div>
+  )
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-subtle">
+      {children}
+    </p>
   )
 }
 
 export default function NoteList() {
-  const { notes, selectedNote, setSelectedNote, createNote, fetchNotes } = useNoteStore()
+  const { notes, selectedNote, setSelectedNote, createNote, fetchNotes, updateNote } = useNoteStore()
   const { selectedNotebook } = useNotebookStore()
   const { setNoteListCollapsed } = useUIStore()
+
+  const notebookKey = selectedNotebook?.id ?? 'all'
+  const [view, setView] = useState<ViewMode>('list')
+  const [sort, setSort] = useState<SortOption>('updated_at_desc')
 
   useEffect(() => {
     if (selectedNotebook?.id) {
       fetchNotes(selectedNotebook.id)
     }
   }, [selectedNotebook?.id, fetchNotes])
+
+  // Cargar preferencia de vista (una vez, tras montar — evita mismatch de hidratación)
+  useEffect(() => {
+    const stored = localStorage.getItem('noteevo-notes-view')
+    if (stored === 'grid' || stored === 'list') setView(stored)
+  }, [])
+
+  // Cargar preferencia de orden por libreta
+  useEffect(() => {
+    const stored = localStorage.getItem(`noteevo-sort-${notebookKey}`)
+    setSort(isSortOption(stored) ? stored : 'updated_at_desc')
+  }, [notebookKey])
+
+  const changeView = (next: ViewMode) => {
+    setView(next)
+    localStorage.setItem('noteevo-notes-view', next)
+  }
+
+  const changeSort = (next: SortOption) => {
+    setSort(next)
+    localStorage.setItem(`noteevo-sort-${notebookKey}`, next)
+  }
+
+  const handleTogglePin = async (note: Note) => {
+    const newVal = !note.is_pinned
+    updateNote(note.id, { is_pinned: newVal })
+    try {
+      await togglePin(note.id, newVal)
+    } catch {
+      updateNote(note.id, { is_pinned: !newVal })
+    }
+  }
+
+  const sorted = useMemo(() => sortNotes(notes, sort), [notes, sort])
+  const pinned = useMemo(() => sorted.filter((n) => n.is_pinned), [sorted])
+  const rest = useMemo(() => sorted.filter((n) => !n.is_pinned), [sorted])
+
+  const renderCards = (arr: Note[], startIndex: number) =>
+    arr.map((note, i) => (
+      <NoteCard
+        key={note.id}
+        note={note}
+        view={view}
+        isSelected={selectedNote?.id === note.id}
+        onSelect={() => setSelectedNote(note)}
+        onTogglePin={() => handleTogglePin(note)}
+        index={startIndex + i}
+      />
+    ))
+
+  const gridWrap = (children: React.ReactNode) => (
+    <div className="grid grid-cols-2 gap-2 p-2">{children}</div>
+  )
 
   return (
     <div className="w-72 h-screen bg-panel border-r border-border flex flex-col shrink-0">
@@ -138,6 +371,42 @@ export default function NoteList() {
         </div>
       </div>
 
+      {/* Controls: sort + view toggle */}
+      {notes.length > 0 && (
+        <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-border/60 shrink-0">
+          <SortDropdown sort={sort} onChange={changeSort} />
+
+          <div className="flex items-center gap-0.5">
+            <button
+              type="button"
+              title="Vista de lista"
+              onClick={() => changeView('list')}
+              className={[
+                'p-1.5 rounded-md transition-all duration-150 cursor-pointer',
+                view === 'list'
+                  ? 'bg-surface text-foreground'
+                  : 'text-muted hover:bg-surface hover:text-foreground',
+              ].join(' ')}
+            >
+              <LayoutList size={14} />
+            </button>
+            <button
+              type="button"
+              title="Vista de galería"
+              onClick={() => changeView('grid')}
+              className={[
+                'p-1.5 rounded-md transition-all duration-150 cursor-pointer',
+                view === 'grid'
+                  ? 'bg-surface text-foreground'
+                  : 'text-muted hover:bg-surface hover:text-foreground',
+              ].join(' ')}
+            >
+              <LayoutGrid size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* List */}
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         {notes.length === 0 ? (
@@ -154,15 +423,18 @@ export default function NoteList() {
             )}
           </div>
         ) : (
-          notes.map((note, index) => (
-            <NoteCard
-              key={note.id}
-              note={note}
-              isSelected={selectedNote?.id === note.id}
-              onSelect={() => setSelectedNote(note)}
-              index={index}
-            />
-          ))
+          <>
+            {pinned.length > 0 && (
+              <>
+                <SectionLabel>Ancladas</SectionLabel>
+                {view === 'grid' ? gridWrap(renderCards(pinned, 0)) : renderCards(pinned, 0)}
+                {rest.length > 0 && <SectionLabel>Otras</SectionLabel>}
+              </>
+            )}
+            {view === 'grid'
+              ? gridWrap(renderCards(rest, pinned.length))
+              : renderCards(rest, pinned.length)}
+          </>
         )}
       </div>
     </div>
