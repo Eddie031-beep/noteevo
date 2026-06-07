@@ -7,7 +7,7 @@ import { useNoteStore } from '@/store/noteStore'
 import { createNote } from '@/lib/supabase/notes'
 
 export function useKeyboardShortcuts() {
-  const { setCurrentView, setCheatsheetOpen, setFocusMode, isFocusMode, toggleSidebarCollapsed } = useUIStore()
+  const { setCurrentView, setCheatsheetOpen, setFocusMode, isFocusMode, toggleSidebarCollapsed, toggleTypewriterMode } = useUIStore()
   const { selectedNotebook } = useNotebookStore()
   const { addNote, setSelectedNote } = useNoteStore()
 
@@ -80,6 +80,13 @@ export function useKeyboardShortcuts() {
         return
       }
 
+      // Ctrl+Shift+T — modo máquina de escribir (funciona también dentro del editor)
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'T') {
+        e.preventDefault()
+        toggleTypewriterMode()
+        return
+      }
+
       // ? — cheatsheet
       if (e.key === '?' && !isEditable) {
         e.preventDefault()
@@ -90,5 +97,5 @@ export function useKeyboardShortcuts() {
 
     window.addEventListener('keydown', handler, true)
     return () => window.removeEventListener('keydown', handler, true)
-  }, [selectedNotebook, setCurrentView, setCheatsheetOpen, setFocusMode, isFocusMode, addNote, setSelectedNote, toggleSidebarCollapsed])
+  }, [selectedNotebook, setCurrentView, setCheatsheetOpen, setFocusMode, isFocusMode, addNote, setSelectedNote, toggleSidebarCollapsed, toggleTypewriterMode])
 }

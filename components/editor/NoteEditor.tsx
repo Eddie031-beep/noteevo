@@ -50,17 +50,25 @@ function ToolbarButton({
   shortcut?: string
   children: React.ReactNode
 }) {
+  const [isPulsing, setIsPulsing] = useState(false)
+
+  const handleClick = () => {
+    onClick()
+    setIsPulsing(true)
+    setTimeout(() => setIsPulsing(false), 280)
+  }
+
   return (
     <ToolbarTooltip label={title} shortcut={shortcut}>
       <button
         type="button"
         aria-label={title}
-        onClick={onClick}
+        onClick={handleClick}
         className={`p-1.5 rounded transition cursor-pointer ${
           active
             ? 'bg-elevated text-foreground'
             : 'text-muted hover:bg-surface hover:text-foreground'
-        }`}
+        } ${isPulsing ? 'toolbar-pulse' : ''}`}
       >
         {children}
       </button>
@@ -168,7 +176,7 @@ export default function NoteEditor() {
     const pm = editor.view.dom as HTMLElement
     const centerActive = () => {
       const el = pm.querySelector('.is-active-node')
-      el?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      el?.scrollIntoView({ block: 'center', behavior: 'auto' })
     }
     centerActive()
     editor.on('selectionUpdate', centerActive)
@@ -382,6 +390,15 @@ export default function NoteEditor() {
             <Eraser size={14} />
           </ToolbarButton>
 
+          <ToolbarButton
+            title="Máquina de escribir"
+            shortcut="Ctrl+Shift+T"
+            onClick={() => toggleTypewriterMode()}
+            active={isTypewriterMode}
+          >
+            <AlignCenter size={14} />
+          </ToolbarButton>
+
           <Divider />
 
           {/* Insert Menu */}
@@ -515,29 +532,11 @@ export default function NoteEditor() {
       </div>
 
       {/* ── Barra inferior (estado del editor) ── */}
-      <div className="shrink-0 flex items-center justify-between gap-4 px-4 py-1.5 border-t border-border bg-panel text-xs text-muted">
-        <div className="flex items-center gap-4">
-          {wordCount > 0 && (
-            <span>
-              {wordCount} {wordCount === 1 ? 'palabra' : 'palabras'} · {readingMinutes} min lectura
-            </span>
-          )}
-        </div>
-        {!isReadOnly && (
-          <button
-            type="button"
-            onClick={toggleTypewriterMode}
-            aria-pressed={isTypewriterMode}
-            title="Modo máquina de escribir"
-            className={`flex items-center gap-1.5 rounded px-2 py-1 transition cursor-pointer ${
-              isTypewriterMode
-                ? 'bg-elevated text-accent'
-                : 'text-muted hover:bg-surface hover:text-foreground'
-            }`}
-          >
-            <AlignCenter size={13} />
-            <span>Máquina de escribir</span>
-          </button>
+      <div className="shrink-0 flex items-center gap-4 px-4 py-1.5 border-t border-border bg-panel text-xs text-muted">
+        {wordCount > 0 && (
+          <span>
+            {wordCount} {wordCount === 1 ? 'palabra' : 'palabras'} · {readingMinutes} min lectura
+          </span>
         )}
       </div>
 
