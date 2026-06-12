@@ -195,6 +195,31 @@ export default function Sidebar() {
   const [notebooksOpen, setNotebooksOpen] = useState(true)
   const [spacesOpen, setSpacesOpen] = useState(true)
   const [pendingCount, setPendingCount] = useState(0)
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const accountMenuRef = useRef<HTMLDivElement>(null)
+
+  const accountName = profile?.display_name || userEmail || 'NoteEvo'
+  const accountInitials = (profile?.display_name || userEmail || 'N').slice(0, 2).toUpperCase()
+
+  // Cerrar el menú de cuenta al hacer click fuera o pulsar Escape
+  useEffect(() => {
+    if (!accountMenuOpen) return
+    const handlePointer = (e: MouseEvent) => {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(e.target as Node)) {
+        setAccountMenuOpen(false)
+      }
+    }
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setAccountMenuOpen(false)
+    }
+    document.addEventListener('mousedown', handlePointer)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handlePointer)
+      document.removeEventListener('keydown', handleKey)
+    }
+  }, [accountMenuOpen])
 
   useEffect(() => {
     const load = async () => {
@@ -243,6 +268,7 @@ export default function Sidebar() {
 
     supabase.auth.getUser().then(({ data: { user } }) => {
       userId = user?.id ?? null
+      setUserEmail(user?.email ?? null)
     })
 
     const channel = supabase
@@ -388,30 +414,101 @@ export default function Sidebar() {
         collapsed ? 'w-14' : 'w-60'
       }`}
     >
-      {/* ── Header ── */}
+      {/* ── Workspace header ── */}
       <div
-        className={`h-14 flex items-center border-b border-border shrink-0 ${
-          collapsed ? 'justify-center px-2' : 'px-4 justify-between'
+        ref={accountMenuRef}
+        className={`relative h-14 flex items-center border-b border-border shrink-0 ${
+          collapsed ? 'justify-center px-2' : 'px-3 justify-between gap-1'
         }`}
       >
-        {!collapsed && (
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 bg-accent rounded-lg flex items-center justify-center shrink-0">
-              <span className="text-white font-bold text-xs">N</span>
-            </div>
-            <span className="font-semibold text-foreground text-sm tracking-tight">
-              NoteEvo
-            </span>
-          </div>
-        )}
         <button
           type="button"
-          title={collapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-1.5 rounded-md text-muted hover:bg-surface hover:text-foreground transition cursor-pointer"
+          onClick={() => setAccountMenuOpen((o) => !o)}
+          title={collapsed ? accountName : undefined}
+          aria-haspopup="menu"
+          aria-expanded={accountMenuOpen}
+          className={`flex items-center rounded-lg transition cursor-pointer min-w-0 ${
+            collapsed ? 'justify-center p-1' : 'flex-1 gap-2.5 px-1.5 py-1.5 hover:bg-surface'
+          }`}
         >
-          {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          {profile?.avatar_url ? (
+            <img
+              src={`${profile.avatar_url}?t=${new Date(profile.updated_at).getTime()}`}
+              alt="Avatar"
+              className="w-8 h-8 rounded-full object-cover shrink-0"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center shrink-0">
+              <span className="text-[11px] font-bold text-white">
+                {accountInitials}
+              </span>
+            </div>
+          )}
+          {!collapsed && (
+            <>
+              <span className="text-sm font-medium text-foreground flex-1 text-left truncate">
+                {accountName}
+              </span>
+              <ChevronDown
+                size={14}
+                className={`shrink-0 text-muted transition-transform duration-150 ${
+                  accountMenuOpen ? 'rotate-180' : ''
+                }`}
+              />
+            </>
+          )}
         </button>
+
+        {!collapsed && (
+          <button
+            type="button"
+            title="Colapsar sidebar"
+            onClick={() => setCollapsed(true)}
+            className="p-1.5 rounded-md text-muted hover:bg-surface hover:text-foreground transition cursor-pointer shrink-0"
+          >
+            <ChevronLeft size={16} />
+          </button>
+        )}
+
+        {accountMenuOpen && (
+          <div
+            role="menu"
+            className={`absolute z-50 rounded-xl border border-border bg-elevated shadow-lg py-1 ${
+              collapsed ? 'top-1 left-full ml-2 w-48' : 'top-full left-3 right-3 mt-1'
+            }`}
+          >
+            {collapsed && (
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => { setCollapsed(false); setAccountMenuOpen(false) }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-muted hover:bg-surface hover:text-foreground transition cursor-pointer"
+              >
+                <ChevronRight size={15} className="shrink-0" />
+                Expandir panel
+              </button>
+            )}
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => { router.push('/dashboard/settings'); setAccountMenuOpen(false) }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-muted hover:bg-surface hover:text-foreground transition cursor-pointer"
+            >
+              <Settings size={15} className="shrink-0" />
+              Configuración
+            </button>
+            <div className="my-1 mx-2 h-px bg-border" />
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => { setAccountMenuOpen(false); handleLogout() }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-muted hover:bg-danger/10 hover:text-danger transition cursor-pointer"
+            >
+              <LogOut size={15} className="shrink-0" />
+              Cerrar sesión
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── Search ── */}

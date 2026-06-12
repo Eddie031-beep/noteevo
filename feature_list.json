@@ -521,13 +521,13 @@
     "phase": 16,
     "title": "Sidebar: workspace header + avatar",
     "description": "Añadir al tope del sidebar: avatar del usuario (iniciales o foto de user_profiles), nombre del workspace, dropdown con opciones de cuenta (Configuración, Cerrar sesión). Ancla visualmente toda la navegación igual que Notion.",
-    "status": "pending",
+    "status": "done",
     "depends_on": [],
     "files": [
       "components/sidebar/Sidebar.tsx",
       "store/profileStore.ts"
     ],
-    "notes": "Usar datos de user_profiles (display_name, avatar_url). Fallback: iniciales del email. Dropdown con opciones: Configuración → setCurrentView('settings'), Cerrar sesión → supabase.auth.signOut()."
+    "notes": "Header al tope del Sidebar antes de la navegación: avatar 32px (avatar_url de user_profiles con cache-bust por updated_at; fallback círculo bg-accent con iniciales de display_name o email vía supabase.auth.getUser()), nombre display_name ?? email (text-sm font-medium truncate), ChevronDown que rota 180° al abrir. Dropdown con estado local accountMenuOpen + click-outside (mousedown) + Escape: Configuración → router.push('/dashboard/settings') (el dashboard no renderiza vista 'settings' por currentView, es ruta propia), Cerrar sesión → supabase.auth.signOut() + redirect /login. En modo colapsado (48px) solo avatar centrado y el dropdown se posiciona a la derecha del sidebar (left-full ml-2, sin recorte, sin overflow-hidden) con opción extra 'Expandir panel'. Separador border-b bajo el header; estética consistente con NavItems (rounded-lg, px-3 py-2)."
   },
   {
     "id": 50,
