@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTaskStore } from '@/store/taskStore'
 import { getTasks, createTask } from '@/lib/supabase/tasks'
 import TaskModal from '@/components/tasks/TaskModal'
+import EmptyState from '@/components/ui/EmptyState'
 import { ChevronLeft, ChevronRight, Plus, Calendar, Clock } from 'lucide-react'
 import {
   format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays,
@@ -646,11 +647,12 @@ function DayView({ current, tasks, onAdd }: {
         </div>
 
         {dayTasks.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 mt-20 text-center">
-            <Calendar size={32} className="text-subtle" />
-            <p className="text-foreground font-medium text-sm">Sin tareas para este día</p>
-            <p className="text-muted text-xs">Haz clic en &quot;Nueva tarea&quot; para añadir una</p>
-          </div>
+          <EmptyState
+            variant="calendar"
+            title="Sin eventos en este período"
+            description="Crea una tarea con fecha para verla aquí"
+            action={{ label: 'Crear tarea', onClick: onAdd }}
+          />
         ) : (
           <div className="space-y-2">
             {dayTasks.map((t) => {

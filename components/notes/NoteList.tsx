@@ -14,6 +14,7 @@ import { togglePin, updateNoteColor, trashNote } from '@/lib/supabase/notes'
 import { NOTE_COLORS, isNoteColor, type NoteColor } from '@/lib/constants/colors'
 import NotePopoverMenu from './NotePopoverMenu'
 import MoveNoteModal from './MoveNoteModal'
+import EmptyState from '@/components/ui/EmptyState'
 import type { Note } from '@/types'
 
 type SortOption = 'updated_at_desc' | 'created_at_desc' | 'title_asc' | 'size_desc'
@@ -541,18 +542,16 @@ export default function NoteList() {
       {/* List */}
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         {notes.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full gap-3 px-6 text-center">
-            <p className="text-sm text-subtle">Sin notas aquí</p>
-            {selectedNotebook && (
-              <button
-                type="button"
-                onClick={() => createNote(selectedNotebook.id)}
-                className="text-xs text-accent hover:text-accent/80 transition cursor-pointer underline-offset-2 hover:underline"
-              >
-                Crear nota
-              </button>
-            )}
-          </div>
+          <EmptyState
+            variant="notes"
+            title="Sin notas aquí"
+            description="Crea tu primera nota y empieza a escribir"
+            action={
+              selectedNotebook
+                ? { label: 'Crear primera nota', onClick: () => createNote(selectedNotebook.id) }
+                : undefined
+            }
+          />
         ) : visible.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-2 px-6 text-center">
             <p className="text-sm text-subtle">Sin notas de este color</p>

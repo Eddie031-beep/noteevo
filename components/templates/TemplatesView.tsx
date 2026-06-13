@@ -9,6 +9,7 @@ import { useNoteStore } from '@/store/noteStore'
 import { useUIStore } from '@/store/uiStore'
 import TemplatePreview from './TemplatePreview'
 import NotebookPicker from './NotebookPicker'
+import EmptyState from '@/components/ui/EmptyState'
 import type { Template, Notebook } from '@/types'
 
 const LAST_NOTEBOOK_KEY = 'noteevo-last-template-notebook'
@@ -306,10 +307,24 @@ export default function TemplatesView() {
             <Loader2 size={20} className="text-muted animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 py-20 text-center">
-            <LayoutTemplate size={30} className="text-subtle" />
-            <p className="text-sm text-muted">Sin plantillas que coincidan</p>
-          </div>
+          debouncedQuery ? (
+            <EmptyState
+              variant="search"
+              title="Sin resultados"
+              description="Prueba con otro término de búsqueda"
+            />
+          ) : filter === 'mine' ? (
+            <EmptyState
+              variant="templates"
+              title="Aún no tienes plantillas propias"
+              description="Guarda cualquier nota como plantilla desde el editor"
+            />
+          ) : (
+            <EmptyState
+              variant="templates"
+              title="Sin plantillas que coincidan"
+            />
+          )
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {filtered.map((t) => (

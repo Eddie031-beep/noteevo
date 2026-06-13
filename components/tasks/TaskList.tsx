@@ -8,8 +8,9 @@ import {
 } from '@/lib/supabase/tasks'
 import type { TaskWithContext } from '@/lib/supabase/tasks'
 import TaskModal from './TaskModal'
+import EmptyState from '@/components/ui/EmptyState'
 import {
-  Plus, Flag, Calendar, Clock, CheckSquare, Trash2,
+  Plus, Flag, Calendar, Clock, Trash2,
   ChevronDown, BookOpen, SlidersHorizontal, X,
 } from 'lucide-react'
 import { format, parseISO, isToday, isPast, isWithinInterval, addDays, startOfDay } from 'date-fns'
@@ -344,17 +345,20 @@ export default function TaskList() {
           loading ? (
             <p className="text-sm text-muted text-center mt-12">Cargando…</p>
           ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center gap-4 mt-16 text-center">
-              <CheckSquare size={36} className="text-subtle" />
-              <div>
-                <p className="text-foreground font-medium text-sm">Sin tareas</p>
-                <p className="text-muted text-xs mt-1">
-                  {hasActiveFilters
-                    ? 'No hay tareas que coincidan con los filtros activos'
-                    : 'Crea tu primera tarea con el botón de arriba'}
-                </p>
-              </div>
-            </div>
+            hasActiveFilters ? (
+              <EmptyState
+                variant="search"
+                title="Sin resultados"
+                description="No hay tareas que coincidan con los filtros activos"
+              />
+            ) : (
+              <EmptyState
+                variant="tasks"
+                title="Sin tareas pendientes"
+                description="Crea una tarea o vincúlala a una nota"
+                action={{ label: 'Nueva tarea', onClick: () => setShowModal(true) }}
+              />
+            )
           ) : (
             <div className="space-y-2">
               {filtered.map((task) => (

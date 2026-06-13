@@ -284,6 +284,21 @@ ul[data-type="taskList"] li > div {
   animation: noteCardEnter 0.22s ease-out;
 }
 
+@keyframes emptyStateEnter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.empty-state-enter {
+  animation: emptyStateEnter 0.35s ease-out both;
+}
+
 @keyframes toastEnter {
   from {
     opacity: 0;

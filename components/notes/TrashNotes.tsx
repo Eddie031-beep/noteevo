@@ -6,6 +6,7 @@ import type { Note } from '@/types'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Trash2, RotateCcw, X } from 'lucide-react'
+import EmptyState from '@/components/ui/EmptyState'
 
 export default function TrashNotes() {
   const [trashedNotes, setTrashedNotes] = useState<Note[]>([])
@@ -61,10 +62,11 @@ export default function TrashNotes() {
         {loading ? (
           <p className="text-xs text-muted text-center mt-8">Cargando...</p>
         ) : trashedNotes.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full gap-3">
-            <Trash2 size={32} className="text-subtle" />
-            <p className="text-sm text-muted">Papelera vacía</p>
-          </div>
+          <EmptyState
+            variant="trash"
+            title="La papelera está vacía"
+            description="Las notas que elimines aparecerán aquí"
+          />
         ) : (
           trashedNotes.map((note) => (
             <div

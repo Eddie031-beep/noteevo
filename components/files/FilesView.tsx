@@ -14,8 +14,9 @@ import { useNoteStore } from '@/store/noteStore'
 import { useUIStore } from '@/store/uiStore'
 import {
   File, FileText, ImageIcon, Music, Video, Download, Trash2, Search, X,
-  Paperclip, LayoutGrid, List, ArrowUpDown, Upload, BookOpen, Loader2, ChevronRight,
+  LayoutGrid, List, ArrowUpDown, Upload, BookOpen, Loader2, ChevronRight,
 } from 'lucide-react'
+import EmptyState from '@/components/ui/EmptyState'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -259,7 +260,19 @@ export default function FilesView() {
         {loading ? (
           <p className="text-sm text-muted text-center mt-12">Cargando…</p>
         ) : sorted.length === 0 ? (
-          <EmptyState query={query} />
+          query ? (
+            <EmptyState
+              variant="search"
+              title="Sin resultados"
+              description="Prueba con otro término de búsqueda"
+            />
+          ) : (
+            <EmptyState
+              variant="files"
+              title="Sin archivos todavía"
+              description="Los adjuntos de tus notas aparecerán aquí — también puedes arrastrar archivos a esta vista"
+            />
+          )
         ) : view === 'grid' ? (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3">
             {sorted.map((att) => (
@@ -318,28 +331,6 @@ export default function FilesView() {
           onClose={() => setPendingFiles(null)}
         />
       )}
-    </div>
-  )
-}
-
-// ── Estado vacío ─────────────────────────────────────────────────────────────
-
-function EmptyState({ query }: { query: string }) {
-  return (
-    <div className="flex flex-col items-center gap-4 mt-16 text-center">
-      <div className="w-14 h-14 bg-panel border border-border rounded-2xl flex items-center justify-center">
-        <Paperclip size={24} className="text-subtle" />
-      </div>
-      <div>
-        <p className="text-foreground font-medium text-sm">
-          {query ? 'Sin resultados' : 'Sin archivos'}
-        </p>
-        <p className="text-muted text-xs mt-1">
-          {query
-            ? 'Prueba con otro término de búsqueda'
-            : 'Arrastra archivos aquí o adjúntalos desde una nota'}
-        </p>
-      </div>
     </div>
   )
 }

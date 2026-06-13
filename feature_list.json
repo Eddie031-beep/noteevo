@@ -732,7 +732,7 @@
     "id": 62,
     "phase": 17,
     "title": "Empty states con ilustración",
-    "status": "pending",
+    "status": "done",
     "depends_on": [],
     "effort": "easy",
     "impact": "medium",
@@ -746,7 +746,7 @@
       "components/templates/TemplatesView.tsx",
       "components/notes/TrashNotes.tsx"
     ],
-    "notes": "Crear EmptyState.tsx: props icon (SVG inline simple, no librería), title, description, action? {label, onClick}. SVGs: formas geométricas simples que sugieran el concepto (ej. para notas: rectángulos apilados; para tareas: checkboxes). Cada uso tiene título y CTA específico en español. Ej notas vacías: 'Sin notas aquí' + 'Crear primera nota'."
+    "notes": "Crear EmptyState.tsx: props icon (SVG inline simple, no librería), title, description, action? {label, onClick}. SVGs: formas geométricas simples que sugieran el concepto (ej. para notas: rectángulos apilados; para tareas: checkboxes). Cada uso tiene título y CTA específico en español. Ej notas vacías: 'Sin notas aquí' + 'Crear primera nota'. | DONE: EmptyState.tsx (variant notes/tasks/files/calendar/templates/trash/search, SVG inline 80x80 stroke+detalle accent, fade emptyStateEnter). Aplicado en NoteList(notes+action), TaskList(tasks/search segun filtros), FilesView(files/search), CalendarView DayView(calendar+onAdd), TemplatesView(search/templates-mias), TrashNotes(trash). Build verde."
   },
   {
     "id": 63,
