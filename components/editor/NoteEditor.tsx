@@ -38,7 +38,7 @@ import VersionHistoryPanel from './VersionHistoryPanel'
 import SaveAsTemplateModal from '@/components/templates/SaveAsTemplateModal'
 import MoveNoteModal from '@/components/notes/MoveNoteModal'
 import InsertMenu from './InsertMenu'
-import { FontFamilySelector, TextColorPicker } from './FormatDropdowns'
+import { FontFamilySelector, FontSizeSelector, TextColorPicker } from './FormatDropdowns'
 import AiMenuExpanded from './AiMenuExpanded'
 import NoteActionsMenu from './NoteActionsMenu'
 import TableToolbar from './TableToolbar'
@@ -340,6 +340,7 @@ export default function NoteEditor() {
 
           {/* Formato avanzado */}
           {editor && <FontFamilySelector editor={editor} />}
+          {editor && <FontSizeSelector editor={editor} />}
           {editor && <TextColorPicker editor={editor} />}
 
           <Divider />

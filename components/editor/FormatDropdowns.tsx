@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronDown, Check } from 'lucide-react'
 import type { Editor } from '@tiptap/react'
+import { useProfileStore } from '@/store/profileStore'
 import ToolbarTooltip from './ToolbarTooltip'
 
 // ── Font Family ────────────────────────────────────────────────────────────
@@ -79,6 +80,85 @@ export function FontFamilySelector({ editor }: { editor: Editor }) {
                 <span className={isActive ? 'text-accent' : 'text-foreground'}>
                   {font.label}
                 </span>
+                {isActive && <Check size={11} className="text-accent shrink-0" />}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Font Size (override por selección) ───────────────────────────────────────
+// Capa OVERRIDE: aplica un tamaño SOLO al texto seleccionado, guardado en el
+// content JSON via la marca `fontSize` sobre textStyle. El texto sin override
+// hereda el tamaño BASE de Configuración (--editor-font-size). El botón refleja
+// el override activo si lo hay, o el tamaño base en caso contrario.
+const SIZES = ['12', '14', '16', '18', '20', '24', '28', '32']
+
+export function FontSizeSelector({ editor }: { editor: Editor }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const baseFontSize = useProfileStore((s) => s.editorFontSize)
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    if (open) document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  // Override activo en la selección (p. ej. "18px") o null si no hay.
+  const activeFontSize = editor.getAttributes('textStyle').fontSize as string | undefined
+  const activeSize = activeFontSize ? activeFontSize.replace('px', '') : null
+  // Lo que muestra el botón: el override si existe, si no el tamaño base.
+  const displaySize = activeSize ?? String(baseFontSize)
+
+  return (
+    <div className="relative" ref={ref}>
+      <ToolbarTooltip label="Tamaño de texto">
+        <button
+          type="button"
+          aria-label="Tamaño de texto"
+          onClick={() => setOpen(!open)}
+          className="flex items-center gap-0.5 px-1.5 py-1.5 rounded text-xs text-muted hover:bg-surface hover:text-foreground transition cursor-pointer"
+        >
+          <span>{displaySize}</span>
+          <ChevronDown size={10} className="shrink-0" />
+        </button>
+      </ToolbarTooltip>
+
+      {open && (
+        <div className="absolute left-0 top-9 z-40 bg-panel border border-border rounded-xl shadow-2xl w-32 py-1">
+          <button
+            type="button"
+            onClick={() => {
+              editor.chain().focus().unsetFontSize().run()
+              setOpen(false)
+            }}
+            className="w-full flex items-center justify-between px-3 py-1.5 text-xs hover:bg-surface transition cursor-pointer text-left"
+          >
+            <span className={activeSize === null ? 'text-accent' : 'text-muted'}>
+              Predeterminado
+            </span>
+            {activeSize === null && <Check size={11} className="text-accent shrink-0" />}
+          </button>
+          <div className="border-b border-border/60 my-1" />
+          {SIZES.map((size) => {
+            const isActive = activeSize === size
+            return (
+              <button
+                key={size}
+                type="button"
+                onClick={() => {
+                  editor.chain().focus().setFontSize(`${size}px`).run()
+                  setOpen(false)
+                }}
+                className="w-full flex items-center justify-between px-3 py-1.5 text-xs hover:bg-surface transition cursor-pointer text-left"
+              >
+                <span className={isActive ? 'text-accent' : 'text-foreground'}>{size}</span>
                 {isActive && <Check size={11} className="text-accent shrink-0" />}
               </button>
             )

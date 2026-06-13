@@ -19,6 +19,7 @@ import { MermaidExtension } from '@/lib/editor/mermaid-extension'
 import { CalloutExtension } from '@/lib/editor/callout-extension'
 import { ToggleExtension } from '@/lib/editor/toggle-extension'
 import { TocExtension } from '@/lib/editor/toc-extension'
+import { FontSize } from '@/lib/editor/font-size'
 
 /**
  * Extensiones TipTap compartidas entre el editor principal (NoteEditor) y los
@@ -38,6 +39,7 @@ export const sharedEditorExtensions: Extensions = [
   TextStyle,
   Color,
   FontFamily,
+  FontSize,
   Table.configure({ resizable: false }),
   TableRow,
   TableHeader,
