@@ -98,6 +98,33 @@ export async function updateCover(
   if (error) throw new Error(error.message)
 }
 
+/**
+ * Tipografía POR NOTA (Phase 17 id:61). Escribe note_font_family/_size/_line_height.
+ * Pasa null en un campo para que la nota vuelva a heredar el default global.
+ * Solo se actualizan los campos presentes en `typography` (null sí cuenta como valor).
+ */
+export async function updateNoteTypography(
+  noteId: string,
+  typography: {
+    fontFamily?: string | null
+    fontSize?: number | null
+    lineHeight?: number | null
+  }
+): Promise<void> {
+  const update: Record<string, string | number | null> = {}
+  if ('fontFamily' in typography) update.note_font_family = typography.fontFamily ?? null
+  if ('fontSize' in typography) update.note_font_size = typography.fontSize ?? null
+  if ('lineHeight' in typography) update.note_line_height = typography.lineHeight ?? null
+
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('notes')
+    .update(update)
+    .eq('id', noteId)
+
+  if (error) throw new Error(error.message)
+}
+
 export async function updateNoteColor(noteId: string, color: string | null): Promise<void> {
   const supabase = createClient()
   const { error } = await supabase

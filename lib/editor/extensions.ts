@@ -7,7 +7,6 @@ import Image from '@tiptap/extension-image'
 import TextAlign from '@tiptap/extension-text-align'
 import { TextStyle } from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
-import { FontFamily } from '@tiptap/extension-font-family'
 import { Table } from '@tiptap/extension-table'
 import { TableRow } from '@tiptap/extension-table-row'
 import { TableCell } from '@tiptap/extension-table-cell'
@@ -19,7 +18,6 @@ import { MermaidExtension } from '@/lib/editor/mermaid-extension'
 import { CalloutExtension } from '@/lib/editor/callout-extension'
 import { ToggleExtension } from '@/lib/editor/toggle-extension'
 import { TocExtension } from '@/lib/editor/toc-extension'
-import { FontSize } from '@/lib/editor/font-size'
 
 /**
  * Extensiones TipTap compartidas entre el editor principal (NoteEditor) y los
@@ -38,8 +36,6 @@ export const sharedEditorExtensions: Extensions = [
   TextAlign.configure({ types: ['heading', 'paragraph'] }),
   TextStyle,
   Color,
-  FontFamily,
-  FontSize,
   Table.configure({ resizable: false }),
   TableRow,
   TableHeader,

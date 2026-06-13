@@ -38,7 +38,8 @@ import VersionHistoryPanel from './VersionHistoryPanel'
 import SaveAsTemplateModal from '@/components/templates/SaveAsTemplateModal'
 import MoveNoteModal from '@/components/notes/MoveNoteModal'
 import InsertMenu from './InsertMenu'
-import { FontFamilySelector, FontSizeSelector, TextColorPicker } from './FormatDropdowns'
+import { TextColorPicker } from './FormatDropdowns'
+import NoteTypographyPopover from './NoteTypographyPopover'
 import AiMenuExpanded from './AiMenuExpanded'
 import NoteActionsMenu from './NoteActionsMenu'
 import TableToolbar from './TableToolbar'
@@ -94,10 +95,17 @@ export default function NoteEditor() {
   const { notebooks } = useNotebookStore()
   const { spaces } = useSpaceStore()
   const { isFocusMode, currentView, isNoteListCollapsed, setNoteListCollapsed, isTypewriterMode, toggleTypewriterMode } = useUIStore()
-  // Tipografía configurable del editor (Phase 17 id:61): estado vivo del perfil.
+  // Tipografía del editor (Phase 17 id:61). Dos capas por UBICACIÓN: el default
+  // GLOBAL vive en el perfil (estado vivo abajo); el override POR NOTA en las
+  // columnas note_font_* de selectedNote. Prioridad: nota ?? global.
   const editorFontFamily = useProfileStore((s) => s.editorFontFamily)
   const editorFontSize = useProfileStore((s) => s.editorFontSize)
   const editorLineHeight = useProfileStore((s) => s.editorLineHeight)
+  // Valores EFECTIVOS, recomputados en cada render → reactivos a cambios de la
+  // nota (popover) y del default global (Configuración).
+  const effectiveFontFamily = selectedNote?.note_font_family ?? editorFontFamily
+  const effectiveFontSize = selectedNote?.note_font_size ?? editorFontSize
+  const effectiveLineHeight = selectedNote?.note_line_height ?? editorLineHeight
   const titleRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const syncedNoteIdRef = useRef<string | null>(null)
@@ -338,9 +346,16 @@ export default function NoteEditor() {
 
           <Divider />
 
-          {/* Formato avanzado */}
-          {editor && <FontFamilySelector editor={editor} />}
-          {editor && <FontSizeSelector editor={editor} />}
+          {/* Tipografía de la nota (familia/tamaño/interlineado) + color por selección */}
+          <NoteTypographyPopover
+            noteId={selectedNote.id}
+            noteFontFamily={selectedNote.note_font_family ?? null}
+            noteFontSize={selectedNote.note_font_size ?? null}
+            noteLineHeight={selectedNote.note_line_height ?? null}
+            effectiveFontFamily={effectiveFontFamily}
+            effectiveFontSize={effectiveFontSize}
+            effectiveLineHeight={effectiveLineHeight}
+          />
           {editor && <TextColorPicker editor={editor} />}
 
           <Divider />
@@ -495,14 +510,14 @@ export default function NoteEditor() {
             {/* Separador sutil entre título/tags y el cuerpo */}
             <div className="border-b border-border/60 my-5" />
             {editor && <TableToolbar editor={editor} />}
-            {/* Vars de tipografía aplicadas SOLO al cuerpo (no al título). El
-                font-family por selección de FormatDropdowns sigue mandando sobre
-                texto marcado; esto es la fuente base. */}
+            {/* Vars de tipografía aplicadas SOLO al cuerpo (no al título). Usan los
+                valores EFECTIVOS (override de la nota si existe, si no el global).
+                Los defaults de globals.css quedan como fallback. */}
             <div
               style={{
-                '--editor-font-family': fontStackForKey(editorFontFamily),
-                '--editor-font-size': `${editorFontSize}px`,
-                '--editor-line-height': String(editorLineHeight),
+                '--editor-font-family': fontStackForKey(effectiveFontFamily),
+                '--editor-font-size': `${effectiveFontSize}px`,
+                '--editor-line-height': String(effectiveLineHeight),
               } as React.CSSProperties}
             >
               <EditorContent editor={editor} />

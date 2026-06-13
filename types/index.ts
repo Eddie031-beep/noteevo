@@ -21,6 +21,11 @@ export interface Note {
   cover_url?: string | null
   cover_gradient?: string | null
   color?: string | null
+  // Tipografía POR NOTA (Phase 17 id:61). null = hereda el default global de
+  // user_profiles. note_font_family es una clave de EditorFontKey (sans/serif/...).
+  note_font_family?: string | null
+  note_font_size?: number | null
+  note_line_height?: number | null
   created_at: string
   updated_at: string
 }
