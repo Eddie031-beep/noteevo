@@ -89,56 +89,6 @@ export function FontFamilySelector({ editor }: { editor: Editor }) {
   )
 }
 
-// ── Font Size ──────────────────────────────────────────────────────────────
-const SIZES = ['12', '14', '16', '18', '20', '24', '28', '32']
-
-export function FontSizeSelector({ editor }: { editor: Editor }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
-    }
-    if (open) document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [open])
-
-  return (
-    <div className="relative" ref={ref}>
-      <ToolbarTooltip label="Tamaño de texto">
-        <button
-          type="button"
-          aria-label="Tamaño de texto"
-          onClick={() => setOpen(!open)}
-          className="flex items-center gap-0.5 px-1.5 py-1.5 rounded text-xs text-muted hover:bg-surface hover:text-foreground transition cursor-pointer"
-        >
-          <span>16</span>
-          <ChevronDown size={10} className="shrink-0" />
-        </button>
-      </ToolbarTooltip>
-
-      {open && (
-        <div className="absolute left-0 top-9 z-40 bg-panel border border-border rounded-xl shadow-2xl w-20 py-1">
-          {SIZES.map((size) => (
-            <button
-              key={size}
-              type="button"
-              onClick={() => {
-                editor.chain().focus().setMark('textStyle', { fontSize: `${size}px` }).run()
-                setOpen(false)
-              }}
-              className="w-full px-3 py-1.5 text-xs text-muted hover:bg-surface hover:text-foreground transition cursor-pointer text-left"
-            >
-              {size}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
 // ── Text Color ─────────────────────────────────────────────────────────────
 const COLORS: { value: string | null; label: string }[] = [
   { value: null, label: 'Auto' },
