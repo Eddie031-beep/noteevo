@@ -139,6 +139,12 @@ export interface UserProfile {
   timezone: string
   email_notifications: boolean
   onboarding_completed: boolean
+  // Tipografía configurable del editor (Phase 17 id:61). Migración aplicada:
+  // editor_font_family text DEFAULT 'sans', editor_font_size int DEFAULT 16,
+  // editor_line_height numeric DEFAULT 1.7.
+  editor_font_family: string | null
+  editor_font_size: number | null
+  editor_line_height: number | null
   created_at: string
   updated_at: string
 }

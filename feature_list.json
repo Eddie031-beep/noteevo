@@ -714,7 +714,7 @@
     "id": 61,
     "phase": 17,
     "title": "Opciones tipográficas del editor",
-    "status": "pending",
+    "status": "done",
     "depends_on": [],
     "effort": "medium",
     "impact": "medium",
@@ -726,7 +726,7 @@
       "store/profileStore.ts",
       "app/globals.css"
     ],
-    "notes": "Valores en editor_prefs: lineHeight (1.4|1.7|2.0), paragraphSpacing (compact|normal|relaxed), lineWidth (narrow=max-w-2xl|normal=max-w-3xl|wide=max-w-4xl), fontSize (14|16|18). Panel de opciones accesible desde botón en barra inferior del editor (icono SlidersHorizontal). CSS variables en globals.css aplicadas al contenedor .editor-content. Guardar con debounce 1000ms en user_profiles."
+    "notes": "Migración aplicada: user_profiles + editor_font_family text DEFAULT sans, editor_font_size int DEFAULT 16, editor_line_height numeric DEFAULT 1.7 (3 columnas, no jsonb). PARTE1 defaults en globals.css .ProseMirror: line-height 1.7 base, ritmo vertical (p 0.75em top, h1-3 1.4em/0.5em), text-wrap balance en h1-3, blockquote/code/hr con tokens; bloques custom (Callout/Toggle/TOC/tabla) intactos. PARTE2: lib/constants/editor-fonts.ts (6 familias EXACTAS de FormatDropdowns: sans/serif/slab/mono/script/hand, sin recargar fuentes). profileStore con editorFontFamily/Size/LineHeight + setters async que persisten via updateProfile y revierten on error. NoteEditor inyecta --editor-font-family/-size/-line-height inline SOLO sobre el cuerpo (no el título); defaults PARTE1 como fallback. profile.ts sin cambios: select(*) ya trae las columnas y updateProfile es Partial<UserProfile> tipado. PARTE3: settings/page.tsx sección Editor bajo tema/idioma: selector de familia (preview en su fuente), stepper 12-22px con muestra Aa, interlineado 1.4/1.7/2.0; cambios en vivo via store. Build verde."
   },
   {
     "id": 62,

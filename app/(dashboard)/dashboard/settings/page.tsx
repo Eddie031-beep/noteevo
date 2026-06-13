@@ -2,10 +2,17 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { User, Settings, Bell, ArrowLeft, Camera, Check, Loader2 } from 'lucide-react'
+import { User, Settings, Bell, ArrowLeft, Camera, Check, Loader2, Minus, Plus } from 'lucide-react'
 import { getProfile, updateProfile, uploadAvatar } from '@/lib/supabase/profile'
 import { useProfileStore } from '@/store/profileStore'
 import { useUIStore } from '@/store/uiStore'
+import {
+  EDITOR_FONTS,
+  LINE_HEIGHT_OPTIONS,
+  MIN_EDITOR_FONT_SIZE,
+  MAX_EDITOR_FONT_SIZE,
+  fontStackForKey,
+} from '@/lib/constants/editor-fonts'
 import type { UserProfile } from '@/types'
 
 type Tab = 'perfil' | 'preferencias' | 'notificaciones'
@@ -57,7 +64,15 @@ function SaveButton({
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { setProfile: setStoreProfile } = useProfileStore()
+  const {
+    setProfile: setStoreProfile,
+    editorFontFamily,
+    editorFontSize,
+    editorLineHeight,
+    setEditorFontFamily,
+    setEditorFontSize,
+    setEditorLineHeight,
+  } = useProfileStore()
   const { setTheme: setStoreTheme } = useUIStore()
 
   const [activeTab, setActiveTab] = useState<Tab>('perfil')
@@ -166,6 +181,38 @@ export default function SettingsPage() {
       setSaving(false)
     }
   }
+
+  // Editor: cambios en vivo (el setter persiste en user_profiles y revierte si falla).
+  const handleEditorFont = async (key: string) => {
+    setError(null)
+    try {
+      await setEditorFontFamily(key)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al guardar la fuente del editor')
+    }
+  }
+
+  const handleEditorSize = async (next: number) => {
+    const clamped = Math.min(MAX_EDITOR_FONT_SIZE, Math.max(MIN_EDITOR_FONT_SIZE, next))
+    if (clamped === editorFontSize) return
+    setError(null)
+    try {
+      await setEditorFontSize(clamped)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al guardar el tamaño de texto')
+    }
+  }
+
+  const handleEditorLineHeight = async (value: number) => {
+    setError(null)
+    try {
+      await setEditorLineHeight(value)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al guardar el interlineado')
+    }
+  }
+
+  const fontPreviewStack = fontStackForKey(editorFontFamily)
 
   const avatarSrc = avatarPreview ?? (
     profile?.avatar_url
@@ -373,6 +420,91 @@ export default function SettingsPage() {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                {/* ── Editor: tipografía ── */}
+                <div className="pt-2 border-t border-border">
+                  <label className="block text-sm font-medium text-foreground mb-1">Editor</label>
+                  <p className="text-xs text-muted mb-4">
+                    Tipografía del cuerpo de tus notas. Los cambios se aplican al instante.
+                  </p>
+
+                  {/* Familia */}
+                  <div className="mb-5">
+                    <p className="text-xs font-medium text-muted mb-2">Fuente</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {EDITOR_FONTS.map((f) => (
+                        <button
+                          key={f.key}
+                          type="button"
+                          onClick={() => handleEditorFont(f.key)}
+                          style={{ fontFamily: f.stack }}
+                          className={`py-2.5 px-3 rounded-lg border text-sm transition cursor-pointer truncate ${
+                            editorFontFamily === f.key
+                              ? 'border-accent bg-accent/10 text-accent'
+                              : 'border-border bg-surface text-muted hover:text-foreground'
+                          }`}
+                        >
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Tamaño */}
+                  <div className="mb-5">
+                    <p className="text-xs font-medium text-muted mb-2">Tamaño de texto</p>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        aria-label="Reducir tamaño"
+                        onClick={() => handleEditorSize(editorFontSize - 1)}
+                        disabled={editorFontSize <= MIN_EDITOR_FONT_SIZE}
+                        className="w-9 h-9 flex items-center justify-center rounded-lg border border-border bg-surface text-muted hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
+                      >
+                        <Minus size={15} />
+                      </button>
+                      <span className="w-16 text-center text-sm font-medium text-foreground tabular-nums">
+                        {editorFontSize}px
+                      </span>
+                      <button
+                        type="button"
+                        aria-label="Aumentar tamaño"
+                        onClick={() => handleEditorSize(editorFontSize + 1)}
+                        disabled={editorFontSize >= MAX_EDITOR_FONT_SIZE}
+                        className="w-9 h-9 flex items-center justify-center rounded-lg border border-border bg-surface text-muted hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
+                      >
+                        <Plus size={15} />
+                      </button>
+                      <span
+                        className="ml-2 text-foreground leading-none"
+                        style={{ fontSize: `${editorFontSize}px`, fontFamily: fontPreviewStack }}
+                      >
+                        Aa
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Interlineado */}
+                  <div>
+                    <p className="text-xs font-medium text-muted mb-2">Interlineado</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {LINE_HEIGHT_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => handleEditorLineHeight(opt.value)}
+                          className={`py-2.5 px-3 rounded-lg border text-sm font-medium transition cursor-pointer ${
+                            editorLineHeight === opt.value
+                              ? 'border-accent bg-accent/10 text-accent'
+                              : 'border-border bg-surface text-muted hover:text-foreground'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 <SaveButton

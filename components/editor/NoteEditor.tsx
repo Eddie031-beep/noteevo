@@ -9,6 +9,8 @@ import { useNoteStore } from '@/store/noteStore'
 import { useNotebookStore } from '@/store/notebookStore'
 import { useSpaceStore } from '@/store/spaceStore'
 import { useUIStore } from '@/store/uiStore'
+import { useProfileStore } from '@/store/profileStore'
+import { fontStackForKey } from '@/lib/constants/editor-fonts'
 import { updateNote } from '@/lib/supabase/notes'
 import { uploadNoteImage } from '@/lib/supabase/storage'
 import {
@@ -92,6 +94,10 @@ export default function NoteEditor() {
   const { notebooks } = useNotebookStore()
   const { spaces } = useSpaceStore()
   const { isFocusMode, currentView, isNoteListCollapsed, setNoteListCollapsed, isTypewriterMode, toggleTypewriterMode } = useUIStore()
+  // Tipografía configurable del editor (Phase 17 id:61): estado vivo del perfil.
+  const editorFontFamily = useProfileStore((s) => s.editorFontFamily)
+  const editorFontSize = useProfileStore((s) => s.editorFontSize)
+  const editorLineHeight = useProfileStore((s) => s.editorLineHeight)
   const titleRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const syncedNoteIdRef = useRef<string | null>(null)
@@ -489,7 +495,18 @@ export default function NoteEditor() {
             {/* Separador sutil entre título/tags y el cuerpo */}
             <div className="border-b border-border/60 my-5" />
             {editor && <TableToolbar editor={editor} />}
-            <EditorContent editor={editor} />
+            {/* Vars de tipografía aplicadas SOLO al cuerpo (no al título). El
+                font-family por selección de FormatDropdowns sigue mandando sobre
+                texto marcado; esto es la fuente base. */}
+            <div
+              style={{
+                '--editor-font-family': fontStackForKey(editorFontFamily),
+                '--editor-font-size': `${editorFontSize}px`,
+                '--editor-line-height': String(editorLineHeight),
+              } as React.CSSProperties}
+            >
+              <EditorContent editor={editor} />
+            </div>
             <AttachmentPanel noteId={selectedNote.id} />
           </div>
         </div>
