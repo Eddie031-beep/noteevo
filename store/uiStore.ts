@@ -23,6 +23,8 @@ interface UIStore {
   toggleSidebarCollapsed: () => void
   isCheatsheetOpen: boolean
   setCheatsheetOpen: (v: boolean) => void
+  isCommandPaletteOpen: boolean
+  setCommandPaletteOpen: (v: boolean) => void
   theme: Theme
   setTheme: (theme: Theme) => void
 }
@@ -43,6 +45,8 @@ export const useUIStore = create<UIStore>((set) => ({
   toggleSidebarCollapsed: () => set((s) => ({ isSidebarCollapsed: !s.isSidebarCollapsed })),
   isCheatsheetOpen: false,
   setCheatsheetOpen: (v) => set({ isCheatsheetOpen: v }),
+  isCommandPaletteOpen: false,
+  setCommandPaletteOpen: (v) => set({ isCommandPaletteOpen: v }),
   theme: 'dark',
   setTheme: (theme) => set({ theme }),
 }))

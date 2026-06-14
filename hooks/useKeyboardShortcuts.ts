@@ -7,7 +7,7 @@ import { useNoteStore } from '@/store/noteStore'
 import { createNote } from '@/lib/supabase/notes'
 
 export function useKeyboardShortcuts() {
-  const { setCurrentView, setCheatsheetOpen, setFocusMode, isFocusMode, toggleSidebarCollapsed, toggleTypewriterMode } = useUIStore()
+  const { setCurrentView, setCheatsheetOpen, setFocusMode, isFocusMode, toggleSidebarCollapsed, toggleTypewriterMode, setCommandPaletteOpen } = useUIStore()
   const { selectedNotebook } = useNotebookStore()
   const { addNote, setSelectedNote } = useNoteStore()
 
@@ -22,20 +22,15 @@ export function useKeyboardShortcuts() {
       // Escape — siempre
       if (e.key === 'Escape') {
         setCheatsheetOpen(false)
+        setCommandPaletteOpen(false)
         return
       }
 
-      // Ctrl+K — buscar (Chrome no lo reserva)
+      // Ctrl+K — command palette (solo fuera de campos editables para no romper el Ctrl+K de TipTap)
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault()
         if (!isEditable) {
-          setCurrentView('search')
-          setTimeout(() => {
-            const input = document.querySelector<HTMLInputElement>(
-              'input[placeholder="Buscar notas..."]'
-            )
-            input?.focus()
-          }, 50)
+          e.preventDefault()
+          setCommandPaletteOpen(true)
         }
         return
       }
@@ -97,5 +92,5 @@ export function useKeyboardShortcuts() {
 
     window.addEventListener('keydown', handler, true)
     return () => window.removeEventListener('keydown', handler, true)
-  }, [selectedNotebook, setCurrentView, setCheatsheetOpen, setFocusMode, isFocusMode, addNote, setSelectedNote, toggleSidebarCollapsed, toggleTypewriterMode])
+  }, [selectedNotebook, setCurrentView, setCheatsheetOpen, setFocusMode, isFocusMode, addNote, setSelectedNote, toggleSidebarCollapsed, toggleTypewriterMode, setCommandPaletteOpen])
 }
