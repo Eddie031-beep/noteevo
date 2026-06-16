@@ -74,6 +74,7 @@
 - **Templates builtin**: `is_builtin = true`, `user_id = null` — nunca modificar
 - **Sin `overflow-hidden`** en contenedores con submenús/dropdowns anidados
 - **Editor siempre con `max-w-3xl` centrado** — no volver a full-width
+- **Verificar propiedad de FKs del cliente** (`notebook_id`, `note_id`): RLS por `user_id` no cubre referencias cruzadas — comprobar pertenencia antes de escribir
 
 ---
 

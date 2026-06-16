@@ -437,6 +437,8 @@ RESEND_API_KEY=                  # Phase 13
 | Notebooks expandibles sin fetch extra (Phase 16 id:54) | Usar notas ya en noteStore para calcular conteo; evita N+1 queries al renderizar el sidebar |
 | Tooltip nativo `title` en sidebar colapsado (Phase 16 id:53) | Suficiente para desktop; evita dependencia de librería de tooltips |
 | Sin `overflow: hidden` en sidebar groups (Phase 16 ids 52–54) | Necesario para que el acordeón de "Más" y el de notebooks aniden dropdowns correctamente |
+| Autosave con `titleDebounceRef` + `contentDebounceRef` separados (fix) | Un solo debounce compartido hacía que editar título y luego cuerpo en <800ms cancelara el guardado del título y se perdiera el cambio. NUNCA volver a un ref único en NoteEditor |
+| Link público con defensa en capas en `getSharedNote` (fix) | Excluye `access_level='none'`, expirados (`expires_at`) y notas en papelera, no solo `is_active`. El render de `/n/[slug]` no debe servir notas que dejaron de ser públicas |
 
 ---
 
@@ -481,3 +483,4 @@ npm run test:e2e     # Playwright
 10. Para la página pública `/n/[slug]`: excluir del middleware de auth
 11. Sin `overflow-hidden` en contenedores de dropdowns que tienen submenús
 12. Editor siempre con `max-w-3xl` centrado — no volver a full-width
+13. Verificar propiedad de FKs que llegan del cliente (`notebook_id`, `note_id`, etc.): RLS sobre `user_id` no impide referenciar recursos ajenos. Comprobar pertenencia explícitamente antes de insertar/actualizar

@@ -127,7 +127,8 @@ export default function NoteEditor() {
   const effectiveFontSize = selectedNote?.note_font_size ?? editorFontSize
   const effectiveLineHeight = selectedNote?.note_line_height ?? editorLineHeight
   const titleRef = useRef<HTMLInputElement>(null)
-  const debounceRef = useRef<NodeJS.Timeout | null>(null)
+  const titleDebounceRef = useRef<NodeJS.Timeout | null>(null)
+  const contentDebounceRef = useRef<NodeJS.Timeout | null>(null)
   const syncedNoteIdRef = useRef<string | null>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
 
@@ -200,8 +201,8 @@ export default function NoteEditor() {
       if (!syncedNoteIdRef.current) return
       const noteId = syncedNoteIdRef.current
       const content = editor.getJSON()
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-      debounceRef.current = setTimeout(() => {
+      if (contentDebounceRef.current) clearTimeout(contentDebounceRef.current)
+      contentDebounceRef.current = setTimeout(() => {
         updateNote(noteId, { content })
           .then(() => {
             updateNoteStore(noteId, { content })
@@ -253,8 +254,8 @@ export default function NoteEditor() {
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!selectedNote) return
     const newTitle = e.target.value
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(async () => {
+    if (titleDebounceRef.current) clearTimeout(titleDebounceRef.current)
+    titleDebounceRef.current = setTimeout(async () => {
       await updateNote(selectedNote.id, { title: newTitle })
       updateNoteStore(selectedNote.id, { title: newTitle })
     }, 800)

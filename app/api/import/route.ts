@@ -58,6 +58,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Faltan parámetros (notebookId o files)' }, { status: 400 })
   }
 
+  // La libreta destino debe pertenecer al usuario autenticado.
+  const { data: ownedNotebook } = await supabase
+    .from('notebooks')
+    .select('id')
+    .eq('id', notebookId)
+    .eq('user_id', user.id)
+    .maybeSingle()
+  if (!ownedNotebook) {
+    return NextResponse.json({ error: 'Libreta no válida' }, { status: 403 })
+  }
+
   const created: { id: string; title: string }[] = []
   const failed: string[] = []
 

@@ -25,14 +25,19 @@ export type UpdateSharedNoteResult =
 export async function getSharedNote(slug: string): Promise<SharedNoteWithNote | null> {
   const supabase = createAdminClient()
 
+  const nowIso = new Date().toISOString()
   const { data: sharedNote, error } = await supabase
     .from('shared_notes')
     .select('*, notes(*)')
     .eq('public_slug', slug)
     .eq('is_active', true)
-    .single()
+    .neq('access_level', 'none')
+    .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
+    .maybeSingle()
 
   if (error || !sharedNote) return null
+  // No servir notas movidas a la papelera aunque el link siga activo.
+  if ((sharedNote as SharedNoteWithNote).notes?.is_trashed) return null
   return sharedNote as SharedNoteWithNote
 }
 
