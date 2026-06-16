@@ -832,7 +832,7 @@
     "id": 68,
     "phase": 17,
     "title": "Backlinks entre notas",
-    "status": "pending",
+    "status": "done",
     "depends_on": [],
     "effort": "hard",
     "impact": "high",
@@ -840,11 +840,13 @@
     "sql": "CREATE TABLE note_links (source_note_id uuid references notes(id) ON DELETE CASCADE, target_note_id uuid references notes(id) ON DELETE CASCADE, created_at timestamptz default now(), PRIMARY KEY (source_note_id, target_note_id)); ALTER TABLE note_links ENABLE ROW LEVEL SECURITY; CREATE POLICY note_links_policy ON note_links USING (EXISTS (SELECT 1 FROM notes WHERE id = source_note_id AND user_id = auth.uid()));",
     "files": [
       "lib/editor/notelink-extension.ts",
-      "lib/supabase/notes.ts",
-      "components/editor/NoteEditor.tsx",
-      "types/index.ts"
+      "lib/supabase/note-links.ts",
+      "components/editor/NoteLinkComponent.tsx",
+      "components/editor/NoteLinkMenu.tsx",
+      "components/editor/BacklinksPanel.tsx",
+      "components/editor/NoteEditor.tsx"
     ],
-    "notes": "Extensión TipTap: detectar patrón [[texto en input → InputRule → abrir dropdown de notas filtradas por título → al seleccionar, insertar nodo custom 'noteLink' con atributos {noteId, title}. Al guardar nota (autosave): escanear JSON buscando nodos tipo 'noteLink', sincronizar tabla note_links (DELETE donde source=noteId, INSERT los encontrados). Panel BacklinksPanel en NoteEditor (igual que VersionHistoryPanel): lista de notas que tienen source_note_id apuntando a la nota actual. RPC get_backlinks(p_note_id) → retorna notas con JOIN. Solo implementar si ids 55-65 están completos."
+    "notes": "DB: tabla note_links (source_note_id/target_note_id uuid PK, CASCADE, RLS) + RPC get_backlinks(p_note_id). NoteLinkExtension (lib/editor/notelink-extension.ts): nodo inline atom 'noteLink' con attrs {noteId, title}, ReactNodeViewRenderer → NoteLinkComponent.tsx (chip azul con icono Link, click→setSelectedNote). NoteLinkMenu.tsx: dropdown flotante al tipear [[, filtro de notas del store, ↑↓Enter, onMouseDown→insertContent noteLink + delete [[query. BacklinksPanel.tsx: panel lateral 288px con lista de notas que enlazan a la actual. NoteEditor.tsx: agrega NoteLinkExtension a extensions, collectNoteLinkIds() escanea JSON del doc, onUpdate detecta [[ via regex y posiciona el menú, autosave llama syncNoteLinks, botón Backlinks en toolbar. Build verde."
   },
   {
     "id": 69,

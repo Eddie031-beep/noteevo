@@ -22,6 +22,7 @@ import {
   Code, FileCode,
   Superscript as SuperscriptIcon, Subscript as SubscriptIcon, Eraser,
   PanelLeftOpen, PanelLeftClose,
+  Link as LinkIcon,
 } from 'lucide-react'
 import TagInput from './TagInput'
 import NoteEmojiButton from './NoteEmojiButton'
@@ -44,7 +45,26 @@ import AiMenuExpanded from './AiMenuExpanded'
 import NoteActionsMenu from './NoteActionsMenu'
 import TableToolbar from './TableToolbar'
 import { saveVersion, getVersionCount } from '@/lib/supabase/versions'
+import { syncNoteLinks } from '@/lib/supabase/note-links'
+import { NoteLinkExtension } from '@/lib/editor/notelink-extension'
+import BacklinksPanel from './BacklinksPanel'
+import NoteLinkMenu from './NoteLinkMenu'
 import type { NoteVersion } from '@/types'
+
+function collectNoteLinkIds(json: Record<string, unknown>): string[] {
+  const ids: string[] = []
+  function walk(node: unknown) {
+    if (!node || typeof node !== 'object') return
+    const n = node as Record<string, unknown>
+    if (n.type === 'noteLink' && n.attrs) {
+      const attrs = n.attrs as Record<string, unknown>
+      if (typeof attrs.noteId === 'string') ids.push(attrs.noteId)
+    }
+    if (Array.isArray(n.content)) n.content.forEach(walk)
+  }
+  walk(json)
+  return [...new Set(ids)]
+}
 
 function ToolbarButton({
   onClick, active, title, shortcut, children,
@@ -121,6 +141,9 @@ export default function NoteEditor() {
   const [showVersions, setShowVersions] = useState(false)
   const [showSaveTemplate, setShowSaveTemplate] = useState(false)
   const [showMove, setShowMove] = useState(false)
+  const [showBacklinks, setShowBacklinks] = useState(false)
+  const [noteLinkQuery, setNoteLinkQuery] = useState<string | null>(null)
+  const [noteLinkAnchor, setNoteLinkAnchor] = useState<{ top: number; left: number } | null>(null)
   const [tagInputKey, setTagInputKey] = useState(0)
   const [wordCount, setWordCount] = useState(0)
   const [improveToolbar, setImproveToolbar] = useState<{
@@ -144,21 +167,47 @@ export default function NoteEditor() {
     extensions: [
       ...sharedEditorExtensions,
       ActiveNodeHighlight,
+      NoteLinkExtension,
       Placeholder.configure({ placeholder: 'Escribe algo...' }),
     ],
     content: '',
     onSelectionUpdate: ({ editor }) => {
       if (editor.state.selection.empty) setImproveToolbar(null)
+      // Cerrar menú de noteLink si el cursor ya no está en posición [[
+      const { from } = editor.state.selection
+      const textBefore = editor.state.doc.textBetween(Math.max(0, from - 200), from)
+      if (!/\[\[([^\]]*)$/.test(textBefore)) {
+        setNoteLinkQuery(null)
+        setNoteLinkAnchor(null)
+      }
     },
     onUpdate: ({ editor }) => {
       setWordCount(countWords(editor.getText()))
+
+      // Detectar patrón [[ para mostrar menú de backlinks
+      const { from } = editor.state.selection
+      const textBefore = editor.state.doc.textBetween(Math.max(0, from - 200), from)
+      const linkMatch = /\[\[([^\]]*)$/.exec(textBefore)
+      if (linkMatch) {
+        const coords = editor.view.coordsAtPos(from)
+        setNoteLinkQuery(linkMatch[1])
+        setNoteLinkAnchor({ top: coords.bottom + 8, left: coords.left })
+      } else {
+        setNoteLinkQuery(null)
+        setNoteLinkAnchor(null)
+      }
+
       if (!syncedNoteIdRef.current) return
       const noteId = syncedNoteIdRef.current
       const content = editor.getJSON()
       if (debounceRef.current) clearTimeout(debounceRef.current)
       debounceRef.current = setTimeout(() => {
         updateNote(noteId, { content })
-          .then(() => updateNoteStore(noteId, { content }))
+          .then(() => {
+            updateNoteStore(noteId, { content })
+            const targetIds = collectNoteLinkIds(content)
+            return syncNoteLinks(noteId, targetIds)
+          })
           .catch(() => {})
       }, 800)
     },
@@ -422,6 +471,14 @@ export default function NoteEditor() {
             <AlignCenter size={14} />
           </ToolbarButton>
 
+          <ToolbarButton
+            title="Backlinks"
+            onClick={() => setShowBacklinks((v) => !v)}
+            active={showBacklinks}
+          >
+            <LinkIcon size={14} />
+          </ToolbarButton>
+
           <Divider />
 
           {/* Insert Menu */}
@@ -541,6 +598,13 @@ export default function NoteEditor() {
             onClose={() => setShowChat(false)}
           />
         )}
+        {showBacklinks && selectedNote && (
+          <BacklinksPanel
+            noteId={selectedNote.id}
+            onClose={() => setShowBacklinks(false)}
+          />
+        )}
+
         {showVersions && selectedNote && (
           <VersionHistoryPanel
             noteId={selectedNote.id}
@@ -606,6 +670,16 @@ export default function NoteEditor() {
           note={selectedNote}
           onMoved={() => {}}
           onClose={() => setShowMove(false)}
+        />
+      )}
+
+      {/* ── Floating note link menu (triggered by [[) ── */}
+      {noteLinkQuery !== null && noteLinkAnchor && editor && (
+        <NoteLinkMenu
+          editor={editor}
+          query={noteLinkQuery}
+          anchor={noteLinkAnchor}
+          onClose={() => { setNoteLinkQuery(null); setNoteLinkAnchor(null) }}
         />
       )}
 
