@@ -17,9 +17,10 @@ import {
   Home, FileText, BookOpen, Star, Trash2, LogOut,
   Plus, X, Search, Tag, CheckSquare, Paperclip,
   Calendar, Users, Sparkles, ChevronDown, ChevronRight, ChevronLeft, Share2, LayoutTemplate, Pencil, Settings,
-  Sun, Moon, Monitor, SlidersHorizontal,
+  Sun, Moon, Monitor, SlidersHorizontal, Upload,
 } from 'lucide-react'
 import NotificationBell from './NotificationBell'
+import ImportModal from '@/components/notes/ImportModal'
 import { useDroppable } from '@dnd-kit/core'
 import type { Notebook, Space } from '@/types'
 
@@ -197,6 +198,7 @@ export default function Sidebar() {
   const [pendingCount, setPendingCount] = useState(0)
   const [accountMenuOpen, setAccountMenuOpen] = useState(false)
   const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [showImportModal, setShowImportModal] = useState(false)
   const accountMenuRef = useRef<HTMLDivElement>(null)
 
   const accountName = profile?.display_name || userEmail || 'NoteEvo'
@@ -409,6 +411,7 @@ export default function Sidebar() {
     currentView === 'notebooks' || currentView === 'notebooks-view'
 
   return (
+    <>
     <aside
       className={`h-screen bg-panel border-r border-border flex flex-col shrink-0 transition-[width] duration-200 ${
         collapsed ? 'w-14' : 'w-60'
@@ -496,6 +499,15 @@ export default function Sidebar() {
             >
               <Settings size={15} className="shrink-0" />
               Configuración
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => { setShowImportModal(true); setAccountMenuOpen(false) }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-muted hover:bg-surface hover:text-foreground transition cursor-pointer"
+            >
+              <Upload size={15} className="shrink-0" />
+              Importar notas
             </button>
             <div className="my-1 mx-2 h-px bg-border" />
             <button
@@ -917,5 +929,8 @@ export default function Sidebar() {
         </button>
       </div>
     </aside>
+
+    {showImportModal && <ImportModal onClose={() => setShowImportModal(false)} />}
+  </>
   )
 }

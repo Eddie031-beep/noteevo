@@ -816,7 +816,7 @@
     "id": 67,
     "phase": 17,
     "title": "Importar desde Markdown / .enex",
-    "status": "pending",
+    "status": "done",
     "depends_on": [],
     "effort": "medium",
     "impact": "medium",
