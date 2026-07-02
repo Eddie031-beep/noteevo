@@ -203,7 +203,7 @@ export default function AiAssistantView() {
                 {msg.content || (
                   <span className="inline-flex items-center gap-1.5 text-muted">
                     <Loader2 size={13} className="animate-spin" />
-                    Pensando…
+                    <span className="ai-shimmer">Pensando…</span>
                   </span>
                 )}
               </div>
