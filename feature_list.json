@@ -944,7 +944,7 @@
     "phase": 18,
     "name": "motion-fase-b",
     "title": "DESIGN.md Fase B: listas animadas + modales + Sonner en todos los flujos + vaul móvil",
-    "status": "pending",
+    "status": "done",
     "needs_db": false,
     "files": [
       "components/notes/NoteList.tsx",
@@ -953,21 +953,21 @@
       "components/files/FilesView.tsx",
       "components/tasks/TaskModal.tsx"
     ],
-    "notes": "useAutoAnimate en NoteList/TagsView/FilesView/TaskList (key estable). Modales con AnimatePresence (fade backdrop + fadeScale contenido, presets de lib/motion/tokens). Estandarizar Sonner en guardado/errores/undo de papelera/límites IA. Instalar vaul para filtros de Tasks y modales <640px. Checkpoints DESIGN.md §10 Fase B."
+    "notes": "Commit 891314a. HECHO: useAutoAnimate en NoteList/TaskList/TagsView/FilesView (keys estables) + undo de papelera con Sonner (toast 'Nota movida a la papelera' con acción Deshacer via restoreNote, error en español si falla). RESTANTE (movido a id:80): modales con AnimatePresence, vaul móvil, Sonner en más flujos (guardado, límites IA)."
   },
   {
     "id": 77,
     "phase": 18,
     "name": "motion-fase-c",
     "title": "DESIGN.md Fase C: transiciones de vista + sidebar animado + notificaciones",
-    "status": "pending",
+    "status": "done",
     "needs_db": false,
     "files": [
       "app/(dashboard)/dashboard/page.tsx",
       "components/sidebar/Sidebar.tsx",
       "components/sidebar/NotificationBell.tsx"
     ],
-    "notes": "AnimatePresence mode='wait' sobre currentView (fade + y:8 corto). Colapso del sidebar con layout/springSoft. Acordeones con auto-animate (sin overflow-hidden). Lista de notificaciones con AnimatePresence."
+    "notes": "Commit 9bee747. HECHO: AnimatePresence mode='wait' sobre currentView en dashboard/page.tsx (fade + y:8, durations.base/easeOut de tokens). Sidebar: la transición CSS de ancho existente se conservó (principio 6 DESIGN.md: CSS antes que JS) y se alineó a --motion-slow/--ease-in-out. RESTANTE (movido a id:80): notificaciones animadas y acordeones del sidebar con auto-animate."
   },
   {
     "id": 78,
@@ -980,7 +980,7 @@
       "components/ai/AiAssistantView.tsx",
       "components/editor/NoteEditor.tsx"
     ],
-    "notes": "cmdk ya no aplica (id:66 done con CommandPalette custom). Queda: shimmer de texto durante streaming de IA, cover image reveal (id:59) con springSoft, micro-motion en empty states, shared-element card→editor (layoutId), auditoría 60fps + reduced-motion."
+    "notes": "cmdk ya no aplica (id:66 done con CommandPalette custom). HECHO (commit ff5446f): shimmer .ai-shimmer en el streaming del asistente IA. Queda: cover image reveal (id:59) con springSoft, micro-motion en empty states, shared-element card→editor (layoutId), auditoría 60fps + reduced-motion."
   },
   {
     "id": 79,
@@ -993,6 +993,22 @@
       "components/editor/NoteEditor.tsx",
       "components/onboarding/OnboardingModal.tsx"
     ],
-    "notes": "#4: auditar densidad de toolbar del editor (mover lo avanzado a divulgación progresiva). #5: FAB/bottom-sheet móvil para 'nueva nota' en zona del pulgar (vaul, depende de id:76). #6: reorientar OnboardingModal hacia 'tu primera captura' (time-to-first-note)."
+    "notes": "#4: auditar densidad de toolbar del editor (mover lo avanzado a divulgación progresiva). #5: FAB/bottom-sheet móvil para 'nueva nota' en zona del pulgar (vaul, depende de id:80). #6: reorientar OnboardingModal hacia 'tu primera captura' (time-to-first-note)."
+  },
+  {
+    "id": 80,
+    "phase": 18,
+    "name": "motion-restante-modales-vaul",
+    "title": "DESIGN.md restante: modales con AnimatePresence + vaul móvil + Sonner en más flujos + notificaciones animadas",
+    "status": "pending",
+    "needs_db": false,
+    "files": [
+      "components/tasks/TaskModal.tsx",
+      "components/notes/MoveNoteModal.tsx",
+      "components/editor/ExportModal.tsx",
+      "components/spaces/InviteModal.tsx",
+      "components/sidebar/NotificationBell.tsx"
+    ],
+    "notes": "Restos de Fases B/C: envolver modales en AnimatePresence (fade backdrop + fadeScale contenido — requiere mover el condicional de apertura al padre para animar la salida), instalar vaul para filtros de Tasks y sheets <640px, Sonner en guardado/límites de IA, lista de notificaciones con AnimatePresence, acordeones del sidebar con auto-animate."
   }
 ]
