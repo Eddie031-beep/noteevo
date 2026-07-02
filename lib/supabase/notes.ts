@@ -14,7 +14,7 @@ export async function getNotesByNotebook(notebookId: string): Promise<Note[]> {
   return data ?? []
 }
 
-export async function createNote(notebookId: string): Promise<Note> {
+export async function createNote(notebookId: string, title?: string): Promise<Note> {
   const supabase = createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -25,7 +25,7 @@ export async function createNote(notebookId: string): Promise<Note> {
     .insert({
       notebook_id: notebookId,
       user_id: user.id,
-      title: 'Sin título',
+      title: title?.trim() || 'Sin título',
       content: {},
     })
     .select()
@@ -196,8 +196,8 @@ export async function getAllNotesWithNotebook(): Promise<NoteWithNotebook[]> {
   return (data ?? []) as unknown as NoteWithNotebook[]
 }
 
-export async function createQuickNote(notebookId: string): Promise<Note> {
-  return createNote(notebookId)
+export async function createQuickNote(notebookId: string, title?: string): Promise<Note> {
+  return createNote(notebookId, title)
 }
 
 export async function getNoteById(id: string): Promise<Note | null> {

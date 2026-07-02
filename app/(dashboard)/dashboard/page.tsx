@@ -10,7 +10,6 @@ import FavoriteNotes from '@/components/notes/FavoriteNotes'
 import TrashNotes from '@/components/notes/TrashNotes'
 import SearchResults from '@/components/notes/SearchResults'
 import AdvancedSearchPanel from '@/components/notes/AdvancedSearchPanel'
-import DashboardStats from '@/components/dashboard/DashboardStats'
 import TaskList from '@/components/tasks/TaskList'
 import FilesView from '@/components/files/FilesView'
 import CalendarView from '@/components/calendar/CalendarView'
@@ -19,81 +18,12 @@ import SharedWithMeView from '@/components/spaces/SharedWithMeView'
 import TemplatesView from '@/components/templates/TemplatesView'
 import TagsView from '@/components/tags/TagsView'
 import AiAssistantView from '@/components/ai/AiAssistantView'
+import HomeView from '@/components/home/HomeView'
 import { getAllNotesWithNotebook, createQuickNote, type NoteWithNotebook } from '@/lib/supabase/notes'
 import { extractTextPreview } from '@/lib/utils/tiptap'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { BookOpen, FileText, Plus } from 'lucide-react'
-
-function HomePanel() {
-  const { notebooks } = useNotebookStore()
-  const { setCurrentView } = useUIStore()
-  const { setSelectedNotebook } = useNotebookStore()
-
-  const hour = new Date().getHours()
-  const greeting =
-    hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches'
-
-  const handleNotebookClick = (notebook: (typeof notebooks)[number]) => {
-    setSelectedNotebook(notebook)
-    setCurrentView('notebooks')
-  }
-
-  return (
-    <div className="flex-1 overflow-y-auto bg-background">
-      <div className="max-w-5xl mx-auto px-10 py-12 flex flex-col gap-8">
-        {/* Greeting */}
-        <div>
-          <h1 className="text-3xl font-semibold text-foreground">{greeting}</h1>
-          <p className="text-muted text-sm mt-1">Tu espacio para pensar y crear</p>
-        </div>
-
-        {/* Stats + charts */}
-        <DashboardStats />
-
-        {/* Notebooks grid */}
-        {notebooks.length > 0 && (
-          <div>
-            <h2 className="text-xs font-semibold text-muted uppercase tracking-wider mb-3">
-              Libretas recientes
-            </h2>
-            <div className="grid grid-cols-2 gap-2.5">
-              {notebooks.slice(0, 6).map((nb) => (
-                <button
-                  key={nb.id}
-                  type="button"
-                  onClick={() => handleNotebookClick(nb)}
-                  className="flex items-center gap-3 p-4 bg-panel border border-border rounded-xl hover:border-accent/40 hover:bg-surface transition cursor-pointer text-left"
-                >
-                  <div className="w-8 h-8 bg-accent/15 rounded-lg flex items-center justify-center shrink-0">
-                    <BookOpen size={15} className="text-accent" />
-                  </div>
-                  <span className="text-sm text-foreground font-medium truncate">
-                    {nb.name}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {notebooks.length === 0 && (
-          <div className="flex flex-col items-center gap-4 py-16 text-center">
-            <div className="w-16 h-16 bg-panel border border-border rounded-2xl flex items-center justify-center">
-              <FileText size={28} className="text-subtle" />
-            </div>
-            <div>
-              <p className="text-foreground font-medium">Aún no tienes libretas</p>
-              <p className="text-muted text-sm mt-1">
-                Crea una libreta desde el sidebar para empezar
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
 
 function AllNotesView() {
   const [notes, setNotes] = useState<NoteWithNotebook[]>([])
@@ -227,7 +157,7 @@ export default function DashboardPage() {
     <div className="flex h-full bg-background">
       {!isFocusMode && (
         <>
-          {showHome && <HomePanel />}
+          {showHome && <HomeView />}
 
           {/* Paneles de lista de notas — colapsables con animación */}
           {(showAllNotes || showNoteList || showFavorites || showTrash || showSearch) && (
