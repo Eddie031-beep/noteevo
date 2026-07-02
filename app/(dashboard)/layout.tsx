@@ -10,6 +10,8 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core'
 import { useState } from 'react'
+import { Toaster } from 'sonner'
+import { MotionConfig } from 'motion/react'
 import Sidebar from '@/components/sidebar/Sidebar'
 import KeyboardShortcutsCheatsheet from '@/components/KeyboardShortcutsCheatsheet'
 import OnboardingModal from '@/components/onboarding/OnboardingModal'
@@ -64,15 +66,21 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex h-screen bg-background">
-        {!isFocusMode && <Sidebar />}
-        <main className="flex-1 overflow-auto">
-          {children}
-        </main>
-        <KeyboardShortcutsCheatsheet />
-        <OnboardingModal />
-        <CommandPalette />
-      </div>
+      {/* MotionConfig: todas las animaciones de Motion respetan reduced-motion
+          del SO sin código extra por componente (DESIGN.md §5.4). */}
+      <MotionConfig reducedMotion="user">
+        <div className="flex h-screen bg-background">
+          {!isFocusMode && <Sidebar />}
+          <main className="flex-1 overflow-auto">
+            {children}
+          </main>
+          <KeyboardShortcutsCheatsheet />
+          <OnboardingModal />
+          <CommandPalette />
+          {/* Único Toaster de la app: todos los mensajes pasan por toast.*() */}
+          <Toaster position="bottom-right" richColors closeButton toastOptions={{ duration: 4000 }} />
+        </div>
+      </MotionConfig>
 
       <DragOverlay>
         {activeDragTitle ? (

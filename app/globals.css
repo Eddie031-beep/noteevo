@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css"; /* DESIGN.md §5.2 — reemplaza a tailwindcss-animate */
 @plugin "@tailwindcss/typography";
 
 /* Colors are NON-inline so utilities compile to var(--color-*) and respond
@@ -33,6 +34,25 @@
 /* Default (dark) color-scheme so browser form elements render correctly */
 :root {
   color-scheme: dark;
+
+  /* Tokens de movimiento (DESIGN.md §5.2) — usar SIEMPRE estas variables */
+  --motion-fast: 130ms;   /* micro: hover, press, checkbox */
+  --motion-base: 190ms;   /* estándar: fades, dropdowns, tabs */
+  --motion-slow: 280ms;   /* modales, paneles, cover */
+
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);   /* entradas (decelera) */
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);    /* estándar */
+  --ease-in:     cubic-bezier(0.4, 0, 1, 1);      /* salidas (acelera) */
+}
+
+/* Accesibilidad: respeto global de reduced-motion (DESIGN.md §5.2) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 [data-theme='light'] {
