@@ -10,7 +10,7 @@ import ToolbarTooltip from './ToolbarTooltip'
 // se configuran POR NOTA en NoteTypographyPopover (no por selección).
 const COLORS: { value: string | null; label: string }[] = [
   { value: null, label: 'Auto' },
-  { value: '#e8e8e8', label: '' },
+  { value: '#e7ece8', label: '' },
   { value: '#a0a0a0', label: '' },
   { value: '#ef4444', label: '' },
   { value: '#f97316', label: '' },
@@ -20,7 +20,7 @@ const COLORS: { value: string | null; label: string }[] = [
   { value: '#3b82f6', label: '' },
   { value: '#8b5cf6', label: '' },
   { value: '#ec4899', label: '' },
-  { value: '#1a7a4a', label: '' },
+  { value: '#2e9e68', label: '' },
 ]
 
 export function TextColorPicker({ editor }: { editor: Editor }) {

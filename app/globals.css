@@ -1,23 +1,28 @@
 @import "tailwindcss";
+@import "tw-animate-css"; /* DESIGN.md §5.2 — reemplaza a tailwindcss-animate */
 @plugin "@tailwindcss/typography";
 
 /* Colors are NON-inline so utilities compile to var(--color-*) and respond
    to the [data-theme='light'] overrides below. Using `@theme inline` here
    bakes the dark literal into every bg / text / border utility, which is
    exactly why light mode failed to flip anything but explicit rules. */
+/* Paleta "Tinta y bosque" (Phase 18): el dark mode es carbón con matiz
+   verde (no gris neutro) y el light mode es papel cálido. El acento
+   esmeralda es más luminoso en dark para legibilidad y más profundo en
+   light para contraste AA sobre papel. */
 @theme {
-  --color-background: #0f0f0f;
-  --color-panel:      #1a1a1a;
-  --color-surface:    #242424;
-  --color-elevated:   #2a2a2a;
-  --color-border:     #2d2d2d;
-  --color-accent:     #1a7a4a;
-  --color-accent-light: #1e8f57;
-  --color-danger:     #ef4444;
-  --color-foreground: #e8e8e8;
-  --color-muted:      #8a8a8a;
-  --color-subtle:     #4a4a4a;
-  --color-code:       #86efac;
+  --color-background: #0e1210;
+  --color-panel:      #151a17;
+  --color-surface:    #1d2420;
+  --color-elevated:   #252d28;
+  --color-border:     #2b342e;
+  --color-accent:     #2e9e68;
+  --color-accent-light: #3fb87d;
+  --color-danger:     #f0565a;
+  --color-foreground: #e7ece8;
+  --color-muted:      #8fa096;
+  --color-subtle:     #566259;
+  --color-code:       #8be3ad;
 }
 
 /* Fonts stay inline — they intentionally resolve to the next/font variables. */
@@ -29,29 +34,48 @@
 /* Default (dark) color-scheme so browser form elements render correctly */
 :root {
   color-scheme: dark;
+
+  /* Tokens de movimiento (DESIGN.md §5.2) — usar SIEMPRE estas variables */
+  --motion-fast: 130ms;   /* micro: hover, press, checkbox */
+  --motion-base: 190ms;   /* estándar: fades, dropdowns, tabs */
+  --motion-slow: 280ms;   /* modales, paneles, cover */
+
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);   /* entradas (decelera) */
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);    /* estándar */
+  --ease-in:     cubic-bezier(0.4, 0, 1, 1);      /* salidas (acelera) */
+}
+
+/* Accesibilidad: respeto global de reduced-motion (DESIGN.md §5.2) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 [data-theme='light'] {
   color-scheme: light;
-  --color-background: #f5f5f5;
-  --color-panel:      #ffffff;
-  --color-surface:    #f0f0f0;
-  --color-elevated:   #e8e8e8;
-  --color-border:     #d4d4d4;
-  --color-foreground: #1a1a1a;
-  --color-muted:      #6b6b6b;
-  --color-subtle:     #8a8a8a;
-  --color-accent:     #1a7a4a;
-  --color-accent-light: #1e8f57;
-  --color-danger:     #ef4444;
-  --color-code:       #059669;
+  --color-background: #f4f3ee;
+  --color-panel:      #fdfcf9;
+  --color-surface:    #ecebe4;
+  --color-elevated:   #e3e2d9;
+  --color-border:     #d9d6ca;
+  --color-foreground: #20261f;
+  --color-muted:      #666e66;
+  --color-subtle:     #979e95;
+  --color-accent:     #177347;
+  --color-accent-light: #1e8a58;
+  --color-danger:     #dc3b40;
+  --color-code:       #0b6e3f;
 }
 
 /* Explicit light-mode background/color for structural containers.
    Guards against any CSS-variable cascade edge-cases in Tailwind v4. */
 [data-theme='light'] body {
-  background-color: #f5f5f5;
-  color: #1a1a1a;
+  background-color: #f4f3ee;
+  color: #20261f;
 }
 
 body {
@@ -64,8 +88,76 @@ body {
 [data-theme='light'] input,
 [data-theme='light'] textarea,
 [data-theme='light'] select {
-  color: #1a1a1a;
+  color: #20261f;
   background-color: transparent;
+}
+
+/* ── Refinamientos globales (Phase 18) ─────────────────────────────────── */
+
+/* La selección de texto habla el idioma de la marca. */
+::selection {
+  background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
+
+/* Scrollbars finas y silenciosas en toda la app. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-subtle);
+}
+
+/* Foco visible por teclado, consistente y en acento. */
+:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-accent) 55%, transparent);
+  outline-offset: 1px;
+}
+.ProseMirror:focus-visible {
+  outline: none;
+}
+
+/* Shimmer de texto para streaming de IA (DESIGN.md Fase D — única excepción
+   "wow" permitida). Se anula solo con el bloque global de reduced-motion. */
+.ai-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-muted) 0%,
+    var(--color-foreground) 50%,
+    var(--color-muted) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: aiShimmer 1.6s linear infinite;
+}
+@keyframes aiShimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Fondo de cuaderno punteado — firma visual de las páginas de auth. */
+.dotted-paper {
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--color-foreground) 8%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
 }
 
 /* ── Task List ── */
@@ -95,7 +187,7 @@ ul[data-type="taskList"] li > label {
 ul[data-type="taskList"] li > label input[type="checkbox"] {
   width: 14px;
   height: 14px;
-  accent-color: #1a7a4a;
+  accent-color: var(--color-accent);
   cursor: pointer;
   border-radius: 3px;
   margin: 0;
@@ -207,7 +299,7 @@ ul[data-type="taskList"] li > div {
 }
 
 .ProseMirror mark {
-  background-color: color-mix(in srgb, #1a7a4a 25%, transparent);
+  background-color: color-mix(in srgb, var(--color-accent) 25%, transparent);
   color: var(--color-foreground);
   border-radius: 2px;
   padding: 0.05em 0.2em;
@@ -260,31 +352,31 @@ ul[data-type="taskList"] li > div {
 
 /* ── ProseMirror: light mode overrides ── */
 [data-theme='light'] .ProseMirror {
-  color: #1a1a1a;
+  color: #20261f;
 }
 [data-theme='light'] .ProseMirror h1,
 [data-theme='light'] .ProseMirror h2,
 [data-theme='light'] .ProseMirror h3,
 [data-theme='light'] .ProseMirror h4 {
-  color: #0f0f0f;
+  color: #141a15;
 }
-[data-theme='light'] .ProseMirror strong { color: #0f0f0f; }
-[data-theme='light'] .ProseMirror em { color: #1a1a1a; }
+[data-theme='light'] .ProseMirror strong { color: #141a15; }
+[data-theme='light'] .ProseMirror em { color: #20261f; }
 [data-theme='light'] .ProseMirror code {
-  background: #e8e8e8;
-  color: #166534;
+  background: #e7e6dd;
+  color: #0b6e3f;
 }
 [data-theme='light'] .ProseMirror pre {
-  background: #e8e8e8;
-  border-color: #d4d4d4;
+  background: #efeee7;
+  border-color: #d9d6ca;
 }
 [data-theme='light'] .ProseMirror blockquote {
-  color: #6b6b6b;
-  border-left-color: #d4d4d4;
+  color: #666e66;
+  border-left-color: #d9d6ca;
 }
 [data-theme='light'] .ProseMirror th {
-  background: #f0f0f0;
-  color: #0f0f0f;
+  background: #ecebe4;
+  color: #141a15;
 }
 
 /* ── Animaciones ── */
@@ -345,15 +437,15 @@ ul[data-type="taskList"] li > div {
 /* ── Toolbar button click feedback (id:65) ── */
 @keyframes toolbarPulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(26, 122, 74, 0.4);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 40%, transparent);
     transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 0 4px rgba(26, 122, 74, 0);
+    box-shadow: 0 0 0 4px transparent;
     transform: scale(0.96);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(26, 122, 74, 0);
+    box-shadow: 0 0 0 0 transparent;
     transform: scale(1);
   }
 }

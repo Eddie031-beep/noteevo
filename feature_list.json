@@ -862,5 +862,152 @@
       "components/editor/NoteEditor.tsx"
     ],
     "notes": "Extensión TipTap: InputRule que detecta '/ai ' al inicio de un párrafo vacío → reemplaza el nodo por un placeholder decorativo 'Escribe un prompt...' → al presionar Enter toma el texto del párrafo como prompt → llama app/api/ai/inline/route.ts con {prompt, context: nota actual} → streaming → inserta la respuesta en el documento reemplazando el nodo de prompt. Route Handler: mismo patrón que chat/route.ts pero sin historial. Rate limit: acción 'ai_inline' en ai_usage. Solo implementar después de todos los demás."
+  },
+  {
+    "id": 70,
+    "phase": 18,
+    "name": "design-tokens-v2",
+    "title": "Rediseño UI/UX: paleta 'Tinta y bosque' (tokens v2)",
+    "status": "done",
+    "needs_db": false,
+    "files": [
+      "app/globals.css",
+      "components/editor/MermaidComponent.tsx",
+      "components/editor/FormatDropdowns.tsx",
+      "components/dashboard/DashboardStats.tsx",
+      "supabase/functions/send-reminders/index.ts"
+    ],
+    "notes": "Commit 0e48f67. Nueva paleta completa: dark = carbón con matiz verde (#0e1210/#151a17/#1d2420...), light = papel cálido (#f4f3ee/#fdfcf9...). Acento esmeralda #2e9e68 (dark) / #177347 (light, contraste AA). Como toda la app consume tokens --color-*, el cambio re-viste todas las vistas. Hex hardcodeados de la paleta vieja alineados en Mermaid, TextColorPicker, gráficos del dashboard y template de email (este último requiere redeploy de la edge function send-reminders)."
+  },
+  {
+    "id": 71,
+    "phase": 18,
+    "name": "global-polish",
+    "title": "Rediseño UI/UX: refinamientos globales de interacción",
+    "status": "done",
+    "needs_db": false,
+    "files": ["app/globals.css"],
+    "notes": "Commit 0e48f67 (mismo que id:70). ::selection en acento al 30%, scrollbars finas y silenciosas (scrollbar-width thin + ::-webkit-scrollbar con thumb redondeado), :focus-visible global con outline en acento (accesibilidad teclado; .ProseMirror excluido), animación toolbarPulse y mark migradas de rgba hardcodeado a color-mix(var(--color-accent)). Nueva utilidad .dotted-paper (fondo de cuaderno punteado via radial-gradient) usada en auth."
+  },
+  {
+    "id": 72,
+    "phase": 18,
+    "name": "auth-redesign",
+    "title": "Rediseño UI/UX: páginas de login y registro",
+    "status": "done",
+    "needs_db": false,
+    "files": ["app/(auth)/login/page.tsx", "app/(auth)/register/page.tsx"],
+    "notes": "Commit f3a96bd. Fondo de cuaderno punteado (.dotted-paper) como firma visual, wordmark 'NoteEvo' con acento en 'Evo' y línea de tinta bajo la marca, tagline 'Tu segundo cerebro', labels uppercase con tracking-wider, sombras de acento en logo y CTA, focus ring-2 en inputs, active:scale en botón. Lógica de auth (signInWithPassword/signUp) y data-testid intactos."
+  },
+  {
+    "id": 73,
+    "phase": 18,
+    "name": "sidebar-ink-bar",
+    "title": "Rediseño UI/UX: barra de tinta en navegación del sidebar",
+    "status": "done",
+    "needs_db": false,
+    "files": ["components/sidebar/Sidebar.tsx"],
+    "notes": "Commit 350574d. Item activo de NavItem con marcador vertical de 3px en acento (barra de tinta) + tinte bg-accent/12; separadores más suaves (bg-border/70 con más margen lateral). Colapsado conserva el tinte sin barra."
+  },
+  {
+    "id": 74,
+    "phase": 18,
+    "name": "motion-base-fase-a",
+    "title": "DESIGN.md Fase A: base de movimiento",
+    "status": "done",
+    "needs_db": false,
+    "files": [
+      "package.json",
+      "app/globals.css",
+      "lib/motion/tokens.ts",
+      "app/(dashboard)/layout.tsx"
+    ],
+    "notes": "Commit 163695c. Deps: motion, @formkit/auto-animate, sonner, tw-animate-css. cmdk NO instalado (id:66 ya resuelto con CommandPalette custom); vaul diferido a Fase B (id:76). Tokens --motion-fast/base/slow + easings en globals.css, bloque global prefers-reduced-motion, lib/motion/tokens.ts con presets tipados (fade, fadeScale, slideUp, spring, springSoft), MotionConfig reducedMotion='user' + único Toaster de Sonner en el layout del dashboard. Pendiente de Fase A: cablear useAutoAnimate en NoteList/TagsView/FilesView/TaskList (va con id:76)."
+  },
+  {
+    "id": 75,
+    "phase": 18,
+    "name": "home-inicio-daily-driver",
+    "title": "FLUJO.md Prompt 1 — Home 'Inicio': centro de gravedad diario + captura rápida",
+    "status": "done",
+    "needs_db": false,
+    "files": [
+      "components/home/HomeView.tsx",
+      "app/(dashboard)/dashboard/page.tsx",
+      "lib/supabase/notes.ts"
+    ],
+    "notes": "Commit 9451841. HomePanel (bienvenida+stats) reemplazado por HomeView daily-driver: saludo contextual + fecha es, captura rápida (Enter=nota con título en última libreta usada, localStorage noteevo-last-notebook), Nueva nota / Nueva tarea (TaskModal), Ancladas, Continuar donde lo dejaste (6 por updated_at), Para hoy (vencidas/hoy, checkbox optimista con toggleTaskComplete, auto-animate), stats plegadas (DashboardStats bajo toggle), empty state usuario nuevo. createNote/createQuickNote con título opcional. Cero queries nuevas. Sidebar ya tenía 'Inicio'; vista 'home' ya era default."
+  },
+  {
+    "id": 76,
+    "phase": 18,
+    "name": "motion-fase-b",
+    "title": "DESIGN.md Fase B: listas animadas + modales + Sonner en todos los flujos + vaul móvil",
+    "status": "done",
+    "needs_db": false,
+    "files": [
+      "components/notes/NoteList.tsx",
+      "components/tasks/TaskList.tsx",
+      "components/tags/TagsView.tsx",
+      "components/files/FilesView.tsx",
+      "components/tasks/TaskModal.tsx"
+    ],
+    "notes": "Commit 891314a. HECHO: useAutoAnimate en NoteList/TaskList/TagsView/FilesView (keys estables) + undo de papelera con Sonner (toast 'Nota movida a la papelera' con acción Deshacer via restoreNote, error en español si falla). RESTANTE (movido a id:80): modales con AnimatePresence, vaul móvil, Sonner en más flujos (guardado, límites IA)."
+  },
+  {
+    "id": 77,
+    "phase": 18,
+    "name": "motion-fase-c",
+    "title": "DESIGN.md Fase C: transiciones de vista + sidebar animado + notificaciones",
+    "status": "done",
+    "needs_db": false,
+    "files": [
+      "app/(dashboard)/dashboard/page.tsx",
+      "components/sidebar/Sidebar.tsx",
+      "components/sidebar/NotificationBell.tsx"
+    ],
+    "notes": "Commit 9bee747. HECHO: AnimatePresence mode='wait' sobre currentView en dashboard/page.tsx (fade + y:8, durations.base/easeOut de tokens). Sidebar: la transición CSS de ancho existente se conservó (principio 6 DESIGN.md: CSS antes que JS) y se alineó a --motion-slow/--ease-in-out. RESTANTE (movido a id:80): notificaciones animadas y acordeones del sidebar con auto-animate."
+  },
+  {
+    "id": 78,
+    "phase": 18,
+    "name": "motion-fase-d-e",
+    "title": "DESIGN.md Fases D/E restantes: shimmer IA + cover reveal + pulido",
+    "status": "pending",
+    "needs_db": false,
+    "files": [
+      "components/ai/AiAssistantView.tsx",
+      "components/editor/NoteEditor.tsx"
+    ],
+    "notes": "cmdk ya no aplica (id:66 done con CommandPalette custom). HECHO (commit ff5446f): shimmer .ai-shimmer en el streaming del asistente IA. Queda: cover image reveal (id:59) con springSoft, micro-motion en empty states, shared-element card→editor (layoutId), auditoría 60fps + reduced-motion."
+  },
+  {
+    "id": 79,
+    "phase": 18,
+    "name": "flujo-backlog-4-6",
+    "title": "FLUJO.md backlog #4–#6: divulgación progresiva + ergonomía móvil + onboarding a primera captura",
+    "status": "pending",
+    "needs_db": false,
+    "files": [
+      "components/editor/NoteEditor.tsx",
+      "components/onboarding/OnboardingModal.tsx"
+    ],
+    "notes": "#4: auditar densidad de toolbar del editor (mover lo avanzado a divulgación progresiva). #5: FAB/bottom-sheet móvil para 'nueva nota' en zona del pulgar (vaul, depende de id:80). #6: reorientar OnboardingModal hacia 'tu primera captura' (time-to-first-note)."
+  },
+  {
+    "id": 80,
+    "phase": 18,
+    "name": "motion-restante-modales-vaul",
+    "title": "DESIGN.md restante: modales con AnimatePresence + vaul móvil + Sonner en más flujos + notificaciones animadas",
+    "status": "pending",
+    "needs_db": false,
+    "files": [
+      "components/tasks/TaskModal.tsx",
+      "components/notes/MoveNoteModal.tsx",
+      "components/editor/ExportModal.tsx",
+      "components/spaces/InviteModal.tsx",
+      "components/sidebar/NotificationBell.tsx"
+    ],
+    "notes": "Restos de Fases B/C: envolver modales en AnimatePresence (fade backdrop + fadeScale contenido — requiere mover el condicional de apertura al padre para animar la salida), instalar vaul para filtros de Tasks y sheets <640px, Sonner en guardado/límites de IA, lista de notificaciones con AnimatePresence, acordeones del sidebar con auto-animate."
   }
 ]

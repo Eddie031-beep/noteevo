@@ -20,7 +20,7 @@ import {
   type UserStats, type DashboardExtras,
 } from '@/lib/supabase/stats'
 
-const ACCENT = '#1a7a4a'
+const ACCENT = '#2e9e68'
 
 interface StatCard {
   label: string

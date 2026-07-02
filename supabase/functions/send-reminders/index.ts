@@ -85,7 +85,7 @@ function buildHtml(r: DueReminder, kind: ReminderKind): string {
     : ''
   return `
   <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:480px;margin:0 auto;padding:24px;">
-    <div style="display:inline-block;width:40px;height:40px;background:#1a7a4a;border-radius:10px;text-align:center;line-height:40px;color:#fff;font-weight:700;font-size:18px;">N</div>
+    <div style="display:inline-block;width:40px;height:40px;background:#2e9e68;border-radius:10px;text-align:center;line-height:40px;color:#fff;font-weight:700;font-size:18px;">N</div>
     <h1 style="font-size:20px;color:#1a1a1a;margin:16px 0 4px;">${heading}</h1>
     <p style="margin:0 0 16px;color:#6b6b6b;font-size:14px;">${hello}</p>
     <div style="background:#f6f6f6;border:1px solid #e4e4e4;border-radius:12px;padding:16px;">
