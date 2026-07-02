@@ -27,25 +27,25 @@ function getMermaidTheme(isDark: boolean) {
     ? {
         theme: 'dark' as const,
         themeVariables: {
-          background: '#1a1a1a',
-          mainBkg: '#242424',
-          nodeBorder: '#2d2d2d',
-          primaryColor: '#1a7a4a',
-          primaryTextColor: '#e8e8e8',
-          primaryBorderColor: '#1a7a4a',
-          lineColor: '#8a8a8a',
-          secondaryColor: '#242424',
-          tertiaryColor: '#2a2a2a',
+          background: '#151a17',
+          mainBkg: '#1d2420',
+          nodeBorder: '#2b342e',
+          primaryColor: '#2e9e68',
+          primaryTextColor: '#e7ece8',
+          primaryBorderColor: '#2e9e68',
+          lineColor: '#8fa096',
+          secondaryColor: '#1d2420',
+          tertiaryColor: '#252d28',
           fontFamily: 'var(--font-geist-sans), sans-serif',
         },
       }
     : {
         theme: 'default' as const,
         themeVariables: {
-          primaryColor: '#1a7a4a',
-          primaryTextColor: '#1a1a1a',
-          primaryBorderColor: '#1a7a4a',
-          lineColor: '#6b6b6b',
+          primaryColor: '#177347',
+          primaryTextColor: '#20261f',
+          primaryBorderColor: '#177347',
+          lineColor: '#666e66',
           fontFamily: 'var(--font-geist-sans), sans-serif',
         },
       }
