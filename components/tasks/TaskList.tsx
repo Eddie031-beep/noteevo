@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { useTaskStore } from '@/store/taskStore'
 import {
   getTasks, createTask, toggleTaskComplete, deleteTask,
@@ -66,6 +67,7 @@ function dueDatePill(task: Task): string {
 
 export default function TaskList() {
   const { tasks, setTasks, addTask, updateTask, deleteTask: removeTask } = useTaskStore()
+  const [taskListRef] = useAutoAnimate()
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [mainTab, setMainTab] = useState<MainTab>('mytasks')
@@ -360,7 +362,7 @@ export default function TaskList() {
               />
             )
           ) : (
-            <div className="space-y-2">
+            <div ref={taskListRef} className="space-y-2">
               {filtered.map((task) => (
                 <TaskItem
                   key={task.id}

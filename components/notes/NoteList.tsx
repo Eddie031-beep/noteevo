@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'
+import { useAutoAnimate } from '@formkit/auto-animate/react'
+import { toast } from 'sonner'
 import {
   Plus, Star, PanelLeftClose, Pin,
   ArrowUpDown, LayoutList, LayoutGrid, Check, MoreHorizontal,
@@ -10,7 +12,7 @@ import { useNoteStore } from '@/store/noteStore'
 import { useNotebookStore } from '@/store/notebookStore'
 import { useUIStore } from '@/store/uiStore'
 import { extractTextPreview } from '@/lib/utils/tiptap'
-import { togglePin, updateNoteColor, trashNote } from '@/lib/supabase/notes'
+import { togglePin, updateNoteColor, trashNote, restoreNote } from '@/lib/supabase/notes'
 import { NOTE_COLORS, isNoteColor, type NoteColor } from '@/lib/constants/colors'
 import NotePopoverMenu from './NotePopoverMenu'
 import MoveNoteModal from './MoveNoteModal'
@@ -380,13 +382,29 @@ export default function NoteList() {
     }
   }
 
+  const [listRef] = useAutoAnimate()
+
   const handleDelete = async (note: Note) => {
     deleteNote(note.id) // optimista: lo quita de la lista
     try {
       await trashNote(note.id)
+      toast('Nota movida a la papelera', {
+        action: {
+          label: 'Deshacer',
+          onClick: async () => {
+            try {
+              await restoreNote(note.id)
+              if (selectedNotebook?.id) fetchNotes(selectedNotebook.id)
+            } catch {
+              toast.error('No se pudo restaurar la nota')
+            }
+          },
+        },
+      })
     } catch {
       // rollback: recargar la libreta para restaurar el estado real
       if (selectedNotebook?.id) fetchNotes(selectedNotebook.id)
+      toast.error('No se pudo mover la nota a la papelera')
     }
   }
 
@@ -539,8 +557,8 @@ export default function NoteList() {
         </div>
       )}
 
-      {/* List */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin">
+      {/* List — auto-animate: añadir/borrar/reordenar/filtrar se anima solo */}
+      <div ref={listRef} className="flex-1 overflow-y-auto scrollbar-thin">
         {notes.length === 0 ? (
           <EmptyState
             variant="notes"

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 import {
   getAllAttachments,
   deleteAttachment,
@@ -71,6 +72,7 @@ function FileTypeIcon({ type, size = 16 }: { type: string | null; size?: number 
 
 export default function FilesView() {
   const [attachments, setAttachments] = useState<AttachmentWithNote[]>([])
+  const [filesGridRef] = useAutoAnimate()
   const [loading, setLoading] = useState(true)
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
   const [view, setView] = useState<ViewMode>('grid')
@@ -274,7 +276,7 @@ export default function FilesView() {
             />
           )
         ) : view === 'grid' ? (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3">
+          <div ref={filesGridRef} className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3">
             {sorted.map((att) => (
               <GridCard
                 key={att.id}

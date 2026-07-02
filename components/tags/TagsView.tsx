@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 import {
   Tag as TagIcon,
   Search,
@@ -291,6 +292,7 @@ function TagNotesPanel({ tag, onBack }: TagNotesPanelProps) {
 
 export default function TagsView() {
   const [tags, setTags] = useState<TagWithCount[]>([])
+  const [tagsGridRef] = useAutoAnimate()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [query, setQuery] = useState('')
@@ -387,7 +389,7 @@ export default function TagsView() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div ref={tagsGridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {filtered.map((tag) => (
               <TagCard
                 key={tag.id}
