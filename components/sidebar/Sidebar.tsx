@@ -417,7 +417,7 @@ export default function Sidebar() {
   return (
     <>
     <aside
-      className={`h-screen bg-panel border-r border-border flex flex-col shrink-0 transition-[width] duration-200 ${
+      className={`h-screen bg-panel border-r border-border flex flex-col shrink-0 transition-[width] duration-[var(--motion-slow)] ease-[var(--ease-in-out)] ${
         collapsed ? 'w-14' : 'w-60'
       }`}
     >

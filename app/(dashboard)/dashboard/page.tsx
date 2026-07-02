@@ -19,6 +19,8 @@ import TemplatesView from '@/components/templates/TemplatesView'
 import TagsView from '@/components/tags/TagsView'
 import AiAssistantView from '@/components/ai/AiAssistantView'
 import HomeView from '@/components/home/HomeView'
+import { AnimatePresence, motion } from 'motion/react'
+import { durations, easeOut } from '@/lib/motion/tokens'
 import { getAllNotesWithNotebook, createQuickNote, type NoteWithNotebook } from '@/lib/supabase/notes'
 import { extractTextPreview } from '@/lib/utils/tiptap'
 import { format } from 'date-fns'
@@ -155,6 +157,16 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-full bg-background">
+      {/* Transición de vista (DESIGN.md Fase C): fundido corto al cambiar currentView */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentView}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 8 }}
+          transition={{ duration: durations.base, ease: easeOut }}
+          className="flex h-full flex-1 min-w-0"
+        >
       {!isFocusMode && (
         <>
           {showHome && <HomeView />}
@@ -185,6 +197,8 @@ export default function DashboardPage() {
         </>
       )}
       {showEditor && <NoteEditor />}
+        </motion.div>
+      </AnimatePresence>
     </div>
   )
 }
