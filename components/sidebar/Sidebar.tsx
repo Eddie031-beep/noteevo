@@ -37,12 +37,12 @@ interface NavItemProps {
 }
 
 function NavItem({ icon, label, active, onClick, collapsed, disabled, badge }: NavItemProps) {
-  const base = 'w-full flex items-center rounded-lg transition-colors duration-150'
+  const base = 'relative w-full flex items-center rounded-lg transition-colors duration-150'
   const layout = collapsed ? 'justify-center p-2' : 'gap-2.5 px-3 py-2'
   const state = disabled
     ? 'opacity-30 pointer-events-none text-muted'
     : active
-      ? 'bg-accent/15 text-accent'
+      ? 'bg-accent/12 text-accent'
       : 'text-muted hover:bg-surface hover:text-foreground cursor-pointer'
 
   const showBadge = badge !== undefined && badge > 0
@@ -54,6 +54,10 @@ function NavItem({ icon, label, active, onClick, collapsed, disabled, badge }: N
       onClick={disabled ? undefined : onClick}
       className={`${base} ${layout} ${state}`}
     >
+      {/* Barra de tinta: marcador del item activo (firma del rediseño Phase 18) */}
+      {active && !collapsed && (
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[3px] rounded-full bg-accent" />
+      )}
       <span className="relative shrink-0">
         {icon}
         {collapsed && showBadge && (
@@ -75,7 +79,7 @@ function NavItem({ icon, label, active, onClick, collapsed, disabled, badge }: N
 }
 
 function Separator() {
-  return <div className="my-1 mx-2 h-px bg-border" />
+  return <div className="my-1.5 mx-3 h-px bg-border/70" />
 }
 
 function DroppableNotebook({
