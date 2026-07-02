@@ -25,7 +25,7 @@ setup('autenticar cuenta de prueba', async ({ page }) => {
   await page.getByTestId('login-submit').click()
 
   await page.waitForURL('**/dashboard**', { timeout: 30_000 })
-  await expect(page.getByTestId('logout-btn')).toBeVisible()
+  await expect(page.getByTestId('account-menu-btn')).toBeVisible()
 
   fs.mkdirSync(path.dirname(authFile), { recursive: true })
   await page.context().storageState({ path: authFile })

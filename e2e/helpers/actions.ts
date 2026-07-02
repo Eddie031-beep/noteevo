@@ -1,14 +1,21 @@
 import { expect, type Page } from '@playwright/test'
 
 /**
- * Crea una libreta desde el sidebar y espera a que quede seleccionada
- * (su nombre aparece como encabezado del panel de notas).
+ * Crea una libreta desde el sidebar y devuelve su id.
+ * Intercepta la respuesta REST de Supabase para obtener el id sin necesitar
+ * el admin client (evita "permission denied for table notebooks").
  */
-export async function createNotebook(page: Page, name: string): Promise<void> {
+export async function createNotebook(page: Page, name: string): Promise<string> {
+  const responsePromise = page.waitForResponse(
+    (resp) => resp.url().includes('/rest/v1/notebooks') && resp.request().method() === 'POST'
+  )
   await page.getByTestId('new-notebook-btn').click()
   await page.getByTestId('notebook-name-input').fill(name)
   await page.getByTestId('notebook-create-submit').click()
+  const response = await responsePromise
   await expect(page.getByRole('heading', { name, level: 2 })).toBeVisible()
+  const data = (await response.json()) as { id: string }
+  return data.id
 }
 
 /**

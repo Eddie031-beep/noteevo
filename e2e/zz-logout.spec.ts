@@ -7,6 +7,7 @@ import { test, expect } from '@playwright/test'
  */
 test('logout regresa a la pantalla de login', async ({ page }) => {
   await page.goto('/dashboard')
+  await page.getByTestId('account-menu-btn').click()
   await page.getByTestId('logout-btn').click()
 
   await page.waitForURL('**/login**', { timeout: 30_000 })

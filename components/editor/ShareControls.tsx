@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Globe, Link, Lock, Eye, PenLine, Check } from 'lucide-react'
+import { Globe, Link, Lock, Eye, Check } from 'lucide-react'
 import { getShareLink, createShareLink, updateShareLink } from '@/lib/supabase/shared-notes'
 import type { SharedNote } from '@/types'
 
@@ -63,21 +63,17 @@ export default function ShareControls({ noteId, noteTitle }: ShareControlsProps)
       const isActive = level !== 'none'
       if (!sharedNote) {
         if (level === 'none') return
-        // createShareLink crea con access_level 'view'; si se pidió 'edit',
-        // se promociona inmediatamente.
+        // Los links públicos solo ofrecen 'view'. La edición colaborativa se
+        // hace por Spaces (usuarios con cuenta).
         const created = await createShareLink(noteId)
-        if (level === 'edit') {
-          await updateShareLink(created.id, { access_level: 'edit', is_active: true })
-          setSharedNote({ ...created, access_level: 'edit', is_active: true })
-        } else {
-          setSharedNote(created)
-        }
+        setSharedNote(created)
       } else {
         await updateShareLink(sharedNote.id, { access_level: level, is_active: isActive })
         setSharedNote({ ...sharedNote, access_level: level, is_active: isActive })
       }
-    } catch {
-      // error silencioso
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error desconocido'
+      showToast(`No se pudo cambiar el acceso: ${msg}`)
     } finally {
       setUpdating(false)
     }
@@ -151,22 +147,6 @@ export default function ShareControls({ noteId, noteTitle }: ShareControlsProps)
                   <span className="text-muted text-[11px]">Acceso de solo lectura</span>
                 </span>
                 {accessLevel === 'view' && <Check size={12} className="mt-1 text-accent shrink-0" />}
-              </button>
-
-              {/* Edit */}
-              <button
-                type="button"
-                onClick={() => handleAccessChange('edit')}
-                className="w-full flex items-start gap-3 px-3 py-2.5 text-xs transition cursor-pointer hover:bg-surface"
-              >
-                <PenLine size={13} className="mt-0.5 shrink-0 text-muted" />
-                <span className="flex-1 text-left">
-                  <span className={`font-medium block ${accessLevel === 'edit' ? 'text-foreground' : 'text-muted'}`}>
-                    Anyone with the link can edit
-                  </span>
-                  <span className="text-muted text-[11px]">Cualquiera con el link puede editar la nota</span>
-                </span>
-                {accessLevel === 'edit' && <Check size={12} className="mt-1 text-accent shrink-0" />}
               </button>
             </div>
           )}

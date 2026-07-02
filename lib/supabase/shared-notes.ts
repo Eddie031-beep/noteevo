@@ -50,12 +50,16 @@ export async function updateShareLink(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('No autenticado')
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('shared_notes')
     .update(updates)
     .eq('id', id)
     .eq('user_id', user.id)
+    .select()
   if (error) throw new Error(error.message)
+  if (!data || data.length === 0) {
+    throw new Error('No se pudo actualizar el enlace (sin permisos o no encontrado)')
+  }
 }
 
 export async function deactivateShareLink(id: string, isActive: boolean): Promise<void> {

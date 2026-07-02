@@ -205,14 +205,23 @@ chat general con streaming (`ReadableStream`), selector de contexto
 Contexto "Todas mis notas": carga perezosa de `getAllNotesWithNotebook` + `extractTextPreview`.
 `app/api/ai/assistant/route.ts`: rate limit 20/día con `action='ai_assistant'` en `ai_usage`.
 
-### id:48 — Compartir nota: modo edición colaborativa ✅ done
-`access_level` ahora `'none' | 'view' | 'edit'` (text, sin CHECK constraint). `ShareControls`
+### id:48 — Compartir nota: modo edición colaborativa ✅ done (edición pública RETIRADA 2026-06-17)
+`access_level` ahora `'none' | 'view' | 'edit'` (text, **con** CHECK constraint `shared_notes_access_level_check` que acepta los 3 valores). NOTA (fix): el constraint heredado de id:28 solo permitía `none`/`view` y rechazaba `'edit'` en silencio (UPDATE de 0 filas / violación de constraint). Migración aplicada: `ALTER TABLE shared_notes DROP CONSTRAINT shared_notes_access_level_check; ALTER TABLE shared_notes ADD CONSTRAINT shared_notes_access_level_check CHECK (access_level IN ('none','view','edit'));`. `ShareControls`
 habilita "Anyone with the link can edit" (al activar desde cero crea link `view` y lo
 promociona a `edit`). `NoteViewer` → renombrado a **`NotePublicEditor`** (props `editable`
 + `slug`); cuando `editable`, TipTap editable con autosave debounce 1500ms e indicador
 Guardando/Guardado/Error (`initializedRef` evita autosave en el `setContent` inicial).
 Endpoint público `app/api/shared/update/route.ts` → `updateSharedNoteContent` (service role)
 que valida `is_active` + `access_level='edit'` + no expirado + cota 500KB antes de escribir.
+
+**RETIRADO (2026-06-17):** se quitó la opción "Anyone with the link can edit" del dropdown
+de `ShareControls` — el selector solo ofrece Restricted/View; `createShareLink` nunca se
+promociona a `'edit'`. Migración aplicada: `update shared_notes set access_level = 'view'
+where access_level = 'edit';`. La maquinaria construida (`/api/shared/update`,
+`NotePublicEditor` en modo `editable`, tipo `AccessLevel` con `'edit'`) queda en el código
+intacta pero inerte — ningún link puede volver a llegar a `'edit'` desde la UI. La edición
+colaborativa real se hace por Spaces (usuarios con cuenta). Reversible: para reactivar,
+restaurar el botón "Edit" y la rama de promoción en `handleAccessChange`.
 
 ---
 
@@ -429,7 +438,7 @@ RESEND_API_KEY=                  # Phase 13
 | Rejilla semanal con `HOUR_HEIGHT=48` y línea de hora viva (Phase 16 id:44) | Posicionamiento absoluto de eventos por minutos; línea de "ahora" refrescada cada 60s |
 | Color de space determinista por `id` (Phase 16 id:45) | Evita migración/columna; visualmente equivalente a "color aleatorio al crear" y estable entre sesiones. `lib/utils/space-color.ts` |
 | `/api/spaces/lookup-user` solo owner/admin (Phase 16 id:45) | Preview de usuario antes de invitar sin convertir el endpoint en oráculo de enumeración de emails |
-| Edición pública colaborativa con service role (Phase 16 id:48) | `/api/shared/update` no requiere auth; `updateSharedNoteContent` valida is_active + access_level='edit' + no expirado + cota 500KB antes de escribir. NoteViewer→NotePublicEditor con prop `editable`; autosave debounce 1500ms |
+| Edición pública colaborativa con service role (Phase 16 id:48) | **RETIRADO 2026-06-17** — `/api/shared/update` no requiere auth; `updateSharedNoteContent` valida is_active + access_level='edit' + no expirado + cota 500KB antes de escribir. NoteViewer→NotePublicEditor con prop `editable`; autosave debounce 1500ms. La UI ya no ofrece `'edit'` en `ShareControls` (solo Restricted/View); este endpoint y modo quedan en el código pero inertes |
 | Sidebar width colapsado: 48px (Phase 16 ids 49–54) | Mínimo para mostrar íconos 20px con padding 14px a cada lado |
 | Sidebar width expandido: ~240px (Phase 16 ids 49–54) | Consistente con Notion (224px) y Evernote; cabe display_name sin truncar en mayoría de casos |
 | `isSidebarCollapsed` en uiStore (Phase 16 id:53) | Estado global necesario para que el layout del dashboard ajuste el margen del área de contenido |
@@ -439,6 +448,7 @@ RESEND_API_KEY=                  # Phase 13
 | Sin `overflow: hidden` en sidebar groups (Phase 16 ids 52–54) | Necesario para que el acordeón de "Más" y el de notebooks aniden dropdowns correctamente |
 | Autosave con `titleDebounceRef` + `contentDebounceRef` separados (fix) | Un solo debounce compartido hacía que editar título y luego cuerpo en <800ms cancelara el guardado del título y se perdiera el cambio. NUNCA volver a un ref único en NoteEditor |
 | Link público con defensa en capas en `getSharedNote` (fix) | Excluye `access_level='none'`, expirados (`expires_at`) y notas en papelera, no solo `is_active`. El render de `/n/[slug]` no debe servir notas que dejaron de ser públicas |
+| `NotePublicEditor` usa `sharedEditorExtensions` (fix) | Tenía una lista de extensiones propia y desactualizada (incluía `FontFamily`, retirada en id:61); al crear el editor editable rompía con "Cannot read properties of undefined (reading 'dispatchTransaction')". Reusar la lista central evita el drift y renderiza Callout/Toggle/TOC en notas públicas. NUNCA mantener una lista de extensiones paralela |
 
 ---
 

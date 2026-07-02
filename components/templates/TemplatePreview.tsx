@@ -19,20 +19,25 @@ export default function TemplatePreview({ content }: TemplatePreviewProps) {
     immediatelyRender: false,
     editable: false,
     extensions: sharedEditorExtensions,
+    content: '',
     editorProps: {
       attributes: { class: 'focus:outline-none' },
     },
   })
 
-  // Mismo patrón que NoteEditor: setContent en setTimeout evita el error de
-  // flushSync con React 19 + TipTap v3.
+  // setContent en setTimeout (evita flushSync con React 19 + TipTap v3), con
+  // cleanup + guarda isDestroyed para el doble montaje de React 19 en dev.
   useEffect(() => {
     if (!editor) return
     const hasContent = Object.keys(content).length > 0
-    setTimeout(() => {
+    const t = setTimeout(() => {
+      if (editor.isDestroyed) return
       editor.commands.setContent(hasContent ? content : '')
     }, 0)
+    return () => clearTimeout(t)
   }, [editor, content])
 
-  return <EditorContent editor={editor} />
+  // No montar EditorContent con editor=null: en TipTap v3 deja la vista sin
+  // montar y el preview sale en blanco.
+  return editor ? <EditorContent editor={editor} /> : null
 }

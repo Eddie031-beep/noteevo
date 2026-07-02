@@ -2,24 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import Underline from '@tiptap/extension-underline'
-import Highlight from '@tiptap/extension-highlight'
-import TaskList from '@tiptap/extension-task-list'
-import TaskItem from '@tiptap/extension-task-item'
-import Image from '@tiptap/extension-image'
-import TextAlign from '@tiptap/extension-text-align'
-import { TextStyle } from '@tiptap/extension-text-style'
-import { Color } from '@tiptap/extension-color'
-import { FontFamily } from '@tiptap/extension-font-family'
-import { Table } from '@tiptap/extension-table'
-import { TableRow } from '@tiptap/extension-table-row'
-import { TableCell } from '@tiptap/extension-table-cell'
-import { TableHeader } from '@tiptap/extension-table-header'
-import Superscript from '@tiptap/extension-superscript'
-import Subscript from '@tiptap/extension-subscript'
 import { Check, Loader2, CircleAlert, PenLine } from 'lucide-react'
-import { MermaidExtension } from '@/lib/editor/mermaid-extension'
+import { sharedEditorExtensions } from '@/lib/editor/extensions'
 
 interface NotePublicEditorProps {
   content: Record<string, unknown>
@@ -39,28 +23,11 @@ export default function NotePublicEditor({ content, editable, slug }: NotePublic
   const editor = useEditor({
     immediatelyRender: false,
     editable,
-    extensions: [
-      StarterKit,
-      Underline,
-      Highlight,
-      TaskList,
-      TaskItem,
-      Image.configure({ inline: false, allowBase64: false }),
-      TextAlign.configure({ types: ['heading', 'paragraph'] }),
-      TextStyle,
-      Color,
-      FontFamily,
-      Table,
-      TableRow,
-      TableCell,
-      TableHeader,
-      Superscript,
-      Subscript,
-      MermaidExtension,
-    ],
-    editorProps: editable
-      ? { attributes: { class: 'focus:outline-none min-h-[300px]' } }
-      : undefined,
+    extensions: sharedEditorExtensions,
+    content: '',
+    editorProps: {
+      attributes: { class: 'focus:outline-none min-h-[300px]' },
+    },
     onUpdate: ({ editor }) => {
       if (!editable || !initializedRef.current) return
       const json = editor.getJSON()
@@ -84,12 +51,17 @@ export default function NotePublicEditor({ content, editable, slug }: NotePublic
   useEffect(() => {
     if (!editor) return
     const hasContent = Object.keys(content).length > 0
-    setTimeout(() => {
+    const t = setTimeout(() => {
+      // El editor puede destruirse entre el mount y este timeout (doble montaje
+      // de React 19 en dev). Sin esta guarda, setContent corre sobre una view ya
+      // destruida → "Cannot read properties of undefined (reading 'dispatchTransaction')".
+      if (editor.isDestroyed) return
       editor.commands.setContent(hasContent ? content : '')
       // Marca la inicialización tras cargar el contenido para no disparar
       // autosave con el setContent inicial.
       initializedRef.current = true
     }, 0)
+    return () => clearTimeout(t)
   }, [editor, content])
 
   useEffect(() => {
@@ -113,7 +85,7 @@ export default function NotePublicEditor({ content, editable, slug }: NotePublic
           </span>
         </div>
       )}
-      <EditorContent editor={editor} />
+      {editor && <EditorContent editor={editor} />}
     </div>
   )
 }

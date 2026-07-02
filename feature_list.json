@@ -511,7 +511,7 @@
     "title": "Compartir nota: modo edición colaborativa",
     "status": "done",
     "description": "access_level añade valor 'edit'. ShareControls habilita opción editar. Página /n/[slug] renderiza editor editable si access_level='edit'. Guardar con service role + debounce 1500ms. Indicador Guardado/Guardando. NoteViewer → NotePublicEditor con prop editable.",
-    "notes": "access_level ahora 'none'|'view'|'edit' (text, sin CHECK constraint en DB). ShareControls: opción 'edit' habilitada; al crear desde cero promociona view→edit. NoteViewer renombrado a NotePublicEditor (prop editable+slug). Autosave debounce 1500ms vía nuevo endpoint público /api/shared/update → updateSharedNoteContent (admin/service role) que valida is_active + access_level='edit' + no expirado + cota de tamaño 500KB. Indicador Guardando/Guardado/Error. initializedRef evita autosave en el setContent inicial.",
+    "notes": "access_level ahora 'none'|'view'|'edit' (text, con CHECK constraint shared_notes_access_level_check de 3 valores; el heredado solo permitia none/view y bloqueaba edit, corregido por migracion). ShareControls: opción 'edit' habilitada; al crear desde cero promociona view→edit. NoteViewer renombrado a NotePublicEditor (prop editable+slug). Autosave debounce 1500ms vía nuevo endpoint público /api/shared/update → updateSharedNoteContent (admin/service role) que valida is_active + access_level='edit' + no expirado + cota de tamaño 500KB. Indicador Guardando/Guardado/Error. initializedRef evita autosave en el setContent inicial. RETIRADO (2026-06-17): se quitó la opción 'edit' del selector en ShareControls (UI solo ofrece Restricted/View); migración 'update shared_notes set access_level=''view'' where access_level=''edit''' aplicada (1 fila afectada). La maquinaria (/api/shared/update, NotePublicEditor modo editable, tipo AccessLevel con 'edit') queda en el código pero inactiva — ningún link nuevo puede llegar a 'edit' desde la UI. Edición colaborativa real ahora vía Spaces.",
     "depends_on": [
       28
     ]
@@ -800,7 +800,6 @@
     "phase": 17,
     "title": "Comando rápido mejorado (Ctrl+K)",
     "status": "done",
-    "notes": "CommandPalette en components/command/CommandPalette.tsx. Ctrl+K abre palette (solo fuera de editables). Secciones: Acciones (nueva nota, guardar plantilla, tema claro/oscuro/sistema), Ir a (11 vistas), Libretas, Spaces, Notas (búsqueda debounce 200ms). Navegación ↑↓/Enter. Animación fade+scale con prefers-reduced-motion. Montado en dashboard/layout.tsx.",
     "depends_on": [],
     "effort": "medium",
     "impact": "medium",
@@ -810,7 +809,7 @@
       "store/uiStore.ts",
       "hooks/useKeyboardShortcuts.ts"
     ],
-    "notes": "Rediseñar el modal de Ctrl+K existente. Input unificado: si el valor empieza con '>' es comando, sino es búsqueda (mantener búsqueda actual). Comandos: >nueva nota, >nueva tarea, >ir tareas, >ir calendario, >ir archivos, >cambiar tema, >configuración. Cada comando tiene ícono Lucide + shortcut visible. Navegación con teclado (↑↓ + Enter). Si ya existe el componente de búsqueda, extenderlo; si no, crear CommandPalette.tsx nuevo."
+    "notes": "Secciones con detalle: Acciones (nueva nota, guardar plantilla, tema claro/oscuro/sistema), Ir a (11 vistas). Animación fade+scale con prefers-reduced-motion. Montado en dashboard/layout.tsx. Rediseñar el modal de Ctrl+K existente. Input unificado: si el valor empieza con '>' es comando, sino es búsqueda (mantener búsqueda actual). Comandos: >nueva nota, >nueva tarea, >ir tareas, >ir calendario, >ir archivos, >cambiar tema, >configuración. Cada comando tiene ícono Lucide + shortcut visible. Navegación con teclado (↑↓ + Enter). Si ya existe el componente de búsqueda, extenderlo; si no, crear CommandPalette.tsx nuevo. | DONE (desviación justificada del plan): paleta unificada y seccionada en components/command/CommandPalette.tsx (Acciones/Ir a/Libretas/Spaces/Notas) que filtra comandos Y notas a la vez con el texto — NO se usó el prefijo '>'; se prefirió el patrón unificado (estilo Raycast/Linear). 14+ comandos con íconos Lucide, shortcut en kbd donde existe. Ctrl+K abre (useKeyboardShortcuts, fuera de campos editables), Esc cierra (handler global), ↑↓+Enter navegan, debounce 200ms en búsqueda de notas. Build verde."
   },
   {
     "id": 67,
@@ -826,7 +825,7 @@
       "components/notes/ImportModal.tsx",
       "lib/utils/tiptap.ts"
     ],
-    "notes": "Route Handler server-side para manejar archivos grandes. Para .md: usar marked (npm install marked) para parsear → convertir HTML a TipTap JSON (invertir lógica de lib/utils/tiptap.ts). Para .enex: XML con estructura <en-export><note><title>...<content>ENML... Parsear con DOMParser en server. ENML es HTML-like: convertir tags EN a equivalentes HTML → a TipTap JSON. Modal con drag&drop de archivos, selector de libreta destino, barra de progreso. Crear nota(s) via createNote + updateNote existentes."
+    "notes": "Route Handler server-side para manejar archivos grandes. Para .md: usar marked (npm install marked) para parsear → convertir HTML a TipTap JSON (invertir lógica de lib/utils/tiptap.ts). Para .enex: XML con estructura <en-export><note><title>...<content>ENML... Parsear con DOMParser en server. ENML es HTML-like: convertir tags EN a equivalentes HTML → a TipTap JSON. Modal con drag&drop de archivos, selector de libreta destino, barra de progreso. Crear nota(s) via createNote + updateNote existentes. | DONE: app/api/import/route.ts (server, multipart) + components/notes/ImportModal.tsx (drag&drop + selector de libreta). Soporta .md y .enex a TipTap JSON. Verifica propiedad de la libreta destino antes de insertar (403 si ajena — fix de esta sesión). Cubierto por e2e/import.spec.ts (403 libreta ajena + 200 happy path, suite 12/12). Build verde."
   },
   {
     "id": 68,

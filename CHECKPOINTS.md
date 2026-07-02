@@ -287,7 +287,7 @@ Todas las features id:1–39 están done. No re-verificar.
 - [ ] Build verde
 
 ### Comando rápido mejorado (id:66)
-- [ ] Input unificado: '>' para comandos, texto libre para búsqueda
+- [ ] Input unificado: filtra comandos Y notas a la vez en paleta seccionada (sin prefijo '>'; desviación justificada del plan, estilo Raycast)
 - [ ] Mínimo 6 comandos funcionales con íconos
 - [ ] Navegación con teclado (↑↓ + Enter)
 - [ ] Shortcut visible en cada opción

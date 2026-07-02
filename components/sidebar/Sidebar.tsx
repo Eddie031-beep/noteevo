@@ -426,6 +426,7 @@ export default function Sidebar() {
       >
         <button
           type="button"
+          data-testid="account-menu-btn"
           onClick={() => setAccountMenuOpen((o) => !o)}
           title={collapsed ? accountName : undefined}
           aria-haspopup="menu"
@@ -513,6 +514,7 @@ export default function Sidebar() {
             <button
               type="button"
               role="menuitem"
+              data-testid="logout-btn"
               onClick={() => { setAccountMenuOpen(false); handleLogout() }}
               className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-muted hover:bg-danger/10 hover:text-danger transition cursor-pointer"
             >
@@ -881,52 +883,6 @@ export default function Sidebar() {
           )}
         </button>
 
-        {/* User / Settings */}
-        <button
-          type="button"
-          title={collapsed ? 'Configuración' : undefined}
-          onClick={() => router.push('/dashboard/settings')}
-          className={`w-full flex items-center rounded-lg py-2 transition cursor-pointer ${
-            pathname === '/dashboard/settings'
-              ? 'bg-accent/15 text-accent'
-              : 'text-muted hover:bg-surface hover:text-foreground'
-          } ${collapsed ? 'justify-center px-2' : 'gap-2.5 px-3'}`}
-        >
-          {profile?.avatar_url ? (
-            <img
-              src={`${profile.avatar_url}?t=${new Date(profile.updated_at).getTime()}`}
-              alt="Avatar"
-              className="w-6 h-6 rounded-md object-cover shrink-0"
-            />
-          ) : (
-            <div className="w-6 h-6 rounded-md bg-accent/20 flex items-center justify-center shrink-0">
-              <span className="text-[10px] font-bold text-accent">
-                {(profile?.display_name || 'U').slice(0, 2).toUpperCase()}
-              </span>
-            </div>
-          )}
-          {!collapsed && (
-            <>
-              <span className="text-sm font-medium flex-1 text-left truncate">
-                {profile?.display_name || 'Mi perfil'}
-              </span>
-              <Settings size={14} className="shrink-0 opacity-50" />
-            </>
-          )}
-        </button>
-
-        <button
-          type="button"
-          title={collapsed ? 'Cerrar sesión' : undefined}
-          data-testid="logout-btn"
-          onClick={handleLogout}
-          className={`w-full flex items-center gap-2.5 rounded-lg py-2 text-sm text-muted hover:bg-danger/10 hover:text-danger transition cursor-pointer ${
-            collapsed ? 'justify-center px-2' : 'px-3'
-          }`}
-        >
-          <LogOut size={18} className="shrink-0" />
-          {!collapsed && <span className="font-medium">Cerrar sesión</span>}
-        </button>
       </div>
     </aside>
 

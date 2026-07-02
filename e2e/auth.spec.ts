@@ -17,7 +17,7 @@ test.describe('Autenticación', () => {
     await page.getByTestId('login-submit').click()
 
     await page.waitForURL('**/dashboard**', { timeout: 30_000 })
-    await expect(page.getByTestId('logout-btn')).toBeVisible()
+    await expect(page.getByTestId('account-menu-btn')).toBeVisible()
 
     await context.close()
   })
