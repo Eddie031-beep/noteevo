@@ -863,5 +863,51 @@
       "components/editor/NoteEditor.tsx"
     ],
     "notes": "Extensión TipTap: InputRule que detecta '/ai ' al inicio de un párrafo vacío → reemplaza el nodo por un placeholder decorativo 'Escribe un prompt...' → al presionar Enter toma el texto del párrafo como prompt → llama app/api/ai/inline/route.ts con {prompt, context: nota actual} → streaming → inserta la respuesta en el documento reemplazando el nodo de prompt. Route Handler: mismo patrón que chat/route.ts pero sin historial. Rate limit: acción 'ai_inline' en ai_usage. Solo implementar después de todos los demás."
+  },
+  {
+    "id": 70,
+    "phase": 18,
+    "name": "design-tokens-v2",
+    "title": "Rediseño UI/UX: paleta 'Tinta y bosque' (tokens v2)",
+    "status": "done",
+    "needs_db": false,
+    "files": [
+      "app/globals.css",
+      "components/editor/MermaidComponent.tsx",
+      "components/editor/FormatDropdowns.tsx",
+      "components/dashboard/DashboardStats.tsx",
+      "supabase/functions/send-reminders/index.ts"
+    ],
+    "notes": "Commit 0e48f67. Nueva paleta completa: dark = carbón con matiz verde (#0e1210/#151a17/#1d2420...), light = papel cálido (#f4f3ee/#fdfcf9...). Acento esmeralda #2e9e68 (dark) / #177347 (light, contraste AA). Como toda la app consume tokens --color-*, el cambio re-viste todas las vistas. Hex hardcodeados de la paleta vieja alineados en Mermaid, TextColorPicker, gráficos del dashboard y template de email (este último requiere redeploy de la edge function send-reminders)."
+  },
+  {
+    "id": 71,
+    "phase": 18,
+    "name": "global-polish",
+    "title": "Rediseño UI/UX: refinamientos globales de interacción",
+    "status": "done",
+    "needs_db": false,
+    "files": ["app/globals.css"],
+    "notes": "Commit 0e48f67 (mismo que id:70). ::selection en acento al 30%, scrollbars finas y silenciosas (scrollbar-width thin + ::-webkit-scrollbar con thumb redondeado), :focus-visible global con outline en acento (accesibilidad teclado; .ProseMirror excluido), animación toolbarPulse y mark migradas de rgba hardcodeado a color-mix(var(--color-accent)). Nueva utilidad .dotted-paper (fondo de cuaderno punteado via radial-gradient) usada en auth."
+  },
+  {
+    "id": 72,
+    "phase": 18,
+    "name": "auth-redesign",
+    "title": "Rediseño UI/UX: páginas de login y registro",
+    "status": "done",
+    "needs_db": false,
+    "files": ["app/(auth)/login/page.tsx", "app/(auth)/register/page.tsx"],
+    "notes": "Commit f3a96bd. Fondo de cuaderno punteado (.dotted-paper) como firma visual, wordmark 'NoteEvo' con acento en 'Evo' y línea de tinta bajo la marca, tagline 'Tu segundo cerebro', labels uppercase con tracking-wider, sombras de acento en logo y CTA, focus ring-2 en inputs, active:scale en botón. Lógica de auth (signInWithPassword/signUp) y data-testid intactos."
+  },
+  {
+    "id": 73,
+    "phase": 18,
+    "name": "sidebar-ink-bar",
+    "title": "Rediseño UI/UX: barra de tinta en navegación del sidebar",
+    "status": "done",
+    "needs_db": false,
+    "files": ["components/sidebar/Sidebar.tsx"],
+    "notes": "Commit 350574d. Item activo de NavItem con marcador vertical de 3px en acento (barra de tinta) + tinte bg-accent/12; separadores más suaves (bg-border/70 con más margen lateral). Colapsado conserva el tinte sin barra."
   }
 ]

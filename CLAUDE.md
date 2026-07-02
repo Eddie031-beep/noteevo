@@ -439,6 +439,7 @@ RESEND_API_KEY=                  # Phase 13
 | Sin `overflow: hidden` en sidebar groups (Phase 16 ids 52–54) | Necesario para que el acordeón de "Más" y el de notebooks aniden dropdowns correctamente |
 | Autosave con `titleDebounceRef` + `contentDebounceRef` separados (fix) | Un solo debounce compartido hacía que editar título y luego cuerpo en <800ms cancelara el guardado del título y se perdiera el cambio. NUNCA volver a un ref único en NoteEditor |
 | Link público con defensa en capas en `getSharedNote` (fix) | Excluye `access_level='none'`, expirados (`expires_at`) y notas en papelera, no solo `is_active`. El render de `/n/[slug]` no debe servir notas que dejaron de ser públicas |
+| Paleta "Tinta y bosque" (Phase 18, ids 70–73) | Dark = carbón con matiz verde, light = papel cálido, acento #2e9e68/#177347. Todo se define en tokens `--color-*` de `globals.css` — NUNCA hardcodear hex de la paleta en componentes; los únicos hex legítimos fuera de globals.css son Mermaid, `COLORS` de FormatDropdowns, `ACCENT` de DashboardStats y el email de send-reminders (mantener alineados al cambiar tokens) |
 
 ---
 
