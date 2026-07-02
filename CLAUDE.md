@@ -440,6 +440,8 @@ RESEND_API_KEY=                  # Phase 13
 | Autosave con `titleDebounceRef` + `contentDebounceRef` separados (fix) | Un solo debounce compartido hacía que editar título y luego cuerpo en <800ms cancelara el guardado del título y se perdiera el cambio. NUNCA volver a un ref único en NoteEditor |
 | Link público con defensa en capas en `getSharedNote` (fix) | Excluye `access_level='none'`, expirados (`expires_at`) y notas en papelera, no solo `is_active`. El render de `/n/[slug]` no debe servir notas que dejaron de ser públicas |
 | Paleta "Tinta y bosque" (Phase 18, ids 70–73) | Dark = carbón con matiz verde, light = papel cálido, acento #2e9e68/#177347. Todo se define en tokens `--color-*` de `globals.css` — NUNCA hardcodear hex de la paleta en componentes; los únicos hex legítimos fuera de globals.css son Mermaid, `COLORS` de FormatDropdowns, `ACCENT` de DashboardStats y el email de send-reminders (mantener alineados al cambiar tokens) |
+| Capa de movimiento DESIGN.md (Phase 18, ids 74–78) | Stack: motion + @formkit/auto-animate + sonner + tw-animate-css. Duraciones/easings SIEMPRE de `--motion-*` (globals.css) y `lib/motion/tokens.ts` — cero valores sueltos. Un solo `<Toaster>` (layout del dashboard). `MotionConfig reducedMotion="user"` global. cmdk NO se adopta: el Ctrl+K (id:66) ya está resuelto con `CommandPalette` custom. vaul se instala recién en Fase B (id:76) |
+| Home daily-driver (Phase 18, id:75) | `components/home/HomeView.tsx` reemplaza al viejo HomePanel: captura rápida + Continuar + Para hoy + stats plegadas. La última libreta de captura vive en localStorage `noteevo-last-notebook`. `createNote(notebookId, title?)` acepta título opcional — no crear otra vía de creación de notas |
 
 ---
 

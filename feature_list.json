@@ -909,5 +909,90 @@
     "needs_db": false,
     "files": ["components/sidebar/Sidebar.tsx"],
     "notes": "Commit 350574d. Item activo de NavItem con marcador vertical de 3px en acento (barra de tinta) + tinte bg-accent/12; separadores más suaves (bg-border/70 con más margen lateral). Colapsado conserva el tinte sin barra."
+  },
+  {
+    "id": 74,
+    "phase": 18,
+    "name": "motion-base-fase-a",
+    "title": "DESIGN.md Fase A: base de movimiento",
+    "status": "done",
+    "needs_db": false,
+    "files": [
+      "package.json",
+      "app/globals.css",
+      "lib/motion/tokens.ts",
+      "app/(dashboard)/layout.tsx"
+    ],
+    "notes": "Commit 163695c. Deps: motion, @formkit/auto-animate, sonner, tw-animate-css. cmdk NO instalado (id:66 ya resuelto con CommandPalette custom); vaul diferido a Fase B (id:76). Tokens --motion-fast/base/slow + easings en globals.css, bloque global prefers-reduced-motion, lib/motion/tokens.ts con presets tipados (fade, fadeScale, slideUp, spring, springSoft), MotionConfig reducedMotion='user' + único Toaster de Sonner en el layout del dashboard. Pendiente de Fase A: cablear useAutoAnimate en NoteList/TagsView/FilesView/TaskList (va con id:76)."
+  },
+  {
+    "id": 75,
+    "phase": 18,
+    "name": "home-inicio-daily-driver",
+    "title": "FLUJO.md Prompt 1 — Home 'Inicio': centro de gravedad diario + captura rápida",
+    "status": "done",
+    "needs_db": false,
+    "files": [
+      "components/home/HomeView.tsx",
+      "app/(dashboard)/dashboard/page.tsx",
+      "lib/supabase/notes.ts"
+    ],
+    "notes": "Commit 9451841. HomePanel (bienvenida+stats) reemplazado por HomeView daily-driver: saludo contextual + fecha es, captura rápida (Enter=nota con título en última libreta usada, localStorage noteevo-last-notebook), Nueva nota / Nueva tarea (TaskModal), Ancladas, Continuar donde lo dejaste (6 por updated_at), Para hoy (vencidas/hoy, checkbox optimista con toggleTaskComplete, auto-animate), stats plegadas (DashboardStats bajo toggle), empty state usuario nuevo. createNote/createQuickNote con título opcional. Cero queries nuevas. Sidebar ya tenía 'Inicio'; vista 'home' ya era default."
+  },
+  {
+    "id": 76,
+    "phase": 18,
+    "name": "motion-fase-b",
+    "title": "DESIGN.md Fase B: listas animadas + modales + Sonner en todos los flujos + vaul móvil",
+    "status": "pending",
+    "needs_db": false,
+    "files": [
+      "components/notes/NoteList.tsx",
+      "components/tasks/TaskList.tsx",
+      "components/tags/TagsView.tsx",
+      "components/files/FilesView.tsx",
+      "components/tasks/TaskModal.tsx"
+    ],
+    "notes": "useAutoAnimate en NoteList/TagsView/FilesView/TaskList (key estable). Modales con AnimatePresence (fade backdrop + fadeScale contenido, presets de lib/motion/tokens). Estandarizar Sonner en guardado/errores/undo de papelera/límites IA. Instalar vaul para filtros de Tasks y modales <640px. Checkpoints DESIGN.md §10 Fase B."
+  },
+  {
+    "id": 77,
+    "phase": 18,
+    "name": "motion-fase-c",
+    "title": "DESIGN.md Fase C: transiciones de vista + sidebar animado + notificaciones",
+    "status": "pending",
+    "needs_db": false,
+    "files": [
+      "app/(dashboard)/dashboard/page.tsx",
+      "components/sidebar/Sidebar.tsx",
+      "components/sidebar/NotificationBell.tsx"
+    ],
+    "notes": "AnimatePresence mode='wait' sobre currentView (fade + y:8 corto). Colapso del sidebar con layout/springSoft. Acordeones con auto-animate (sin overflow-hidden). Lista de notificaciones con AnimatePresence."
+  },
+  {
+    "id": 78,
+    "phase": 18,
+    "name": "motion-fase-d-e",
+    "title": "DESIGN.md Fases D/E restantes: shimmer IA + cover reveal + pulido",
+    "status": "pending",
+    "needs_db": false,
+    "files": [
+      "components/ai/AiAssistantView.tsx",
+      "components/editor/NoteEditor.tsx"
+    ],
+    "notes": "cmdk ya no aplica (id:66 done con CommandPalette custom). Queda: shimmer de texto durante streaming de IA, cover image reveal (id:59) con springSoft, micro-motion en empty states, shared-element card→editor (layoutId), auditoría 60fps + reduced-motion."
+  },
+  {
+    "id": 79,
+    "phase": 18,
+    "name": "flujo-backlog-4-6",
+    "title": "FLUJO.md backlog #4–#6: divulgación progresiva + ergonomía móvil + onboarding a primera captura",
+    "status": "pending",
+    "needs_db": false,
+    "files": [
+      "components/editor/NoteEditor.tsx",
+      "components/onboarding/OnboardingModal.tsx"
+    ],
+    "notes": "#4: auditar densidad de toolbar del editor (mover lo avanzado a divulgación progresiva). #5: FAB/bottom-sheet móvil para 'nueva nota' en zona del pulgar (vaul, depende de id:76). #6: reorientar OnboardingModal hacia 'tu primera captura' (time-to-first-note)."
   }
 ]
